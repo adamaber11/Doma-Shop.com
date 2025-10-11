@@ -20,15 +20,17 @@ export default function Navbar() {
             <div className="flex justify-between items-center">
               <div className="flex items-center justify-start gap-8">
                 <CategoriesSheet />
-                {navLinks.map((link) => (
-                    <Link
-                    key={link.label}
-                    href={link.href}
-                    className="nav-link-underline text-sm font-medium text-muted-foreground py-4 hidden md:block"
-                    >
-                    {link.label}
-                    </Link>
-                ))}
+                <div className="hidden md:flex items-center gap-8">
+                  {navLinks.map((link) => (
+                      <Link
+                      key={link.label}
+                      href={link.href}
+                      className="nav-link-underline text-sm font-medium text-muted-foreground py-4"
+                      >
+                      {link.label}
+                      </Link>
+                  ))}
+                </div>
               </div>
               <CartSheet />
             </div>
