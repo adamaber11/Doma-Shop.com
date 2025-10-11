@@ -10,7 +10,7 @@ export default function Logo({ className }: { className?: string }) {
         <span className="text-foreground">Do</span>
         <span className="text-primary">m</span>
         <span className="text-foreground">a</span>
-        <span className="text-muted-foreground"> Online Shop</span>
+        <span className="text-sm text-muted-foreground"> Online Shop</span>
       </span>
     </Link>
   );
