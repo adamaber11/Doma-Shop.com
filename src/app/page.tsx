@@ -22,7 +22,7 @@ export default function Home() {
   const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
   return (
-    <div className="space-y-12">
+    <div className="flex flex-col" style={{gap: '5px'}}>
       <section className="relative h-[calc(60vh+20px)] w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden bg-secondary shadow-lg">
         {heroImage && (
           <Image
