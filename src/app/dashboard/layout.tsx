@@ -10,7 +10,6 @@ function DashboardNav() {
     { href: '/dashboard', label: 'نظرة عامة' },
     { href: '/dashboard/orders', label: 'طلبات العملاء' },
     { href: '/dashboard/add-product', label: 'إضافة منتج' },
-    { href: '/dashboard/add-category', label: 'إضافة فئة' },
     { href: '/dashboard/manage-categories', label: 'إدارة الفئات' },
   ];
 
