@@ -34,8 +34,8 @@ const productSchema = z.object({
   })).optional(),
 });
 
-export default function EditProductPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { toast } = useToast();
   const firestore = useFirestore();
   const router = useRouter();
