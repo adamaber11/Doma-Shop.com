@@ -80,7 +80,7 @@ export default function CategoriesSheet() {
 
           <Separator className="my-6" />
 
-           <div className="space-y-2">
+           <div className="space-y-2 md:hidden">
               {navLinks.map((link) => (
                 <SheetClose asChild key={link.label}>
                   <Link
