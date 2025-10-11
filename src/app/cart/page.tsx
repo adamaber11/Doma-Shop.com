@@ -30,12 +30,12 @@ export default function CartPage() {
             {cartItems.map((item) => (
               <div key={item.id} className="flex items-center gap-4 p-4 bg-card rounded-lg shadow-sm">
                 <Image
-                  src={item.imageUrl}
+                  src={item.imageUrls[0]}
                   alt={item.name}
                   width={100}
                   height={100}
                   className="rounded-md object-cover"
-                  data-ai-hint={item.imageHint}
+                  data-ai-hint={item.imageHints[0]}
                 />
                 <div className="flex-grow">
                   <h3 className="font-semibold text-lg">{item.name}</h3>

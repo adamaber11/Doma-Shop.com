@@ -43,12 +43,12 @@ export default function CartSheet() {
                 {cartItems.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <Image
-                      src={item.imageUrl}
+                      src={item.imageUrls[0]}
                       alt={item.name}
                       width={80}
                       height={80}
                       className="rounded-md object-cover"
-                      data-ai-hint={item.imageHint}
+                      data-ai-hint={item.imageHints[0]}
                     />
                     <div className="flex-grow">
                       <h3 className="font-semibold">{item.name}</h3>

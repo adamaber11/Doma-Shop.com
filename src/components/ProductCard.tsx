@@ -22,17 +22,20 @@ export default function ProductCard({ product }: { product: Product }) {
     });
   };
 
+  const imageUrl = product.imageUrls?.[0] || 'https://picsum.photos/seed/placeholder/600/800';
+  const imageHint = product.imageHints?.[0] || 'product';
+
   return (
     <Card className="flex flex-col overflow-hidden h-full transition-shadow duration-300 hover:shadow-xl">
       <CardHeader className="p-0">
         <Link href={`/products/${product.id}`}>
           <Image
-            src={product.imageUrl}
+            src={imageUrl}
             alt={product.name}
             width={600}
             height={800}
             className="w-full h-80 object-cover transition-transform duration-300 hover:scale-105"
-            data-ai-hint={product.imageHint}
+            data-ai-hint={imageHint}
           />
         </Link>
       </CardHeader>

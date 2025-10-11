@@ -51,14 +51,20 @@
           "type": "number",
           "description": "Price of the product."
         },
-        "imageUrl": {
-          "type": "string",
-          "description": "URL of the product image.",
-          "format": "uri"
-        },
-        "imageHint": {
+        "imageUrls": {
+          "type": "array",
+          "description": "URLs of the product images.",
+          "items": {
             "type": "string",
-            "description": "AI hint for the product image."
+            "format": "uri"
+          }
+        },
+        "imageHints": {
+          "type": "array",
+          "description": "AI hints for the product images.",
+          "items": {
+            "type": "string"
+          }
         },
         "rating": {
             "type": "number",
@@ -78,8 +84,8 @@
         "name",
         "description",
         "price",
-        "imageUrl",
-        "imageHint",
+        "imageUrls",
+        "imageHints",
         "rating",
         "category",
         "brand"

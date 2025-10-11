@@ -90,7 +90,7 @@ export default function CheckoutPage() {
         batch.set(orderItemRef, {
           productId: item.id,
           name: item.name,
-          imageUrl: item.imageUrl,
+          imageUrl: item.imageUrls[0], // Save the first image URL for the order item
           quantity: item.quantity,
           itemPrice: item.price,
         });

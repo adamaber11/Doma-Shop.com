@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { addDoc, collection } from 'firebase/firestore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Brand, Category } from '@/lib/types';
+import { PlusCircle, Trash2 } from 'lucide-react';
 
 const productSchema = z.object({
   name: z.string().min(3, 'اسم المنتج مطلوب'),
@@ -20,8 +21,10 @@ const productSchema = z.object({
   price: z.coerce.number().min(0, 'السعر يجب أن يكون رقمًا موجبًا'),
   category: z.string().min(2, 'الفئة مطلوبة'),
   brand: z.string().min(1, 'العلامة التجارية مطلوبة'),
-  imageUrl: z.string().url('رابط الصورة غير صالح'),
-  imageHint: z.string().min(2, 'تلميح الصورة مطلوب (كلمتين كحد أقصى)'),
+  images: z.array(z.object({
+    url: z.string().url('رابط الصورة غير صالح'),
+    hint: z.string().min(2, 'تلميح الصورة مطلوب (كلمتين كحد أقصى)'),
+  })).min(1, 'يجب إضافة صورة واحدة على الأقل'),
   rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5'),
 });
 
@@ -43,10 +46,14 @@ export default function AddProductPage() {
       price: 0,
       category: '',
       brand: '',
-      imageUrl: '',
-      imageHint: '',
+      images: [{ url: '', hint: '' }],
       rating: 0,
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "images"
   });
 
   async function onSubmit(values: z.infer<typeof productSchema>) {
@@ -59,8 +66,18 @@ export default function AddProductPage() {
       return;
     }
 
+    const productData = {
+        ...values,
+        imageUrls: values.images.map(img => img.url),
+        imageHints: values.images.map(img => img.hint),
+        images: undefined, // Remove images field before saving to Firestore
+    };
+    // @ts-ignore
+    delete productData.images;
+
+
     try {
-      await addDoc(collection(firestore, 'products'), values);
+      await addDoc(collection(firestore, 'products'), productData);
 
       toast({
         title: 'تمت إضافة المنتج بنجاح!',
@@ -174,34 +191,65 @@ export default function AddProductPage() {
                   )}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                    control={form.control}
-                    name="imageUrl"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>رابط الصورة</FormLabel>
-                        <FormControl>
-                        <Input placeholder="https://example.com/image.jpg" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="imageHint"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>تلميح الصورة (AI)</FormLabel>
-                        <FormControl>
-                        <Input placeholder="مثال: elegant watch" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
+
+              <div>
+                <FormLabel>صور المنتج</FormLabel>
+                <div className="space-y-4 pt-2">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="flex gap-4 items-end p-4 border rounded-md">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+                          <FormField
+                            control={form.control}
+                            name={`images.${index}.url`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>رابط الصورة</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="https://example.com/image.jpg" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`images.${index}.hint`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>تلميح الصورة (AI)</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="مثال: elegant watch" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => remove(index)}
+                        disabled={fields.length <= 1}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => append({ url: '', hint: '' })}
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    إضافة صورة أخرى
+                </Button>
+                <FormMessage>{form.formState.errors.images?.message}</FormMessage>
               </div>
+
                <FormField
                   control={form.control}
                   name="rating"

@@ -2,6 +2,7 @@
 
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import { useState } from 'react';
 import StarRating from '@/components/StarRating';
 import { Separator } from '@/components/ui/separator';
 import AddToCartButton from '@/components/AddToCartButton';
@@ -11,6 +12,7 @@ import { doc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
@@ -19,12 +21,20 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
     [firestore, params.id]
   );
   const { data: product, isLoading } = useDoc<Product>(productRef);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
-          <Skeleton className="w-full h-[600px] rounded-lg" />
+            <div className="space-y-4">
+                <Skeleton className="w-full h-[600px] rounded-lg" />
+                <div className="flex gap-4">
+                    <Skeleton className="w-20 h-20 rounded-md" />
+                    <Skeleton className="w-20 h-20 rounded-md" />
+                    <Skeleton className="w-20 h-20 rounded-md" />
+                </div>
+            </div>
           <div className="space-y-6">
             <Skeleton className="h-12 w-3/4" />
             <Skeleton className="h-6 w-1/4" />
@@ -43,19 +53,47 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   if (!product) {
     notFound();
   }
+  
+  const selectedImageUrl = product.imageUrls?.[selectedImageIndex] || '';
+  const selectedImageHint = product.imageHints?.[selectedImageIndex] || '';
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
-        <div className="bg-card p-4 rounded-lg shadow-sm">
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            width={600}
-            height={800}
-            className="w-full h-auto object-cover rounded-md"
-            data-ai-hint={product.imageHint}
-          />
+        <div className="space-y-4">
+          <div className="bg-card p-4 rounded-lg shadow-sm">
+            <Image
+              src={selectedImageUrl}
+              alt={product.name}
+              width={600}
+              height={800}
+              className="w-full h-auto object-cover rounded-md"
+              data-ai-hint={selectedImageHint}
+            />
+          </div>
+          {product.imageUrls && product.imageUrls.length > 1 && (
+            <div className="flex gap-4">
+              {product.imageUrls.map((url, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImageIndex(index)}
+                  className={cn(
+                    'w-20 h-20 rounded-md overflow-hidden border-2 transition-all',
+                    selectedImageIndex === index ? 'border-primary' : 'border-transparent'
+                  )}
+                >
+                  <Image
+                    src={url}
+                    alt={`${product.name} thumbnail ${index + 1}`}
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover"
+                    data-ai-hint={product.imageHints?.[index]}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="space-y-6">
           <div className="space-y-2">

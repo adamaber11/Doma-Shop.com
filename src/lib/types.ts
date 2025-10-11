@@ -5,8 +5,8 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
-  imageHint: string;
+  imageUrls: string[];
+  imageHints: string[];
   rating: number;
   category: string;
   brand: string; // Add brand field
