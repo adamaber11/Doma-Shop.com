@@ -10,12 +10,13 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, LayoutGrid } from 'lucide-react';
+import { Menu, LayoutGrid, ChevronLeft } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { useMemo } from 'react';
 import { Skeleton } from './ui/skeleton';
+import { Separator } from './ui/separator';
 
 export default function CategoriesSheet() {
   const firestore = useFirestore();
@@ -30,6 +31,15 @@ export default function CategoriesSheet() {
     const categorySet = new Set(products.map(p => p.category));
     return Array.from(categorySet);
   }, [products]);
+
+  const navLinks = [
+    { href: '/', label: 'الرئيسية' },
+    { href: '/offers', label: 'العروض' },
+    { href: '/shopping', label: 'التسوق' },
+    { href: '/best-sellers', label: 'الاكثر مبيعا' },
+    { href: '/daily-deals', label: 'العروض اليوميه' },
+    { href: '/coupons', label: 'كوبونات الخصم' },
+  ];
 
   return (
     <Sheet>
@@ -67,6 +77,22 @@ export default function CategoriesSheet() {
               لا توجد فئات متاحة حاليًا.
             </p>
           )}
+
+          <Separator className="my-6" />
+
+           <div className="space-y-2">
+              {navLinks.map((link) => (
+                <SheetClose asChild key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                    <span className="font-medium">{link.label}</span>
+                  </Link>
+                </SheetClose>
+              ))}
+            </div>
         </div>
       </SheetContent>
     </Sheet>
