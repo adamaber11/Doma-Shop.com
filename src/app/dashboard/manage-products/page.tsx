@@ -174,7 +174,7 @@ function AddProductDialog({ onProductAdded }: { onProductAdded: () => void }) {
                 </Form>
             </DialogContent>
         </Dialog>
-    )
+    );
 }
 
 
@@ -243,7 +243,7 @@ export default function ManageProductsPage() {
                   <TableRow key={product.id}>
                      <TableCell>
                       <Image 
-                        src={product.imageUrls[0] || '/placeholder.svg'} 
+                        src={product.imageUrls?.[0] || '/placeholder.svg'} 
                         alt={product.name} 
                         width={64} 
                         height={64} 
