@@ -3,48 +3,49 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Logo from '@/components/Logo';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAuth, initiateEmailSignIn } from '@/firebase';
+import { useAuth } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
-const loginSchema = z.object({
+const forgotPasswordSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صالح'),
-  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
 });
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const auth = useAuth();
-  const router = useRouter();
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<z.infer<typeof forgotPasswordSchema>>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: '',
-      password: '',
     },
   });
 
-  async function onSubmit(values: z.infer<typeof loginSchema>) {
+  async function onSubmit(values: z.infer<typeof forgotPasswordSchema>) {
+    if (!auth) {
+        toast({ variant: 'destructive', title: 'خطأ', description: 'خدمة المصادقة غير متاحة.' });
+        return;
+    }
     try {
-      await initiateEmailSignIn(auth, values.email, values.password);
+      await sendPasswordResetEmail(auth, values.email);
       toast({
-        title: 'تم تسجيل الدخول بنجاح',
-        description: 'أهلاً بعودتك!',
+        title: 'تم إرسال رابط إعادة التعيين',
+        description: 'يرجى التحقق من بريدك الإلكتروني للمتابعة.',
       });
-      router.push('/');
+      form.reset();
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'حدث خطأ',
-        description: error.message || 'فشل تسجيل الدخول. يرجى التحقق من معلوماتك.',
+        description: error.message || 'فشل إرسال البريد الإلكتروني. يرجى المحاولة مرة أخرى.',
       });
     }
   }
@@ -54,8 +55,8 @@ export default function LoginPage() {
       <Card className="mx-auto max-w-sm w-full">
         <CardHeader className="text-center">
           <Logo className="mb-4 justify-center" />
-          <CardTitle className="text-2xl font-headline">تسجيل الدخول</CardTitle>
-          <CardDescription>أدخل بريدك الإلكتروني أدناه لتسجيل الدخول إلى حسابك</CardDescription>
+          <CardTitle className="text-2xl font-headline">هل نسيت كلمة المرور؟</CardTitle>
+          <CardDescription>أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -73,31 +74,13 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem className="grid gap-2">
-                    <div className="flex items-center">
-                      <FormLabel htmlFor="password">كلمة المرور</FormLabel>
-                      <Link href="/forgot-password" className="ms-auto inline-block text-sm underline">
-                        هل نسيت كلمة المرور؟
-                      </Link>
-                    </div>
-                    <FormControl>
-                      <Input id="password" type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+                {form.formState.isSubmitting ? 'جاري الإرسال...' : 'إرسال رابط إعادة التعيين'}
               </Button>
             </form>
           </Form>
           <div className="mt-4 text-center text-sm">
-            ليس لديك حساب؟ <Link href="/signup" className="underline">إنشاء حساب</Link>
+            تذكرت كلمة المرور؟ <Link href="/login" className="underline">تسجيل الدخول</Link>
           </div>
         </CardContent>
       </Card>
