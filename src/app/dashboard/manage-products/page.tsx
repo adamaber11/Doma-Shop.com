@@ -219,6 +219,7 @@ function AddProductDialog({ onProductAdded }: { onProductAdded: () => void }) {
     );
 }
 
+
 export default function ManageProductsPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
