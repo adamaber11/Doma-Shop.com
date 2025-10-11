@@ -76,11 +76,12 @@ export default function CategoriesSheet() {
   ];
 
   const renderCategory = (category: CategoryWithSubcategories) => {
+    const categorySlug = encodeURIComponent(category.name);
     if (category.subcategories.length === 0) {
       return (
         <SheetClose asChild key={category.id}>
           <Link
-            href={`/category/${category.name.toLowerCase().replace(/ /g, '-')}`}
+            href={`/category/${categorySlug}`}
             className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             <LayoutGrid className="h-5 w-5" />
@@ -103,7 +104,7 @@ export default function CategoriesSheet() {
             <div className="flex flex-col space-y-1 mt-1">
               <SheetClose asChild>
                 <Link
-                  href={`/category/${category.name.toLowerCase().replace(/ /g, '-')}`}
+                  href={`/category/${categorySlug}`}
                   className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
                 >
                   <ArrowLeft className="h-5 w-5" />

@@ -9,6 +9,7 @@ export interface Product {
   imageHint: string;
   rating: number;
   category: string;
+  brand: string; // Add brand field
 }
 
 export interface CartItem extends Product {

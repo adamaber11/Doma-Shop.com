@@ -30,7 +30,7 @@ export default function Home() {
   const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
 
   const brandsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'brands'), limit(5)) : null),
+    () => (firestore ? query(collection(firestore, 'brands'), limit(10)) : null),
     [firestore]
   );
   const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
@@ -88,7 +88,7 @@ export default function Home() {
             <CarouselContent className="-ml-1">
               {isLoadingBrands ? (
                 Array.from({ length: 5 }).map((_, index) => (
-                  <CarouselItem key={index} className="basis-1/3 sm:basis-1/4 md:basis-1/5 pl-1" style={{paddingLeft: '2.5px', paddingRight: '2.5px'}}>
+                  <CarouselItem key={index} className="basis-1/5 pl-1" style={{paddingLeft: '2.5px', paddingRight: '2.5px'}}>
                      <div className="flex flex-col items-center justify-center gap-2">
                         <Skeleton className="h-20 w-20 rounded-full" />
                         <Skeleton className="h-6 w-24" />
@@ -97,8 +97,8 @@ export default function Home() {
                 ))
               ) : (
                 brands?.map((brand) => (
-                  <CarouselItem key={brand.id} className="basis-1/3 sm:basis-1/4 md:basis-1/5" style={{paddingLeft: '2.5px', paddingRight: '2.5px'}}>
-                     <div className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg transition-all">
+                  <CarouselItem key={brand.id} className="basis-1/5" style={{paddingLeft: '2.5px', paddingRight: '2.5px'}}>
+                     <Link href={`/brand/${encodeURIComponent(brand.name)}`} className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg transition-all">
                         <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center p-2 group relative overflow-hidden ring-2 ring-transparent hover:ring-primary transition-all duration-300">
                             <Image
                             src={brand.logoUrl}
@@ -110,7 +110,7 @@ export default function Home() {
                             />
                         </div>
                         <p className="font-semibold mt-2">{brand.name}</p>
-                    </div>
+                    </Link>
                   </CarouselItem>
                 ))
               )}

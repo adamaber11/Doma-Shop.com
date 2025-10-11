@@ -9,14 +9,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { addDoc, collection } from 'firebase/firestore';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { Brand, Category } from '@/lib/types';
 
 const productSchema = z.object({
   name: z.string().min(3, 'اسم المنتج مطلوب'),
   description: z.string().min(10, 'الوصف مطلوب'),
   price: z.coerce.number().min(0, 'السعر يجب أن يكون رقمًا موجبًا'),
   category: z.string().min(2, 'الفئة مطلوبة'),
+  brand: z.string().min(1, 'العلامة التجارية مطلوبة'),
   imageUrl: z.string().url('رابط الصورة غير صالح'),
   imageHint: z.string().min(2, 'تلميح الصورة مطلوب (كلمتين كحد أقصى)'),
   rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5'),
@@ -26,6 +29,12 @@ export default function AddProductPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
 
+  const categoriesQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'categories') : null), [firestore]);
+  const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
+
+  const brandsQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'brands') : null), [firestore]);
+  const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
+
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -33,6 +42,7 @@ export default function AddProductPage() {
       description: '',
       price: 0,
       category: '',
+      brand: '',
       imageUrl: '',
       imageHint: '',
       rating: 0,
@@ -73,7 +83,7 @@ export default function AddProductPage() {
         <CardHeader>
           <CardTitle>إضافة منتج جديد</CardTitle>
           <CardDescription>
-            املأ النموذج أدناه لإضافة منتج جديد إلى متجرك. عند إضافة منتج بفئة جديدة، سيتم إنشاء الفئة تلقائيًا.
+            املأ النموذج أدناه لإضافة منتج جديد إلى متجرك.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -105,7 +115,7 @@ export default function AddProductPage() {
                   </FormItem>
                 )}
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
                   name="price"
@@ -125,9 +135,40 @@ export default function AddProductPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>الفئة</FormLabel>
-                      <FormControl>
-                        <Input placeholder="مثال: إكسسوارات" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر فئة..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories?.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>العلامة التجارية</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingBrands}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر علامة..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {brands?.map((brand) => (
+                            <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
