@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, use } from 'react';
+import { useEffect, use, useMemo } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,8 +34,8 @@ const productSchema = z.object({
   })).optional(),
 });
 
-export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function EditProductPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const { toast } = useToast();
   const firestore = useFirestore();
   const router = useRouter();
@@ -199,3 +199,5 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     </div>
   );
 }
+
+    
