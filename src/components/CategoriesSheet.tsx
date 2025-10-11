@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu, LayoutGrid } from 'lucide-react';
-import { useCollection, useFirestore } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { useMemo } from 'react';
@@ -19,9 +19,11 @@ import { Skeleton } from './ui/skeleton';
 
 export default function CategoriesSheet() {
   const firestore = useFirestore();
-  const { data: products, isLoading } = useCollection<Product>(
-    firestore ? collection(firestore, 'products') : null
+  const productsQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'products') : null),
+    [firestore]
   );
+  const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
   const categories = useMemo(() => {
     if (!products) return [];
