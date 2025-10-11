@@ -45,7 +45,7 @@ const productSchema = z.object({
   name: z.string().min(3, 'اسم المنتج مطلوب'),
   description: z.string().min(10, 'الوصف مطلوب'),
   price: z.coerce.number().min(0, 'السعر يجب أن يكون رقمًا موجبًا'),
-  category: z.string().min(2, 'الفئة مطلوبة'),
+  category: z.string().min(1, 'الفئة مطلوبة'),
   brand: z.string().min(1, 'العلامة التجارية مطلوبة'),
   images: z.array(z.object({
     url: z.string().url('رابط الصورة غير صالح'),
