@@ -42,12 +42,14 @@ export default function Header() {
           <Logo />
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="relative hidden sm:block">
+        <div className="flex-1 flex justify-center px-4">
+          <div className="relative w-full max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="بحث..." className="pl-9" />
           </div>
+        </div>
 
+        <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -93,7 +95,6 @@ export default function Header() {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-
         </div>
       </div>
     </header>
