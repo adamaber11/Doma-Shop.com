@@ -85,10 +85,10 @@ export default function Home() {
             }}
             className="w-full max-w-6xl mx-auto"
           >
-            <CarouselContent className="-ml-2">
+            <CarouselContent className="-ml-1">
               {isLoadingBrands ? (
                 Array.from({ length: 5 }).map((_, index) => (
-                  <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/5 pl-2">
+                  <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/5 pl-1">
                      <div className="flex flex-col items-center justify-center gap-2">
                         <Skeleton className="h-20 w-20 rounded-full" />
                         <Skeleton className="h-6 w-24" />
@@ -97,7 +97,7 @@ export default function Home() {
                 ))
               ) : (
                 brands?.map((brand) => (
-                  <CarouselItem key={brand.id} className="md:basis-1/3 lg:basis-1/5 pl-2">
+                  <CarouselItem key={brand.id} className="md:basis-1/3 lg:basis-1/5 pl-1" style={{paddingLeft: '5px', paddingRight: '5px'}}>
                      <div className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg transition-all">
                         <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center p-2 group relative overflow-hidden ring-2 ring-transparent hover:ring-primary transition-all duration-300">
                             <Image
