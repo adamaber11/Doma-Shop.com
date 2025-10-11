@@ -24,16 +24,11 @@ export default function Header() {
   const auth = useAuth();
   const router = useRouter();
 
-  const navLinks = [
-    { href: '/', label: 'الرئيسية' },
-    { href: '/collections', label: 'المجموعات' },
-    { href: '/offers', label: 'العروض' },
-    { href: '/contact', label: 'تواصل معنا' },
-  ];
-
   const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/');
+    if (auth) {
+      await signOut(auth);
+      router.push('/');
+    }
   };
   
   const getInitials = (name?: string | null) => {
@@ -46,17 +41,6 @@ export default function Header() {
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Logo />
-          <nav className="hidden md:flex gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
         </div>
 
         <div className="flex items-center gap-4">

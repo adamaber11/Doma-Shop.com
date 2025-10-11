@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { APP_NAME } from '@/lib/constants';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: {
@@ -32,6 +33,7 @@ export default function RootLayout({
           <CartProvider>
             <div className="flex min-h-screen flex-col">
               <Header />
+              <Navbar />
               <main className="flex-grow container mx-auto px-4 py-8">
                 {children}
               </main>
