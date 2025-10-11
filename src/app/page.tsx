@@ -58,6 +58,29 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="bg-card py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="font-headline text-3xl font-bold text-center mb-8">
+            أشهر العلامات التجارية
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
+            {Brands.map((brand) => (
+              <div key={brand.id} className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg hover:bg-secondary transition-colors">
+                <Image
+                  src={brand.logoUrl}
+                  alt={`${brand.name} logo`}
+                  width={200}
+                  height={100}
+                  className="object-contain h-16"
+                  data-ai-hint={brand.logoHint}
+                />
+                <p className="font-semibold mt-2">{brand.name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="featured-products" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="font-headline text-3xl font-bold text-center mb-8">
           منتجاتنا المميزة
@@ -80,29 +103,6 @@ export default function Home() {
             ))}
           </div>
         )}
-      </section>
-
-      <section className="bg-card py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-headline text-3xl font-bold text-center mb-8">
-            أشهر العلامات التجارية
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
-            {Brands.map((brand) => (
-              <div key={brand.id} className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg hover:bg-secondary transition-colors">
-                <Image
-                  src={brand.logoUrl}
-                  alt={`${brand.name} logo`}
-                  width={200}
-                  height={100}
-                  className="object-contain h-16"
-                  data-ai-hint={brand.logoHint}
-                />
-                <p className="font-semibold mt-2">{brand.name}</p>
-              </div>
-            ))}
-          </div>
-        </div>
       </section>
     </div>
   );
