@@ -3,6 +3,7 @@ import Logo from './Logo';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Github, Twitter, Instagram } from 'lucide-react';
+import { APP_NAME } from '@/lib/constants';
 
 export default function Footer() {
   return (
@@ -15,9 +16,9 @@ export default function Footer() {
               تجربة تسوق فاخرة للمتسوق المميز.
             </p>
             <div className="flex space-x-4 space-x-reverse">
-              <Link href="#" aria-label="Twitter"><Twitter className="h-5 w-5 hover:text-primary" /></Link>
-              <Link href="#" aria-label="Instagram"><Instagram className="h-5 w-5 hover:text-primary" /></Link>
-              <Link href="#" aria-label="Github"><Github className="h-5 w-5 hover:text-primary" /></Link>
+              <Link href="/twitter" aria-label="Twitter"><Twitter className="h-5 w-5 hover:text-primary" /></Link>
+              <Link href="/instagram" aria-label="Instagram"><Instagram className="h-5 w-5 hover:text-primary" /></Link>
+              <Link href="/github" aria-label="Github"><Github className="h-5 w-5 hover:text-primary" /></Link>
             </div>
           </div>
           <div>
@@ -47,7 +48,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t mt-8 pt-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} تاجر. جميع الحقوق محفوظة.</p>
+          <p>&copy; {new Date().getFullYear()} {APP_NAME}. جميع الحقوق محفوظة.</p>
         </div>
       </div>
     </footer>
