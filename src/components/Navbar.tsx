@@ -13,7 +13,7 @@ export default function Navbar() {
   return (
     <nav className="bg-card border-b">
         <div className="container mx-auto px-4">
-            <div className="hidden md:flex justify-center gap-8">
+            <div className="hidden md:flex justify-end gap-8">
             {navLinks.map((link) => (
                 <Link
                 key={link.label}
