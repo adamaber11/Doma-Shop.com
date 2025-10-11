@@ -23,7 +23,7 @@ export default function Home() {
 
   return (
     <div className="space-y-12">
-      <section className="relative h-[60vh] -mx-4 md:-mx-8 lg:-mx-12 overflow-hidden bg-secondary shadow-lg">
+      <section className="relative h-[60vh] w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden bg-secondary shadow-lg">
         {heroImage && (
           <Image
             src={heroImage.imageUrl}
@@ -36,16 +36,18 @@ export default function Home() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute inset-0 flex items-end p-8 md:p-12">
-          <div className="max-w-md text-white">
-            <h1 className="font-headline text-4xl md:text-6xl font-bold !leading-tight drop-shadow-md">
-              فخامة تستحقها
-            </h1>
-            <p className="mt-4 text-lg text-primary-foreground/90 drop-shadow">
-              اكتشف مجموعتنا الحصرية من المنتجات المصممة لإلهام حياتك.
-            </p>
-            <Button asChild size="lg" className="mt-6 bg-accent text-accent-foreground hover:bg-accent/90">
-              <Link href="#featured-products">تسوق الآن</Link>
-            </Button>
+          <div className="container mx-auto">
+            <div className="max-w-md text-white">
+              <h1 className="font-headline text-4xl md:text-6xl font-bold !leading-tight drop-shadow-md">
+                فخامة تستحقها
+              </h1>
+              <p className="mt-4 text-lg text-primary-foreground/90 drop-shadow">
+                اكتشف مجموعتنا الحصرية من المنتجات المصممة لإلهام حياتك.
+              </p>
+              <Button asChild size="lg" className="mt-6 bg-accent text-accent-foreground hover:bg-accent/90">
+                <Link href="#featured-products">تسوق الآن</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
