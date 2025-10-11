@@ -10,6 +10,7 @@ function DashboardNav() {
     { href: '/dashboard', label: 'نظرة عامة' },
     { href: '/dashboard/orders', label: 'طلبات العملاء' },
     { href: '/dashboard/add-product', label: 'إضافة منتج' },
+    { href: '/dashboard/add-category', label: 'إضافة فئة' },
     { href: '/dashboard/manage-categories', label: 'إدارة الفئات' },
   ];
 
@@ -23,7 +24,7 @@ function DashboardNav() {
               href={link.href}
               className={cn(
                 'py-4 text-sm font-medium border-b-2 transition-colors',
-                pathname.startsWith(link.href) && (link.href !== '/dashboard' || pathname === '/dashboard')
+                pathname === link.href
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               )}
