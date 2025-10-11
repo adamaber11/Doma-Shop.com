@@ -24,17 +24,17 @@ export default function Footer() {
             <h3 className="font-headline font-semibold mb-4">روابط سريعة</h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="/" className="text-muted-foreground hover:text-primary">الرئيسية</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">جميع المنتجات</Link></li>
+              <li><Link href="/products" className="text-muted-foreground hover:text-primary">جميع المنتجات</Link></li>
               <li><Link href="/orders" className="text-muted-foreground hover:text-primary">طلباتي</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">تواصل معنا</Link></li>
+              <li><Link href="/contact" className="text-muted-foreground hover:text-primary">تواصل معنا</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-headline font-semibold mb-4">قانوني</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">سياسة الخصوصية</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">شروط الخدمة</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">سياسة الاسترجاع</Link></li>
+              <li><Link href="/privacy" className="text-muted-foreground hover:text-primary">سياسة الخصوصية</Link></li>
+              <li><Link href="/terms" className="text-muted-foreground hover:text-primary">شروط الخدمة</Link></li>
+              <li><Link href="/returns" className="text-muted-foreground hover:text-primary">سياسة الاسترجاع</Link></li>
             </ul>
           </div>
           <div>

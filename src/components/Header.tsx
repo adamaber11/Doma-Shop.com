@@ -16,9 +16,9 @@ import CartSheet from './CartSheet';
 export default function Header() {
   const navLinks = [
     { href: '/', label: 'الرئيسية' },
-    { href: '#', label: 'المجموعات' },
-    { href: '#', label: 'العروض' },
-    { href: '#', label: 'تواصل معنا' },
+    { href: '/collections', label: 'المجموعات' },
+    { href: '/offers', label: 'العروض' },
+    { href: '/contact', label: 'تواصل معنا' },
   ];
 
   return (
