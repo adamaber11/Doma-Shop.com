@@ -134,48 +134,48 @@ function AddProductDialog({ onProductAdded }: { onProductAdded: () => void }) {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <FormField name="price" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>السعر (درهم)</FormLabel> <FormControl> <Input type="number" step="0.01" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
                             <FormField
-                              control={form.control}
-                              name="category"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>الفئة</FormLabel>
-                                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="اختر فئة..." />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {categories?.map((cat) => (
-                                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="brand"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>العلامة التجارية</FormLabel>
-                                   <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingBrands}>
+                                control={form.control}
+                                name="category"
+                                render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>الفئة</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
                                         <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="اختر علامة..." />
-                                            </SelectTrigger>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="اختر فئة..." />
+                                        </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {brands?.map((brand) => (
-                                                <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem>
-                                            ))}
+                                        {categories?.map((cat) => (
+                                            <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                        ))}
                                         </SelectContent>
-                                   </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
+                                    </Select>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="brand"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>العلامة التجارية</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingBrands}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="اختر علامة..." />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {brands?.map((brand) => (
+                                                    <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
                         </div>
                         <Separator />
