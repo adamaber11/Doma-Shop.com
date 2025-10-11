@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -61,7 +61,8 @@ export default function ManageCategoriesPage() {
   });
 
   const categoryMap = useMemo(() => {
-    return new Map(categories?.map(c => [c.id, c.name]));
+    if (!categories) return new Map();
+    return new Map(categories.map(c => [c.id, c.name]));
   }, [categories]);
 
   const handleOpenForm = (category: Category | null = null) => {
@@ -80,10 +81,10 @@ export default function ManageCategoriesPage() {
     try {
       if (editingCategory) {
         const categoryRef = doc(firestore, 'categories', editingCategory.id);
-        await updateDoc(categoryRef, { ...values });
+        await updateDoc(categoryRef, { ...values, parentId: values.parentId || null });
         toast({ title: 'تم تحديث الفئة بنجاح!' });
       } else {
-        await addDoc(collection(firestore, 'categories'), { ...values });
+        await addDoc(collection(firestore, 'categories'), { ...values, parentId: values.parentId || null });
         toast({ title: 'تمت إضافة الفئة بنجاح!' });
       }
       setIsFormOpen(false);
