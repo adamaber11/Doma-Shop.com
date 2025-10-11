@@ -52,6 +52,9 @@ export default function CartSheet() {
                     />
                     <div className="flex-grow">
                       <h3 className="font-semibold">{item.name}</h3>
+                      {item.selectedSize && (
+                        <p className="text-xs text-muted-foreground">المقاس: {item.selectedSize}</p>
+                      )}
                       <p className="text-sm text-muted-foreground">
                         {item.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
                       </p>

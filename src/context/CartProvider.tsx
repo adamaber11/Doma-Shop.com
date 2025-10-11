@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: Product, quantity: number) => void;
+  addToCart: (product: Product, quantity: number, selectedSize?: string) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -39,20 +39,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [cartItems, isClient]);
 
-  const addToCart = useCallback((product: Product, quantity: number) => {
+  const addToCart = useCallback((product: Product, quantity: number, selectedSize?: string) => {
     setCartItems(prevItems => {
-      const existingItem = prevItems.find(i => i.id === product.id);
+      // Cart item ID is now a combination of product ID and size
+      const cartItemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
+      const existingItem = prevItems.find(i => i.id === cartItemId);
+      
       let newItems;
       if (existingItem) {
         newItems = prevItems.map(i =>
-          i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i
+          i.id === cartItemId ? { ...i, quantity: i.quantity + quantity } : i
         );
       } else {
-        newItems = [...prevItems, { ...product, quantity }];
+        const newItem: CartItem = { 
+            ...product, 
+            quantity, 
+            selectedSize,
+            id: cartItemId, // The unique ID for the cart item
+            productId: product.id, // The original product ID
+        };
+        newItems = [...prevItems, newItem];
       }
       toast({
         title: 'تمت الإضافة إلى السلة',
-        description: `${quantity} x ${product.name}`,
+        description: `${quantity} x ${product.name} ${selectedSize ? `(المقاس: ${selectedSize})` : ''}`,
       });
       return newItems;
     });
@@ -80,6 +90,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   if (!isClient) {
+    // Return null or a loading state until the client has mounted
+    // This prevents hydration mismatches with localStorage
     return null;
   }
 

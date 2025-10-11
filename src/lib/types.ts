@@ -9,11 +9,15 @@ export interface Product {
   imageHints: string[];
   rating: number;
   category: string;
-  brand: string; // Add brand field
+  brand: string;
+  sizes?: string[];
 }
 
 export interface CartItem extends Product {
+  id: string; // Product ID + optional size
+  productId: string;
   quantity: number;
+  selectedSize?: string;
 }
 
 export interface Category {
@@ -45,8 +49,11 @@ export interface OrderItem {
   id: string;
   orderId: string;
   productId: string;
+  name: string;
+  imageUrl: string;
   quantity: number;
   itemPrice: number;
+  selectedSize?: string;
 }
 
 export interface ShippingAddress {

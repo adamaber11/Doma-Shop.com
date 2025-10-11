@@ -9,13 +9,24 @@ import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { ShoppingCart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const router = useRouter();
 
-  const handleAddToCart = () => {
-    addToCart({ ...product, quantity: 1 });
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // If product has sizes, user must go to product page to select one
+    if (product.sizes && product.sizes.length > 0) {
+        router.push(`/products/${product.id}`);
+        return;
+    }
+
+    addToCart(product, 1);
     toast({
       title: 'تمت الإضافة إلى السلة',
       description: `1 x ${product.name}`,
@@ -26,15 +37,15 @@ export default function ProductCard({ product }: { product: Product }) {
   const imageHint = product.imageHints?.[0] || 'product';
 
   return (
-    <Card className="flex flex-col overflow-hidden h-full transition-shadow duration-300 hover:shadow-xl">
-      <CardHeader className="p-0">
+    <Card className="flex flex-col overflow-hidden h-full transition-shadow duration-300 hover:shadow-xl group">
+      <CardHeader className="p-0 relative">
         <Link href={`/products/${product.id}`}>
           <Image
             src={imageUrl}
             alt={product.name}
             width={600}
             height={800}
-            className="w-full h-80 object-cover transition-transform duration-300 hover:scale-105"
+            className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
             data-ai-hint={imageHint}
           />
         </Link>
@@ -53,7 +64,8 @@ export default function ProductCard({ product }: { product: Product }) {
       <CardFooter className="p-4 pt-0 flex justify-between items-center">
         <p className="text-lg font-semibold text-primary">
           {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
-        </p>        <Button variant="outline" size="icon" onClick={handleAddToCart} aria-label={`Add ${product.name} to cart`}>
+        </p>        
+        <Button variant="outline" size="icon" onClick={handleAddToCart} aria-label={`Add ${product.name} to cart`}>
           <ShoppingCart className="h-5 w-5" />
         </Button>
       </CardFooter>

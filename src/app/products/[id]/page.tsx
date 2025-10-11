@@ -13,6 +13,7 @@ import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
@@ -22,6 +23,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   );
   const { data: product, isLoading } = useDoc<Product>(productRef);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
 
   if (isLoading) {
     return (
@@ -56,6 +58,8 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   
   const selectedImageUrl = product.imageUrls?.[selectedImageIndex] || '';
   const selectedImageHint = product.imageHints?.[selectedImageIndex] || '';
+
+  const hasSizes = product.sizes && product.sizes.length > 0;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
@@ -107,8 +111,27 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
             {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
           </p>
           <Separator />
+
+          {hasSizes && (
+            <div className="space-y-4">
+                <h3 className="text-lg font-medium">المقاسات المتاحة</h3>
+                <div className="flex flex-wrap gap-2">
+                    {product.sizes?.map(size => (
+                        <Button 
+                            key={size}
+                            variant={selectedSize === size ? "default" : "outline"}
+                            onClick={() => setSelectedSize(size)}
+                        >
+                            {size}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+          )}
+
+
           <p className="text-lg leading-relaxed">{product.description}</p>
-          <AddToCartButton product={product} />
+          <AddToCartButton product={product} selectedSize={selectedSize} />
         </div>
       </div>
       

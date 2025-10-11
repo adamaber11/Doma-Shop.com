@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth, useFirestore, useUser } from '@/firebase';
 import { addDoc, collection, serverTimestamp, doc, writeBatch } from 'firebase/firestore';
-import type { ShippingAddress } from '@/lib/types';
+import type { ShippingAddress, OrderItem } from '@/lib/types';
 
 const shippingSchema = z.object({
   fullName: z.string().min(2, 'الاسم الكامل مطلوب'),
@@ -87,13 +87,15 @@ export default function CheckoutPage() {
       // 2. Create a document for each item in the order
       for (const item of cartItems) {
         const orderItemRef = doc(collection(firestore, `users/${user.uid}/orders/${orderRef.id}/items`));
-        batch.set(orderItemRef, {
-          productId: item.id,
-          name: item.name,
-          imageUrl: item.imageUrls[0], // Save the first image URL for the order item
-          quantity: item.quantity,
-          itemPrice: item.price,
-        });
+        const orderItem: Omit<OrderItem, 'id' | 'orderId'> = {
+            productId: item.productId,
+            name: item.name,
+            imageUrl: item.imageUrls[0], // Save the first image URL for the order item
+            quantity: item.quantity,
+            itemPrice: item.price,
+            selectedSize: item.selectedSize,
+        }
+        batch.set(orderItemRef, orderItem);
       }
 
       await batch.commit();
@@ -187,7 +189,10 @@ export default function CheckoutPage() {
             <div className="space-y-3">
               {cartItems.map(item => (
                 <div key={item.id} className="flex justify-between items-center text-sm">
-                  <span>{item.name} x {item.quantity}</span>
+                  <div>
+                    <span>{item.name} x {item.quantity}</span>
+                    {item.selectedSize && <span className="text-xs text-muted-foreground block">المقاس: {item.selectedSize}</span>}
+                  </div>
                   <span className="font-medium">{(item.price * item.quantity).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
                 </div>
               ))}

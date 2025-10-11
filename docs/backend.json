@@ -77,6 +77,13 @@
         "brand": {
             "type": "string",
             "description": "Product brand."
+        },
+        "sizes": {
+            "type": "array",
+            "description": "Available sizes for the product.",
+            "items": {
+                "type": "string"
+            }
         }
       },
       "required": [
@@ -213,6 +220,10 @@
         "itemPrice": {
           "type": "number",
           "description": "Price of the item at the time of the order."
+        },
+        "selectedSize": {
+            "type": "string",
+            "description": "The size selected for the item, if applicable."
         }
       },
       "required": [

@@ -8,17 +8,33 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Check, Minus, Plus, ShoppingCart } from 'lucide-react';
 
-export default function AddToCartButton({ product }: { product: Product }) {
+interface AddToCartButtonProps {
+    product: Product;
+    selectedSize?: string;
+}
+
+export default function AddToCartButton({ product, selectedSize }: AddToCartButtonProps) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const { addToCart } = useCart();
   const { toast } = useToast();
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+        toast({
+            variant: "destructive",
+            title: "خطأ",
+            description: "يرجى اختيار مقاس قبل إضافة المنتج إلى السلة.",
+        });
+        return;
+    }
+
+    addToCart(product, quantity, selectedSize);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
+
+  const isAddToCartDisabled = product.sizes && product.sizes.length > 0 && !selectedSize;
 
   return (
     <div className="flex items-center gap-4">
@@ -49,6 +65,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
         size="lg"
         className="flex-grow bg-accent text-accent-foreground hover:bg-accent/90"
         onClick={handleAddToCart}
+        disabled={isAddToCartDisabled}
       >
         {added ? (
           <>

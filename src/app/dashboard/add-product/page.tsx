@@ -14,6 +14,7 @@ import { addDoc, collection } from 'firebase/firestore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Brand, Category } from '@/lib/types';
 import { PlusCircle, Trash2 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 const productSchema = z.object({
   name: z.string().min(3, 'اسم المنتج مطلوب'),
@@ -25,6 +26,9 @@ const productSchema = z.object({
     url: z.string().url('رابط الصورة غير صالح'),
     hint: z.string().min(2, 'تلميح الصورة مطلوب (كلمتين كحد أقصى)'),
   })).min(1, 'يجب إضافة صورة واحدة على الأقل'),
+  sizes: z.array(z.object({
+    value: z.string().min(1, 'المقاس مطلوب'),
+  })).optional(),
   rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5'),
 });
 
@@ -47,13 +51,19 @@ export default function AddProductPage() {
       category: '',
       brand: '',
       images: [{ url: '', hint: '' }],
+      sizes: [],
       rating: 0,
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields: imageFields, append: appendImage, remove: removeImage } = useFieldArray({
     control: form.control,
     name: "images"
+  });
+
+  const { fields: sizeFields, append: appendSize, remove: removeSize } = useFieldArray({
+    control: form.control,
+    name: "sizes"
   });
 
   async function onSubmit(values: z.infer<typeof productSchema>) {
@@ -70,6 +80,7 @@ export default function AddProductPage() {
         ...values,
         imageUrls: values.images.map(img => img.url),
         imageHints: values.images.map(img => img.hint),
+        sizes: values.sizes?.map(s => s.value).filter(s => s.trim() !== ''),
         images: undefined, // Remove images field before saving to Firestore
     };
     // @ts-ignore
@@ -192,10 +203,12 @@ export default function AddProductPage() {
                 />
               </div>
 
+              <Separator />
+
               <div>
                 <FormLabel>صور المنتج</FormLabel>
                 <div className="space-y-4 pt-2">
-                  {fields.map((field, index) => (
+                  {imageFields.map((field, index) => (
                     <div key={field.id} className="flex gap-4 items-end p-4 border rounded-md">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
                           <FormField
@@ -229,8 +242,8 @@ export default function AddProductPage() {
                         type="button"
                         variant="destructive"
                         size="icon"
-                        onClick={() => remove(index)}
-                        disabled={fields.length <= 1}
+                        onClick={() => removeImage(index)}
+                        disabled={imageFields.length <= 1}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -242,13 +255,57 @@ export default function AddProductPage() {
                     variant="outline"
                     size="sm"
                     className="mt-4"
-                    onClick={() => append({ url: '', hint: '' })}
+                    onClick={() => appendImage({ url: '', hint: '' })}
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     إضافة صورة أخرى
                 </Button>
                 <FormMessage>{form.formState.errors.images?.message}</FormMessage>
               </div>
+
+              <Separator />
+
+              <div>
+                <FormLabel>المقاسات (اختياري)</FormLabel>
+                 <div className="space-y-4 pt-2">
+                  {sizeFields.map((field, index) => (
+                    <div key={field.id} className="flex gap-4 items-center">
+                      <FormField
+                        control={form.control}
+                        name={`sizes.${index}.value`}
+                        render={({ field }) => (
+                          <FormItem className="flex-grow">
+                            <FormControl>
+                              <Input placeholder="مثال: S, M, L, 42" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => removeSize(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                 </div>
+                 <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => appendSize({ value: '' })}
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    إضافة مقاس
+                </Button>
+              </div>
+
+              <Separator />
 
                <FormField
                   control={form.control}
