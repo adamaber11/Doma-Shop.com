@@ -1,3 +1,58 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "Luxurious storefront display",
+      "imageUrl": "https://picsum.photos/seed/hero/1200/600",
+      "imageHint": "luxury product display"
+    },
+    {
+      "id": "prod-1",
+      "description": "An elegant wristwatch with a leather strap.",
+      "imageUrl": "https://picsum.photos/seed/prod1/600/800",
+      "imageHint": "elegant wristwatch"
+    },
+    {
+      "id": "prod-2",
+      "description": "A handcrafted leather journal with a wrap tie.",
+      "imageUrl": "https://picsum.photos/seed/prod2/600/800",
+      "imageHint": "leather journal"
+    },
+    {
+      "id": "prod-3",
+      "description": "A pair of designer sunglasses with a golden frame.",
+      "imageUrl": "https://picsum.photos/seed/prod3/600/800",
+      "imageHint": "designer sunglasses"
+    },
+    {
+      "id": "prod-4",
+      "description": "A minimalist fountain pen made of brushed metal.",
+      "imageUrl": "https://picsum.photos/seed/prod4/600/800",
+      "imageHint": "fountain pen"
+    },
+    {
+      "id": "prod-5",
+      "description": "A premium silk scarf with an abstract pattern.",
+      "imageUrl": "https://picsum.photos/seed/prod5/600/800",
+      "imageHint": "silk scarf"
+    },
+    {
+      "id": "prod-6",
+      "description": "A vintage-style leather briefcase.",
+      "imageUrl": "https://picsum.photos/seed/prod6/600/800",
+      "imageHint": "leather briefcase"
+    },
+    {
+      "id": "prod-7",
+      "description": "A set of aromatic scented candles in glass jars.",
+      "imageUrl": "https://picsum.photos/seed/prod7/600/800",
+      "imageHint": "scented candles"
+    },
+    {
+      "id": "prod-8",
+      "description": "A high-quality audio headphone with wooden accents.",
+      "imageUrl": "https://picsum.photos/seed/prod8/600/800",
+      "imageHint": "audio headphones"
+    }
+  ]
 }
