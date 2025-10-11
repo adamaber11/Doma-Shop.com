@@ -13,24 +13,22 @@ import { Button } from '@/components/ui/button';
 import { Menu, LayoutGrid, ChevronLeft } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
-import type { Product } from '@/lib/types';
-import { useMemo } from 'react';
 import { Skeleton } from './ui/skeleton';
 import { Separator } from './ui/separator';
 
+type Category = {
+    id: string;
+    name: string;
+}
+
 export default function CategoriesSheet() {
   const firestore = useFirestore();
-  const productsQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'products') : null),
+  const categoriesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'categories') : null),
     [firestore]
   );
-  const { data: products, isLoading } = useCollection<Product>(productsQuery);
+  const { data: categories, isLoading } = useCollection<Category>(categoriesQuery);
 
-  const categories = useMemo(() => {
-    if (!products) return [];
-    const categorySet = new Set(products.map(p => p.category));
-    return Array.from(categorySet);
-  }, [products]);
 
   const navLinks = [
     { href: '/', label: 'الرئيسية' },
@@ -58,16 +56,16 @@ export default function CategoriesSheet() {
             <div className="space-y-4">
                 {Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
             </div>
-          ) : categories.length > 0 ? (
+          ) : categories && categories.length > 0 ? (
             <div className="space-y-2">
               {categories.map((category) => (
-                <SheetClose asChild key={category}>
+                <SheetClose asChild key={category.id}>
                   <Link
-                    href={`/category/${category.toLowerCase().replace(/ /g, '-')}`}
+                    href={`/category/${category.name.toLowerCase().replace(/ /g, '-')}`}
                     className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
                   >
                     <LayoutGrid className="h-5 w-5" />
-                    <span className="font-medium">{category}</span>
+                    <span className="font-medium">{category.name}</span>
                   </Link>
                 </SheetClose>
               ))}

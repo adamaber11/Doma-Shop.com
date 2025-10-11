@@ -80,6 +80,26 @@
         "category"
       ]
     },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a product category.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the category."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the category."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
     "Order": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Order",
@@ -205,6 +225,12 @@
           "$ref": "#/entities/Product"
         },
         "description": "Stores all products available in the e-commerce store."
+      },
+      "/categories": {
+        "schema": {
+            "$ref": "#/entities/Category"
+        },
+        "description": "Stores all product categories."
       },
       "/users/{userId}/orders": {
         "schema": {
