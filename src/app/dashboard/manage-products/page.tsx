@@ -161,18 +161,18 @@ function AddProductDialog({ onProductAdded }: { onProductAdded: () => void }) {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>العلامة التجارية</FormLabel>
-                                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingBrands}>
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="اختر علامة..." />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {brands?.map((brand) => (
-                                        <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
+                                   <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingBrands}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="اختر علامة..." />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {brands?.map((brand) => (
+                                                <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                   </Select>
                                   <FormMessage />
                                 </FormItem>
                               )}
