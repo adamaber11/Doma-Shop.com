@@ -50,8 +50,7 @@ export default function ProductCard({ product }: { product: Product }) {
       <CardFooter className="p-4 pt-0 flex justify-between items-center">
         <p className="text-lg font-semibold text-primary">
           {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
-        </p>
-        <Button variant="outline" size="icon" onClick={handleAddToCart} aria-label={`Add ${product.name} to cart`}>
+        </p>        <Button variant="outline" size="icon" onClick={handleAddToCart} aria-label={`Add ${product.name} to cart`}>
           <ShoppingCart className="h-5 w-5" />
         </Button>
       </CardFooter>
