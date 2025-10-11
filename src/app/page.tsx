@@ -23,7 +23,7 @@ export default function Home() {
 
   return (
     <div className="space-y-12">
-      <section className="relative h-screen w-full overflow-hidden bg-secondary shadow-lg -mx-4 -mt-8">
+      <section className="relative h-screen w-screen overflow-hidden bg-secondary shadow-lg -mx-4 -mt-8">
         {heroImage && (
           <Image
             src={heroImage.imageUrl}
