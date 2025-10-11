@@ -1,1 +1,1 @@
-export const APP_NAME = 'تاجر';
+export const APP_NAME = 'دوما اونلاين شوب';

@@ -13,6 +13,7 @@ import { useAuth } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { APP_NAME } from '@/lib/constants';
 
 const signupSchema = z.object({
   fullName: z.string().min(2, 'الاسم الكامل مطلوب'),
@@ -42,7 +43,7 @@ export default function SignupPage() {
       });
       toast({
         title: 'تم إنشاء الحساب بنجاح',
-        description: 'مرحباً بك في تاجر!',
+        description: `مرحباً بك في ${APP_NAME}!`,
       });
       router.push('/');
     } catch (error: any) {
