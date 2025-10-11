@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Search, User, LogIn, UserPlus, Package, LogOut } from 'lucide-react';
+import { Search, User, LogIn, UserPlus, Package, LogOut, LayoutDashboard } from 'lucide-react';
 import Logo from './Logo';
 import { useUser, useAuth } from '@/firebase';
 import { Avatar, AvatarFallback } from './ui/avatar';
@@ -75,6 +75,9 @@ export default function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/orders"><Package className="mr-2 h-4 w-4" /> طلباتي</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> لوحة التحكم</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
