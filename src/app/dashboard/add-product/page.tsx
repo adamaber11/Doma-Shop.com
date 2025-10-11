@@ -29,7 +29,7 @@ const productSchema = z.object({
   sizes: z.array(z.object({
     value: z.string().min(1, 'المقاس مطلوب'),
   })).optional(),
-  rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5'),
+  rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5').default(0),
 });
 
 export default function AddProductPage() {
@@ -304,22 +304,6 @@ export default function AddProductPage() {
                     إضافة مقاس
                 </Button>
               </div>
-
-              <Separator />
-
-               <FormField
-                  control={form.control}
-                  name="rating"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>التقييم (0-5)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.1" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? 'جاري الإضافة...' : 'إضافة المنتج'}
               </Button>
