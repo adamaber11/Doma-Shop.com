@@ -1,0 +1,124 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Protects user profiles, enforcing owner-only access.
+     * @path /users/{userId}
+     * @allow (create) If the user is signed in and the created document's ID matches their auth UID.
+     * @deny (create) If the user is not signed in or the document ID does not match their auth UID.
+     * @allow (get, list, update, delete) If the user is signed in and the requested userId matches their auth UID.
+     * @deny (get, list, update, delete) If the user is not signed in or the requested userId does not match their auth UID.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+          return isOwner(userId) && resource.data != null;
+      }
+
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Manages product catalog; public read, owner-only create, update, and delete.
+     * @path /products/{productId}
+     * @allow (get, list) Public read access to product information.
+     * @allow (create) Anyone can create products.
+     * @deny (update, delete) No one can update or delete products.
+     * @principle Grants public read access while restricting modifications.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Secures shipping addresses, enforcing owner-only access via path-based ownership.
+     * @path /users/{userId}/shipping_addresses/{shippingAddressId}
+     * @allow (create) If the user is signed in and owns the parent user document.
+     * @deny (create) If the user is not signed in or does not own the parent user document.
+     * @allow (get, list, update, delete) If the user is signed in and owns the parent user document.
+     * @deny (get, list, update, delete) If the user is not signed in or does not own the parent user document.
+     * @principle Enforces path-based ownership for shipping addresses.
+     */
+    match /users/{userId}/shipping_addresses/{shippingAddressId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource.data != null;
+      }
+
+      allow create: if isSignedIn() && isOwner(userId);
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Protects order data, enforcing owner-only access via path-based ownership.
+     * @path /users/{userId}/orders/{orderId}
+     * @allow (create) If the user is signed in and owns the parent user document.
+     * @deny (create) If the user is not signed in or does not own the parent user document.
+     * @allow (get, list, update, delete) If the user is signed in and owns the parent user document.
+     * @deny (get, list, update, delete) If the user is not signed in or does not own the parent user document.
+     * @principle Enforces path-based ownership for order data.
+     */
+    match /users/{userId}/orders/{orderId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+          return isOwner(userId) && resource.data != null;
+      }
+
+      allow create: if isSignedIn() && isOwner(userId);
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Manages order items under products; public read, restricted write.
+     * @path /products/{productId}/order_items/{orderItemId}
+     * @allow (get, list) Public read access to order items.
+     * @allow (create) Anyone can create order items.
+     * @deny (update, delete) No one can update or delete order items.
+     */
+    match /products/{productId}/order_items/{orderItemId} {
+        function isSignedIn() {
+            return request.auth != null;
+        }
+        allow get, list: if true;
+        allow create: if isSignedIn();
+        allow update: if false;
+        allow delete: if false;
+    }
+  }
+}
