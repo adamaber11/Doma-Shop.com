@@ -15,6 +15,12 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  parentId: string | null;
+}
+
 export interface Order {
   id: string;
   userId?: string;

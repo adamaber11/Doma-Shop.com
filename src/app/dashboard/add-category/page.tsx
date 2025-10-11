@@ -7,22 +7,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { addDoc, collection } from 'firebase/firestore';
+import type { Category } from '@/lib/types';
 
 const categorySchema = z.object({
   name: z.string().min(2, 'اسم الفئة مطلوب'),
+  parentId: z.string().optional(),
 });
 
 export default function AddCategoryPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
 
+  const categoriesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'categories') : null),
+    [firestore]
+  );
+  const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
+
   const form = useForm<z.infer<typeof categorySchema>>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: '',
+      parentId: '',
     },
   });
 
@@ -37,7 +47,10 @@ export default function AddCategoryPage() {
     }
 
     try {
-      await addDoc(collection(firestore, 'categories'), values);
+      await addDoc(collection(firestore, 'categories'), {
+        name: values.name,
+        parentId: values.parentId || null, // Store null if no parent is selected
+      });
 
       toast({
         title: 'تمت إضافة الفئة بنجاح!',
@@ -60,7 +73,7 @@ export default function AddCategoryPage() {
         <CardHeader>
           <CardTitle>إضافة فئة جديدة</CardTitle>
           <CardDescription>
-            املأ النموذج أدناه لإضافة فئة جديدة إلى المتجر.
+            املأ النموذج أدناه لإضافة فئة جديدة. اختر فئة رئيسية لجعلها فئة فرعية.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -73,8 +86,33 @@ export default function AddCategoryPage() {
                   <FormItem>
                     <FormLabel>اسم الفئة</FormLabel>
                     <FormControl>
-                      <Input placeholder="مثال: إلكترونيات" {...field} />
+                      <Input placeholder="مثال: هواتف ذكية" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="parentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الفئة الرئيسية (اختياري)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر فئة رئيسية..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">-- لا يوجد --</SelectItem>
+                        {categories?.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

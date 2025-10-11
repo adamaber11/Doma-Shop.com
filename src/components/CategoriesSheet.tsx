@@ -15,11 +15,18 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
 import { Separator } from './ui/separator';
+import type { Category as CategoryType } from '@/lib/types';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { useMemo } from 'react';
 
-type Category = {
-    id: string;
-    name: string;
-}
+type CategoryWithSubcategories = CategoryType & {
+  subcategories: CategoryWithSubcategories[];
+};
 
 export default function CategoriesSheet() {
   const firestore = useFirestore();
@@ -27,8 +34,37 @@ export default function CategoriesSheet() {
     () => (firestore ? collection(firestore, 'categories') : null),
     [firestore]
   );
-  const { data: categories, isLoading } = useCollection<Category>(categoriesQuery);
+  const { data: categories, isLoading } = useCollection<CategoryType>(categoriesQuery);
 
+  const categoryTree = useMemo(() => {
+    if (!categories) return [];
+    
+    const categoryMap = new Map<string, CategoryWithSubcategories>();
+    const rootCategories: CategoryWithSubcategories[] = [];
+
+    // Initialize map with all categories
+    categories.forEach(category => {
+        categoryMap.set(category.id, { ...category, subcategories: [] });
+    });
+
+    // Build the tree structure
+    categories.forEach(category => {
+        if (category.parentId) {
+            const parent = categoryMap.get(category.parentId);
+            const child = categoryMap.get(category.id);
+            if (parent && child) {
+                parent.subcategories.push(child);
+            }
+        } else {
+            const rootCategory = categoryMap.get(category.id);
+            if (rootCategory) {
+                rootCategories.push(rootCategory);
+            }
+        }
+    });
+
+    return rootCategories;
+  }, [categories]);
 
   const navLinks = [
     { href: '/', label: 'الرئيسية' },
@@ -38,6 +74,40 @@ export default function CategoriesSheet() {
     { href: '/daily-deals', label: 'العروض اليوميه' },
     { href: '/coupons', label: 'كوبونات الخصم' },
   ];
+
+  const renderCategory = (category: CategoryWithSubcategories) => {
+    if (category.subcategories.length === 0) {
+      return (
+        <SheetClose asChild key={category.id}>
+          <Link
+            href={`/category/${category.name.toLowerCase().replace(/ /g, '-')}`}
+            className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            <LayoutGrid className="h-5 w-5" />
+            <span className="font-medium">{category.name}</span>
+          </Link>
+        </SheetClose>
+      );
+    }
+
+    return (
+      <Accordion type="single" collapsible key={category.id} className="w-full">
+        <AccordionItem value={category.id} className="border-none">
+          <AccordionTrigger className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors hover:no-underline">
+              <div className="flex items-center gap-3">
+                <LayoutGrid className="h-5 w-5" />
+                <span className="font-medium">{category.name}</span>
+              </div>
+          </AccordionTrigger>
+          <AccordionContent className="pb-0 pl-6">
+            <div className="flex flex-col space-y-1 mt-1">
+              {category.subcategories.map(renderCategory)}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    );
+  };
 
   return (
     <Sheet>
@@ -54,21 +124,11 @@ export default function CategoriesSheet() {
         <div className="flex-grow overflow-y-auto pr-4 -mr-4 my-4">
           {isLoading ? (
             <div className="space-y-4">
-                {Array.from({length: 5}).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
+                {Array.from({length: 8}).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
             </div>
-          ) : categories && categories.length > 0 ? (
-            <div className="space-y-2">
-              {categories.map((category) => (
-                <SheetClose asChild key={category.id}>
-                  <Link
-                    href={`/category/${category.name.toLowerCase().replace(/ /g, '-')}`}
-                    className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-                  >
-                    <LayoutGrid className="h-5 w-5" />
-                    <span className="font-medium">{category.name}</span>
-                  </Link>
-                </SheetClose>
-              ))}
+          ) : categoryTree.length > 0 ? (
+            <div className="space-y-1">
+              {categoryTree.map(renderCategory)}
             </div>
           ) : (
             <p className="text-muted-foreground text-center pt-10">

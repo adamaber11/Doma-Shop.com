@@ -84,7 +84,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Category",
       "type": "object",
-      "description": "Represents a product category.",
+      "description": "Represents a product category, which can be a main category or a sub-category.",
       "properties": {
         "id": {
           "type": "string",
@@ -93,6 +93,10 @@
         "name": {
           "type": "string",
           "description": "Name of the category."
+        },
+        "parentId": {
+          "type": [ "string", "null" ],
+          "description": "The ID of the parent category. If null, it's a main category."
         }
       },
       "required": [
