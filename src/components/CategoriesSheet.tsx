@@ -10,7 +10,7 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, LayoutGrid, ChevronLeft } from 'lucide-react';
+import { Menu, LayoutGrid, ChevronLeft, ArrowLeft } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
@@ -99,8 +99,17 @@ export default function CategoriesSheet() {
                 <span className="font-medium">{category.name}</span>
               </div>
           </AccordionTrigger>
-          <AccordionContent className="pb-0 pl-6">
+          <AccordionContent className="pb-0 pr-6">
             <div className="flex flex-col space-y-1 mt-1">
+              <SheetClose asChild>
+                <Link
+                  href={`/category/${category.name.toLowerCase().replace(/ /g, '-')}`}
+                  className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                  <span className="font-medium">عرض الكل في {category.name}</span>
+                </Link>
+              </SheetClose>
               {category.subcategories.map(renderCategory)}
             </div>
           </AccordionContent>
