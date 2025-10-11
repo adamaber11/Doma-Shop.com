@@ -52,7 +52,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="featured-products">
+      <section id="featured-products" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="font-headline text-3xl font-bold text-center mb-8">
           منتجاتنا المميزة
         </h2>

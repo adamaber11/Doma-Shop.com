@@ -22,7 +22,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
 
   if (isLoading) {
     return (
-      <div className="space-y-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
           <Skeleton className="w-full h-[600px] rounded-lg" />
           <div className="space-y-6">
@@ -45,7 +45,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   }
 
   return (
-    <div className="space-y-12">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
         <div className="bg-card p-4 rounded-lg shadow-sm">
           <Image
