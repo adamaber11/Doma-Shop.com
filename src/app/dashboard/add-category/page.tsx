@@ -15,7 +15,7 @@ import type { Category } from '@/lib/types';
 
 const categorySchema = z.object({
   name: z.string().min(2, 'اسم الفئة مطلوب'),
-  parentId: z.string().optional(),
+  parentId: z.string().optional().nullable(),
 });
 
 export default function AddCategoryPage() {
@@ -32,7 +32,7 @@ export default function AddCategoryPage() {
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: '',
-      parentId: '',
+      parentId: null,
     },
   });
 
@@ -98,14 +98,14 @@ export default function AddCategoryPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>الفئة الرئيسية (اختياري)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
+                    <Select onValueChange={(value) => field.onChange(value === 'none' ? null : value)} defaultValue={field.value || 'none'} disabled={isLoadingCategories}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="اختر فئة رئيسية..." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">-- لا يوجد --</SelectItem>
+                        <SelectItem value="none">-- لا يوجد --</SelectItem>
                         {categories?.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
                             {category.name}
