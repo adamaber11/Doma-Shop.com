@@ -157,8 +157,8 @@ export default function EditProductPage({ params: paramsPromise }: { params: Pro
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField name="price" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>السعر (درهم)</FormLabel> <FormControl> <Input type="number" step="0.01" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
                 <FormField
-                  name="category"
                   control={form.control}
+                  name="category"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>الفئة</FormLabel>
@@ -179,8 +179,8 @@ export default function EditProductPage({ params: paramsPromise }: { params: Pro
                   )}
                 />
                 <FormField
-                  name="brand"
                   control={form.control}
+                  name="brand"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>العلامة التجارية</FormLabel>
