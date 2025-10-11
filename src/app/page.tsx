@@ -89,7 +89,7 @@ export default function Home() {
                 Array.from({ length: 5 }).map((_, index) => (
                   <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/5">
                      <div className="flex flex-col items-center justify-center gap-2">
-                        <Skeleton className="h-16 w-32" />
+                        <Skeleton className="h-20 w-20 rounded-full" />
                         <Skeleton className="h-6 w-24" />
                     </div>
                   </CarouselItem>
@@ -97,15 +97,17 @@ export default function Home() {
               ) : (
                 brands?.map((brand) => (
                   <CarouselItem key={brand.id} className="md:basis-1/3 lg:basis-1/5">
-                     <div className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg hover:bg-secondary transition-colors">
-                        <Image
-                        src={brand.logoUrl}
-                        alt={`${brand.name} logo`}
-                        width={200}
-                        height={100}
-                        className="object-contain h-16"
-                        data-ai-hint={brand.logoHint}
-                        />
+                     <div className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg transition-all">
+                        <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center p-2 group relative overflow-hidden ring-2 ring-transparent hover:ring-primary transition-all duration-300">
+                            <Image
+                            src={brand.logoUrl}
+                            alt={`${brand.name} logo`}
+                            width={80}
+                            height={80}
+                            className="object-contain transition-transform duration-300 group-hover:scale-110"
+                            data-ai-hint={brand.logoHint}
+                            />
+                        </div>
                         <p className="font-semibold mt-2">{brand.name}</p>
                     </div>
                   </CarouselItem>
