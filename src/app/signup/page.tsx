@@ -9,10 +9,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAuth } from '@/firebase';
+import { useAuth, initiateEmailSignUp } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { updateProfile } from 'firebase/auth';
 import { APP_NAME } from '@/lib/constants';
 
 const signupSchema = z.object({
@@ -36,8 +36,16 @@ export default function SignupPage() {
   });
 
   async function onSubmit(values: z.infer<typeof signupSchema>) {
+    if (!auth) {
+      toast({
+        variant: 'destructive',
+        title: 'حدث خطأ',
+        description: 'خدمة المصادقة غير متاحة.',
+      });
+      return;
+    }
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const userCredential = await initiateEmailSignUp(auth, values.email, values.password);
       await updateProfile(userCredential.user, {
         displayName: values.fullName,
       });
