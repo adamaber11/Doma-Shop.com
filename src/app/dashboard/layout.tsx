@@ -10,6 +10,7 @@ function DashboardNav() {
     { href: '/dashboard', label: 'نظرة عامة' },
     { href: '/dashboard/orders', label: 'طلبات العملاء' },
     { href: '/dashboard/add-product', label: 'إضافة منتج' },
+    { href: '/dashboard/add-product', label: 'إضافة فئات' },
   ];
 
   return (
@@ -22,7 +23,7 @@ function DashboardNav() {
               href={link.href}
               className={cn(
                 'py-4 text-sm font-medium border-b-2 transition-colors',
-                pathname === link.href
+                (pathname === link.href && link.href !== '/dashboard/add-product') || (pathname === '/dashboard/add-product' && (link.label === 'إضافة منتج' || link.label === 'إضافة فئات'))
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               )}
