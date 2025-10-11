@@ -2,12 +2,12 @@
 
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { useState } from 'react';
+import { use, useState } from 'react';
 import StarRating from '@/components/StarRating';
 import { Separator } from '@/components/ui/separator';
 import AddToCartButton from '@/components/AddToCartButton';
 import ProductRecommendations from '@/components/ProductRecommendations';
-import { useDoc } from '@/firebase/firestore/use-doc';
+import { useDoc } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product } from '@/lib/types';
@@ -15,11 +15,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
+export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const firestore = useFirestore();
   const productRef = useMemoFirebase(
-    () => (firestore ? doc(firestore, 'products', params.id) : null),
-    [firestore, params.id]
+    () => (firestore ? doc(firestore, 'products', id) : null),
+    [firestore, id]
   );
   const { data: product, isLoading } = useDoc<Product>(productRef);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
