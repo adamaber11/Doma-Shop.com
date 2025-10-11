@@ -7,7 +7,7 @@ import StarRating from '@/components/StarRating';
 import { Separator } from '@/components/ui/separator';
 import AddToCartButton from '@/components/AddToCartButton';
 import ProductRecommendations from '@/components/ProductRecommendations';
-import { useDoc } from '@/firebase';
+import { useDoc } from '@/firebase/firestore/use-doc';
 import { doc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product } from '@/lib/types';
