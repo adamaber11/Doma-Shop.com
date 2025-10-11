@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
   DropdownMenu,
@@ -9,17 +11,35 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Search, User, LogIn, UserPlus, Package } from 'lucide-react';
+import { Search, User, LogIn, UserPlus, Package, LogOut } from 'lucide-react';
 import Logo from './Logo';
 import CartSheet from './CartSheet';
+import { useUser, useAuth } from '@/firebase';
+import { Avatar, AvatarFallback } from './ui/avatar';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
+
   const navLinks = [
     { href: '/', label: 'الرئيسية' },
     { href: '/collections', label: 'المجموعات' },
     { href: '/offers', label: 'العروض' },
     { href: '/contact', label: 'تواصل معنا' },
   ];
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
+  
+  const getInitials = (name?: string | null) => {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -48,22 +68,46 @@ export default function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
-                <User className="h-6 w-6" />
+                {isUserLoading ? (
+                  <User className="h-6 w-6 animate-pulse" />
+                ) : user ? (
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>{getInitials(user.displayName || user.email)}</AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <User className="h-6 w-6" />
+                )}
                 <span className="sr-only">User menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>حسابي</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> تسجيل الدخول</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> إنشاء حساب</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/orders"><Package className="mr-2 h-4 w-4" /> طلباتي</Link>
-              </DropdownMenuItem>
+              {user ? (
+                <>
+                  <DropdownMenuLabel>{user.displayName || user.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile"><User className="mr-2 h-4 w-4" /> ملفي الشخصي</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/orders"><Package className="mr-2 h-4 w-4" /> طلباتي</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" /> تسجيل الخروج
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuLabel>حسابي</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/login"><LogIn className="mr-2 h-4 w-4" /> تسجيل الدخول</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/signup"><UserPlus className="mr-2 h-4 w-4" /> إنشاء حساب</Link>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
 
