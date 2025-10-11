@@ -11,6 +11,13 @@ import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product, Brand } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 export default function Home() {
   const firestore = useFirestore();
@@ -69,32 +76,45 @@ export default function Home() {
           <h2 className="font-headline text-3xl font-bold text-center mb-8">
             أشهر العلامات التجارية
           </h2>
-          {isLoadingBrands ? (
-             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
-                {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex flex-col items-center justify-center gap-2">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+              direction: "rtl",
+            }}
+            className="w-full max-w-6xl mx-auto"
+          >
+            <CarouselContent>
+              {isLoadingBrands ? (
+                Array.from({ length: 5 }).map((_, index) => (
+                  <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/5">
+                     <div className="flex flex-col items-center justify-center gap-2">
                         <Skeleton className="h-16 w-32" />
                         <Skeleton className="h-6 w-24" />
                     </div>
-                ))}
-             </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
-                {brands?.map((brand) => (
-                <div key={brand.id} className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg hover:bg-secondary transition-colors">
-                    <Image
-                    src={brand.logoUrl}
-                    alt={`${brand.name} logo`}
-                    width={200}
-                    height={100}
-                    className="object-contain h-16"
-                    data-ai-hint={brand.logoHint}
-                    />
-                    <p className="font-semibold mt-2">{brand.name}</p>
-                </div>
-                ))}
-            </div>
-          )}
+                  </CarouselItem>
+                ))
+              ) : (
+                brands?.map((brand) => (
+                  <CarouselItem key={brand.id} className="md:basis-1/3 lg:basis-1/5">
+                     <div className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg hover:bg-secondary transition-colors">
+                        <Image
+                        src={brand.logoUrl}
+                        alt={`${brand.name} logo`}
+                        width={200}
+                        height={100}
+                        className="object-contain h-16"
+                        data-ai-hint={brand.logoHint}
+                        />
+                        <p className="font-semibold mt-2">{brand.name}</p>
+                    </div>
+                  </CarouselItem>
+                ))
+              )}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </div>
       </section>
 
@@ -102,24 +122,36 @@ export default function Home() {
         <h2 className="font-headline text-3xl font-bold text-center mb-8">
           منتجاتنا المميزة
         </h2>
-        {isLoadingProducts ? (
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="space-y-2">
-                <Skeleton className="h-80 w-full" />
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-5 w-1/2" />
-                <Skeleton className="h-8 w-1/4" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products?.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        )}
+        <Carousel
+          opts={{
+            align: "start",
+            direction: "rtl",
+          }}
+          className="w-full max-w-6xl mx-auto"
+        >
+          <CarouselContent>
+            {isLoadingProducts ? (
+              Array.from({ length: 8 }).map((_, index) => (
+                <CarouselItem key={index} className="sm:basis-1/2 lg:basis-1/4 p-2">
+                  <div className="space-y-2">
+                    <Skeleton className="h-80 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-5 w-1/2" />
+                    <Skeleton className="h-8 w-1/4" />
+                  </div>
+                </CarouselItem>
+              ))
+            ) : (
+              products?.map((product) => (
+                <CarouselItem key={product.id} className="sm:basis-1/2 lg:basis-1/4 p-2">
+                  <ProductCard product={product} />
+                </CarouselItem>
+              ))
+            )}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </section>
     </div>
   );
