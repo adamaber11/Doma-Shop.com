@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (item: Product, quantity: number) => void;
+  addToCart: (product: Product, quantity: number) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -18,9 +18,11 @@ export const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    setIsClient(true);
     try {
       const storedCart = localStorage.getItem('tajer-cart');
       if (storedCart) {
@@ -32,8 +34,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('tajer-cart', JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (isClient) {
+      localStorage.setItem('tajer-cart', JSON.stringify(cartItems));
+    }
+  }, [cartItems, isClient]);
 
   const addToCart = useCallback((product: Product, quantity: number) => {
     setCartItems(prevItems => {
@@ -74,6 +78,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <CartContext.Provider
