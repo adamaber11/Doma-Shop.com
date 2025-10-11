@@ -34,8 +34,8 @@ const productSchema = z.object({
   })).optional(),
 });
 
-export default function EditProductPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function EditProductPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const { id } = use(paramsPromise);
   const { toast } = useToast();
   const firestore = useFirestore();
   const router = useRouter();
@@ -156,8 +156,50 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
               <FormField name="description" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>وصف المنتج</FormLabel> <FormControl> <Textarea placeholder="صف المنتج بالتفصيل..." {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField name="price" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>السعر (درهم)</FormLabel> <FormControl> <Input type="number" step="0.01" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField name="category" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>الفئة</FormLabel> <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingCategories}> <FormControl> <SelectTrigger> <SelectValue placeholder="اختر فئة..." /> </SelectTrigger> </FormControl> <SelectContent> {categories?.map((cat) => ( <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem> ))} </SelectContent> </Select> <FormMessage /> </FormItem> )} />
-                <FormField name="brand" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>العلامة التجارية</FormLabel> <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingBrands}> <FormControl> <SelectTrigger> <SelectValue placeholder="اختر علامة..." /> </SelectTrigger> </FormControl> <SelectContent> {brands?.map((brand) => ( <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem> ))} </SelectContent> </Select> <FormMessage /> </FormItem> )} />
+                <FormField
+                  name="category"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الفئة</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingCategories}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر فئة..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories?.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  name="brand"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>العلامة التجارية</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingBrands}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر علامة..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {brands?.map((brand) => (
+                            <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               <Separator />
               <div>
@@ -199,5 +241,3 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     </div>
   );
 }
-
-    
