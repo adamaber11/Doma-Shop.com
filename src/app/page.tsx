@@ -44,9 +44,14 @@ export default function Home() {
               <p className="mt-4 text-lg text-primary-foreground/90 drop-shadow">
                 اكتشف مجموعتنا الحصرية من المنتجات المصممة لإلهام حياتك.
               </p>
-              <Button asChild size="lg" className="mt-6 bg-accent text-accent-foreground hover:bg-accent/90">
-                <Link href="#featured-products">تسوق الآن</Link>
-              </Button>
+              <div className="flex items-center gap-4 mt-6">
+                <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                  <Link href="#featured-products">تسوق الآن</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="text-white border-white bg-transparent hover:bg-white/10 hover:text-white">
+                  <Link href="/about">من نحن</Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
