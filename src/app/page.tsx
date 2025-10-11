@@ -23,7 +23,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col" style={{gap: '5px'}}>
-      <section className="relative h-[calc(60vh+20px)] w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden bg-secondary shadow-lg">
+      <section className="relative h-[calc(60vh+20px)] w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden bg-secondary shadow-lg" style={{ marginTop: '5px' }}>
         {heroImage && (
           <Image
             src={heroImage.imageUrl}
