@@ -5,13 +5,15 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useCart } from '@/hooks/useCart';
+import { useCart } from '@/hooks/use-cart';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { useAuth, useFirestore, useUser } from '@/firebase';
+import { addDoc, collection, serverTimestamp, doc, writeBatch } from 'firebase/firestore';
+import type { ShippingAddress } from '@/lib/types';
 
 const shippingSchema = z.object({
   fullName: z.string().min(2, 'الاسم الكامل مطلوب'),
@@ -33,6 +35,8 @@ export default function CheckoutPage() {
   const { totalPrice, cartItems, clearCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
+  const firestore = useFirestore();
+  const { user } = useUser();
 
   const form = useForm<z.infer<typeof checkoutSchema>>({
     resolver: zodResolver(checkoutSchema),
@@ -48,16 +52,69 @@ export default function CheckoutPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof checkoutSchema>) {
-    console.log(values);
-    toast({
-      title: 'تم تقديم الطلب بنجاح!',
-      description: 'شكرًا لك على الشراء. سيتم توجيهك إلى صفحة الطلبات.',
-    });
-    clearCart();
-    setTimeout(() => {
-      router.push('/orders');
-    }, 2000);
+  async function onSubmit(values: z.infer<typeof checkoutSchema>) {
+    if (!user || !firestore) {
+      toast({
+        variant: 'destructive',
+        title: 'خطأ',
+        description: 'يجب عليك تسجيل الدخول لإتمام عملية الشراء.',
+      });
+      return;
+    }
+
+    const shippingAddress: ShippingAddress = {
+      fullName: values.fullName,
+      address: values.address,
+      city: values.city,
+      country: values.country,
+      postalCode: values.postalCode,
+    };
+    
+    try {
+      // Use a batch write to save order and order items atomically
+      const batch = writeBatch(firestore);
+
+      // 1. Create the main order document
+      const orderRef = doc(collection(firestore, `users/${user.uid}/orders`));
+      batch.set(orderRef, {
+        userId: user.uid,
+        orderDate: serverTimestamp(),
+        totalAmount: totalPrice,
+        status: 'Processing',
+        shippingAddress: shippingAddress,
+      });
+
+      // 2. Create a document for each item in the order
+      for (const item of cartItems) {
+        const orderItemRef = doc(collection(firestore, `users/${user.uid}/orders/${orderRef.id}/items`));
+        batch.set(orderItemRef, {
+          productId: item.id,
+          name: item.name,
+          imageUrl: item.imageUrl,
+          quantity: item.quantity,
+          itemPrice: item.price,
+        });
+      }
+
+      await batch.commit();
+
+      toast({
+        title: 'تم تقديم الطلب بنجاح!',
+        description: 'شكرًا لك على الشراء. سيتم توجيهك إلى صفحة الطلبات.',
+      });
+      clearCart();
+      setTimeout(() => {
+        router.push('/orders');
+      }, 2000);
+
+    } catch (error) {
+      console.error("Error placing order: ", error);
+      toast({
+        variant: 'destructive',
+        title: 'حدث خطأ أثناء تقديم الطلب',
+        description: 'يرجى المحاولة مرة أخرى.',
+      });
+    }
   }
 
   return (

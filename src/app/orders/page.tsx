@@ -1,4 +1,5 @@
-import { orders } from '@/lib/data';
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -9,8 +10,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCollection, useUser, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
+import type { Order } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const getStatusVariant = (status: (typeof orders)[0]['status']) => {
+const getStatusVariant = (status: Order['status']) => {
   switch (status) {
     case 'Delivered':
       return 'default';
@@ -25,15 +30,29 @@ const getStatusVariant = (status: (typeof orders)[0]['status']) => {
   }
 };
 
-const statusTranslations = {
+const statusTranslations: Record<Order['status'], string> = {
   Processing: 'قيد المعالجة',
   Shipped: 'تم الشحن',
   Delivered: 'تم التوصيل',
   Cancelled: 'ملغي',
 };
 
-
 export default function OrdersPage() {
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
+
+  const ordersQuery = useMemoFirebase(
+    () =>
+      user && firestore
+        ? query(collection(firestore, `users/${user.uid}/orders`), orderBy('orderDate', 'desc'))
+        : null,
+    [user, firestore]
+  );
+
+  const { data: orders, isLoading } = useCollection<Order>(ordersQuery);
+
+  const showLoading = isUserLoading || isLoading;
+
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-4xl font-headline font-bold mb-8">طلباتي</h1>
@@ -53,20 +72,41 @@ export default function OrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>{new Date(order.date).toLocaleDateString('ar-AE')}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusVariant(order.status)}>
-                      {statusTranslations[order.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-left">
-                    {order.total.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+              {showLoading ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                  </TableRow>
+                ))
+              ) : orders && orders.length > 0 ? (
+                orders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">#{order.id.substring(0,7)}</TableCell>
+                    <TableCell>
+                      {order.orderDate
+                        ? new Date(order.orderDate.toDate()).toLocaleDateString('ar-AE')
+                        : 'غير متوفر'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusVariant(order.status)}>
+                        {statusTranslations[order.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-left">
+                      {(order.totalAmount ?? 0).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center h-24">
+                    لم يتم العثور على طلبات.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>

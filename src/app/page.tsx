@@ -1,13 +1,25 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { products } from '@/lib/data';
 import ProductCard from '@/components/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useCollection } from '@/firebase';
+import { collection, query, limit } from 'firebase/firestore';
+import { useFirestore, useMemoFirebase } from '@/firebase/provider';
+import type { Product } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
-  const featuredProducts = products.slice(0, 8);
+  const firestore = useFirestore();
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero');
+
+  const productsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'products'), limit(8)) : null),
+    [firestore]
+  );
+  const { data: products, isLoading } = useCollection<Product>(productsQuery);
 
   return (
     <div className="space-y-12">
@@ -42,11 +54,24 @@ export default function Home() {
         <h2 className="font-headline text-3xl font-bold text-center mb-8">
           منتجاتنا المميزة
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {isLoading ? (
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-80 w-full" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-5 w-1/2" />
+                <Skeleton className="h-8 w-1/4" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products?.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

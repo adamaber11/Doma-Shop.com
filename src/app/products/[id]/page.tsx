@@ -1,27 +1,44 @@
+'use client';
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { products } from '@/lib/data';
 import StarRating from '@/components/StarRating';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import AddToCartButton from '@/components/AddToCartButton';
 import ProductRecommendations from '@/components/ProductRecommendations';
-
-export function generateMetadata({ params }: { params: { id: string } }) {
-  const product = products.find((p) => p.id === params.id);
-  if (!product) {
-    return {
-      title: 'Product Not Found',
-    };
-  }
-  return {
-    title: product.name,
-    description: product.description,
-  };
-}
+import { useDoc } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { useFirestore, useMemoFirebase } from '@/firebase/provider';
+import type { Product } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const product = products.find((p) => p.id === params.id);
+  const firestore = useFirestore();
+  const productRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'products', params.id) : null),
+    [firestore, params.id]
+  );
+  const { data: product, isLoading } = useDoc<Product>(productRef);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-12">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+          <Skeleton className="w-full h-[600px] rounded-lg" />
+          <div className="space-y-6">
+            <Skeleton className="h-12 w-3/4" />
+            <Skeleton className="h-6 w-1/4" />
+            <Skeleton className="h-10 w-1/3" />
+            <Separator />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-2/3" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     notFound();

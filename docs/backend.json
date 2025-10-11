@@ -22,19 +22,10 @@
           "type": "string",
           "description": "Email address of the user.",
           "format": "email"
-        },
-        "shippingAddresses": {
-          "type": "array",
-          "description": "References to the ShippingAddresses. (Relationship: User 1:N ShippingAddress)",
-          "items": {
-            "type": "string"
-          }
         }
       },
       "required": [
         "id",
-        "firstName",
-        "lastName",
         "email"
       ]
     },
@@ -64,6 +55,18 @@
           "type": "string",
           "description": "URL of the product image.",
           "format": "uri"
+        },
+        "imageHint": {
+            "type": "string",
+            "description": "AI hint for the product image."
+        },
+        "rating": {
+            "type": "number",
+            "description": "Product rating out of 5."
+        },
+        "category": {
+            "type": "string",
+            "description": "Product category."
         }
       },
       "required": [
@@ -71,7 +74,10 @@
         "name",
         "description",
         "price",
-        "imageUrl"
+        "imageUrl",
+        "imageHint",
+        "rating",
+        "category"
       ]
     },
     "Order": {
@@ -99,18 +105,11 @@
         },
         "status": {
           "type": "string",
-          "description": "Status of the order (e.g., pending, processing, shipped, delivered)."
+          "description": "Status of the order (e.g., pending, processing, shipped, delivered).",
+          "enum": ["Processing", "Shipped", "Delivered", "Cancelled"]
         },
-        "orderItemIds": {
-          "type": "array",
-          "description": "References to OrderItems. (Relationship: Order 1:N OrderItem)",
-          "items": {
-            "type": "string"
-          }
-        },
-        "shippingAddressId": {
-          "type": "string",
-          "description": "Reference to ShippingAddress. (Relationship: ShippingAddress 1:N Order)"
+        "shippingAddress": {
+            "$ref": "#/entities/ShippingAddress"
         }
       },
       "required": [
@@ -119,7 +118,7 @@
         "orderDate",
         "totalAmount",
         "status",
-        "shippingAddressId"
+        "shippingAddress"
       ]
     },
     "OrderItem": {
@@ -128,17 +127,18 @@
       "type": "object",
       "description": "Represents an item within an order.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the order item."
-        },
-        "orderId": {
-          "type": "string",
-          "description": "Reference to Order. (Relationship: Order 1:N OrderItem)"
-        },
         "productId": {
           "type": "string",
           "description": "Reference to Product. (Relationship: Product 1:N OrderItem)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the product."
+        },
+        "imageUrl": {
+            "type": "string",
+            "description": "URL of the product image.",
+            "format": "uri"
         },
         "quantity": {
           "type": "number",
@@ -150,9 +150,9 @@
         }
       },
       "required": [
-        "id",
-        "orderId",
         "productId",
+        "name",
+        "imageUrl",
         "quantity",
         "itemPrice"
       ]
@@ -163,151 +163,61 @@
       "type": "object",
       "description": "Represents a shipping address for a user.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the shipping address."
+        "fullName": {
+            "type": "string",
+            "description": "Full name of the recipient."
         },
-        "userId": {
+        "address": {
           "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N ShippingAddress)"
-        },
-        "addressLine1": {
-          "type": "string",
-          "description": "First line of the address."
-        },
-        "addressLine2": {
-          "type": "string",
-          "description": "Second line of the address."
+          "description": "Address line."
         },
         "city": {
           "type": "string",
           "description": "City of the address."
         },
-        "state": {
+        "country": {
           "type": "string",
-          "description": "State of the address."
+          "description": "Country of the address."
         },
         "postalCode": {
           "type": "string",
           "description": "Postal code of the address."
-        },
-        "country": {
-          "type": "string",
-          "description": "Country of the address."
         }
       },
       "required": [
-        "id",
-        "userId",
-        "addressLine1",
+        "fullName",
+        "address",
         "city",
-        "state",
-        "postalCode",
-        "country"
+        "country",
+        "postalCode"
       ]
     }
   },
   "auth": {
     "providers": [
-      "password",
-      "anonymous"
+      "password"
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles. Uses path-based ownership for security.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
-        }
+    "collections": {
+      "/products": {
+        "schema": {
+          "$ref": "#/entities/Product"
+        },
+        "description": "Stores all products available in the e-commerce store."
       },
-      {
-        "path": "/products/{productId}",
-        "definition": {
-          "entityName": "Product",
-          "schema": {
-            "$ref": "#/backend/entities/Product"
-          },
-          "description": "Stores product information.",
-          "params": [
-            {
-              "name": "productId",
-              "description": "The unique identifier of the product."
-            }
-          ]
-        }
+      "/users/{userId}/orders": {
+        "schema": {
+          "$ref": "#/entities/Order"
+        },
+        "description": "Stores orders for each user."
       },
-      {
-        "path": "/users/{userId}/shipping_addresses/{shippingAddressId}",
-        "definition": {
-          "entityName": "ShippingAddress",
-          "schema": {
-            "$ref": "#/backend/entities/ShippingAddress"
-          },
-          "description": "Stores shipping addresses for each user. The userId is implicitly denormalized by the path.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "shippingAddressId",
-              "description": "The unique identifier of the shipping address."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/orders/{orderId}",
-        "definition": {
-          "entityName": "Order",
-          "schema": {
-            "$ref": "#/backend/entities/Order"
-          },
-          "description": "Stores order information for each user. The userId is implicitly denormalized by the path.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "orderId",
-              "description": "The unique identifier of the order."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/products/{productId}/order_items/{orderItemId}",
-        "definition": {
-          "entityName": "OrderItem",
-          "schema": {
-            "$ref": "#/backend/entities/OrderItem"
-          },
-          "description": "Stores order items for each product. The productId is implicitly denormalized by the path.",
-          "params": [
-            {
-              "name": "productId",
-              "description": "The unique identifier of the product."
-            },
-            {
-              "name": "orderItemId",
-              "description": "The unique identifier of the order item."
-            }
-          ]
-        }
+      "/users/{userId}/orders/{orderId}/items": {
+        "schema": {
+            "$ref": "#/entities/OrderItem"
+        },
+        "description": "Stores items for a specific order."
       }
-    ],
-    "reasoning": "The Firestore structure is designed to support the e-commerce application 'Tajer', focusing on products, orders, user accounts, and shipping information. The design emphasizes authorization independence through path-based ownership for user-related data and avoids the use of `get()` calls in security rules, promoting atomic operations. Segregation is applied to separate user-specific data. \n\nSpecifically:\n\n*   **/users/{userId}**: Stores user profiles. User-owned data is nested under the user ID to simplify ownership-based security rules. Shipping addresses and orders are stored as subcollections.\n*   **/products/{productId}**: Contains product catalog information. No user-specific information is stored here.\n*   **/users/{userId}/shipping_addresses/{shippingAddressId}**: Stores shipping addresses associated with each user. Path-based ownership ensures only the user can access these addresses. The userId is implicitly denormalized by the path.\n*   **/users/{userId}/orders/{orderId}**: Stores order information for each user. Path-based ownership is used. The userId is implicitly denormalized by the path.\n*   **/products/{productId}/order_items/{orderItemId}**: Stores order items under the product. The productId is implicitly denormalized by the path.\n\nThis structure supports QAPs by:\n\n*   Enabling secure list operations for user-specific data through path-based ownership (e.g., listing orders for a specific user).\n*   Clearly defining ownership and access control at each level, making security rules straightforward and maintainable.\n\nAuthorization Independence is achieved by:\n\n*   Using path-based authorization for user-owned data, such as shipping addresses and orders, eliminating the need for `get()` calls to parent documents."
+    }
   }
 }
