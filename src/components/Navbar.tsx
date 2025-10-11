@@ -22,7 +22,7 @@ export default function Navbar() {
                   <Link
                   key={link.label}
                   href={link.href}
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-4"
+                  className="nav-link-underline text-sm font-medium text-muted-foreground py-4"
                   >
                   {link.label}
                   </Link>

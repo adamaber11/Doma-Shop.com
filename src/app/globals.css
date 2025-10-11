@@ -83,3 +83,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .nav-link-underline {
+    @apply relative text-muted-foreground transition-colors duration-300;
+  }
+  .nav-link-underline::after {
+    @apply content-[''] absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] w-0 bg-primary transition-all duration-300;
+  }
+  .nav-link-underline:hover {
+    @apply text-primary;
+  }
+  .nav-link-underline:hover::after {
+    @apply w-full;
+  }
+}
