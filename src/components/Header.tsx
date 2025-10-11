@@ -13,7 +13,6 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Search, User, LogIn, UserPlus, Package, LogOut } from 'lucide-react';
 import Logo from './Logo';
-import CartSheet from './CartSheet';
 import { useUser, useAuth } from '@/firebase';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { signOut } from 'firebase/auth';
@@ -95,7 +94,6 @@ export default function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <CartSheet />
         </div>
       </div>
     </header>

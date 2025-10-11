@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import CartSheet from './CartSheet';
 
 export default function Navbar() {
     const navLinks = [
@@ -13,16 +14,19 @@ export default function Navbar() {
   return (
     <nav className="bg-card border-b">
         <div className="container mx-auto px-4">
-            <div className="hidden md:flex justify-start gap-8">
-            {navLinks.map((link) => (
-                <Link
-                key={link.label}
-                href={link.href}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-4"
-                >
-                {link.label}
-                </Link>
-            ))}
+            <div className="flex justify-between items-center">
+              <div className="hidden md:flex justify-start gap-8">
+              {navLinks.map((link) => (
+                  <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary py-4"
+                  >
+                  {link.label}
+                  </Link>
+              ))}
+              </div>
+              <CartSheet />
             </div>
         </div>
     </nav>
