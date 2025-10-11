@@ -32,7 +32,7 @@ export default function CartSheet() {
           <span className="sr-only">Open shopping cart</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="flex flex-col">
+      <SheetContent side="left" className="flex flex-col">
         <SheetHeader>
           <SheetTitle className="font-headline text-2xl">سلة التسوق</SheetTitle>
         </SheetHeader>
