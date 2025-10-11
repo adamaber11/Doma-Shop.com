@@ -6,9 +6,11 @@ import CartSheet from './CartSheet';
 export default function Navbar() {
     const navLinks = [
         { href: '/', label: 'الرئيسية' },
-        { href: '/collections', label: 'المجموعات' },
         { href: '/offers', label: 'العروض' },
-        { href: '/contact', label: 'تواصل معنا' },
+        { href: '/shopping', label: 'التسوق' },
+        { href: '/best-sellers', label: 'الاكثر مبيعا' },
+        { href: '/daily-deals', label: 'العروض اليوميه' },
+        { href: '/coupons', label: 'كوبونات الخصم' },
       ];
 
   return (
