@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, use } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase';
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection } from 'firebase/firestore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Brand, Category, Product } from '@/lib/types';
 import { PlusCircle, Trash2 } from 'lucide-react';
@@ -34,14 +34,13 @@ const productSchema = z.object({
   })).optional(),
 });
 
-export default function EditProductPage({ params }: { params: { id: string } }) {
-  const { id } = params;
-  const isNewProduct = id === 'new';
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { toast } = useToast();
   const firestore = useFirestore();
   const router = useRouter();
 
-  const productRef = useMemoFirebase(() => (firestore && !isNewProduct ? doc(firestore, 'products', id) : null), [firestore, id, isNewProduct]);
+  const productRef = useMemoFirebase(() => (firestore ? doc(firestore, 'products', id) : null), [firestore, id]);
   const { data: product, isLoading: isLoadingProduct } = useDoc<Product>(productRef);
 
   const categoriesQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'categories') : null), [firestore]);
@@ -95,40 +94,30 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       imageUrls: values.images.map(img => img.url),
       imageHints: values.images.map(img => img.hint),
       sizes: values.sizes?.map(s => s.value).filter(s => s.trim() !== ''),
-      rating: product?.rating || 0, // Preserve existing rating or default to 0
-      images: undefined,
+      rating: product?.rating || 0, // Preserve existing rating
     };
     // @ts-ignore
     delete productData.images;
 
     try {
-      if (isNewProduct) {
-        await addDoc(collection(firestore, 'products'), productData);
-        toast({
-          title: 'تمت إضافة المنتج بنجاح!',
-          description: `تمت إضافة "${values.name}" إلى المتجر.`,
-        });
-        router.push('/dashboard/manage-products');
-      } else {
-        const productDocRef = doc(firestore, 'products', id);
-        await updateDoc(productDocRef, productData);
-        toast({
-          title: 'تم تحديث المنتج بنجاح!',
-          description: `تم تحديث "${values.name}".`,
-        });
-        router.push('/dashboard/manage-products');
-      }
+      const productDocRef = doc(firestore, 'products', id);
+      await updateDoc(productDocRef, productData);
+      toast({
+        title: 'تم تحديث المنتج بنجاح!',
+        description: `تم تحديث "${values.name}".`,
+      });
+      router.push('/dashboard/manage-products');
     } catch (error) {
-      console.error("Error saving product: ", error);
+      console.error("Error updating product: ", error);
       toast({
         variant: 'destructive',
-        title: `حدث خطأ أثناء ${isNewProduct ? 'إضافة' : 'تحديث'} المنتج`,
+        title: `حدث خطأ أثناء تحديث المنتج`,
         description: 'يرجى المحاولة مرة أخرى.',
       });
     }
   }
 
-  if (isLoadingProduct && !isNewProduct) {
+  if (isLoadingProduct) {
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <Card className="max-w-3xl mx-auto">
@@ -155,9 +144,9 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
-          <CardTitle>{isNewProduct ? 'إضافة منتج جديد' : 'تعديل المنتج'}</CardTitle>
+          <CardTitle>تعديل المنتج</CardTitle>
           <CardDescription>
-            {isNewProduct ? 'املأ النموذج أدناه لإضافة منتج جديد إلى متجرك.' : 'قم بتحديث تفاصيل المنتج أدناه.'}
+            قم بتحديث تفاصيل المنتج أدناه.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -201,7 +190,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                  <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => appendSize({ value: '' })}> <PlusCircle className="mr-2 h-4 w-4" /> إضافة مقاس </Button>
               </div>
               <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? (isNewProduct ? 'جاري الإضافة...' : 'جاري الحفظ...') : (isNewProduct ? 'إضافة المنتج' : 'حفظ التعديلات')}
+                {form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ التعديلات'}
               </Button>
             </form>
           </Form>
