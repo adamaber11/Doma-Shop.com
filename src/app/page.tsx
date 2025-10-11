@@ -4,11 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
-import { PlaceHolderImages, Brands } from '@/lib/placeholder-images';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useCollection } from '@/firebase';
 import { collection, query, limit } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
-import type { Product } from '@/lib/types';
+import type { Product, Brand } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 
@@ -20,7 +20,13 @@ export default function Home() {
     () => (firestore ? query(collection(firestore, 'products'), limit(8)) : null),
     [firestore]
   );
-  const { data: products, isLoading } = useCollection<Product>(productsQuery);
+  const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
+
+  const brandsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'brands'), limit(5)) : null),
+    [firestore]
+  );
+  const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
 
   return (
     <div className="flex flex-col" style={{gap: '5px'}}>
@@ -63,21 +69,32 @@ export default function Home() {
           <h2 className="font-headline text-3xl font-bold text-center mb-8">
             أشهر العلامات التجارية
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
-            {Brands.map((brand) => (
-              <div key={brand.id} className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg hover:bg-secondary transition-colors">
-                <Image
-                  src={brand.logoUrl}
-                  alt={`${brand.name} logo`}
-                  width={200}
-                  height={100}
-                  className="object-contain h-16"
-                  data-ai-hint={brand.logoHint}
-                />
-                <p className="font-semibold mt-2">{brand.name}</p>
-              </div>
-            ))}
-          </div>
+          {isLoadingBrands ? (
+             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
+                {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex flex-col items-center justify-center gap-2">
+                        <Skeleton className="h-16 w-32" />
+                        <Skeleton className="h-6 w-24" />
+                    </div>
+                ))}
+             </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
+                {brands?.map((brand) => (
+                <div key={brand.id} className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg hover:bg-secondary transition-colors">
+                    <Image
+                    src={brand.logoUrl}
+                    alt={`${brand.name} logo`}
+                    width={200}
+                    height={100}
+                    className="object-contain h-16"
+                    data-ai-hint={brand.logoHint}
+                    />
+                    <p className="font-semibold mt-2">{brand.name}</p>
+                </div>
+                ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -85,7 +102,7 @@ export default function Home() {
         <h2 className="font-headline text-3xl font-bold text-center mb-8">
           منتجاتنا المميزة
         </h2>
-        {isLoading ? (
+        {isLoadingProducts ? (
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-2">

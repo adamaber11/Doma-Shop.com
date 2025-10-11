@@ -11,6 +11,7 @@ function DashboardNav() {
     { href: '/dashboard/orders', label: 'طلبات العملاء' },
     { href: '/dashboard/add-product', label: 'إضافة منتج' },
     { href: '/dashboard/manage-categories', label: 'إدارة الفئات' },
+    { href: '/dashboard/manage-brands', label: 'إدارة العلامات التجارية' },
   ];
 
   return (

@@ -21,6 +21,13 @@ export interface Category {
   parentId: string | null;
 }
 
+export interface Brand {
+    id: string;
+    name: string;
+    logoUrl: string;
+    logoHint: string;
+}
+
 export interface Order {
   id: string;
   userId?: string;

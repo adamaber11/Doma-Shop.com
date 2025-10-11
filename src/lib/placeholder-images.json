@@ -54,37 +54,5 @@
       "imageUrl": "https://picsum.photos/seed/prod8/600/800",
       "imageHint": "audio headphones"
     }
-  ],
-  "brands": [
-    {
-      "id": "brand-1",
-      "name": "Elegance",
-      "logoUrl": "https://picsum.photos/seed/brand1/200/100",
-      "logoHint": "brand logo"
-    },
-    {
-      "id": "brand-2",
-      "name": "Prestige",
-      "logoUrl": "https://picsum.photos/seed/brand2/200/100",
-      "logoHint": "brand logo"
-    },
-    {
-      "id": "brand-3",
-      "name": "Luxuria",
-      "logoUrl": "https://picsum.photos/seed/brand3/200/100",
-      "logoHint": "brand logo"
-    },
-    {
-      "id": "brand-4",
-      "name": "Aura",
-      "logoUrl": "https://picsum.photos/seed/brand4/200/100",
-      "logoHint": "brand logo"
-    },
-    {
-      "id": "brand-5",
-      "name": "Legacy",
-      "logoUrl": "https://picsum.photos/seed/brand5/200/100",
-      "logoHint": "brand logo"
-    }
   ]
 }

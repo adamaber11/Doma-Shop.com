@@ -104,6 +104,37 @@
         "name"
       ]
     },
+    "Brand": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Brand",
+      "type": "object",
+      "description": "Represents a brand for products.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the brand."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the brand."
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "URL of the brand logo.",
+          "format": "uri"
+        },
+        "logoHint": {
+          "type": "string",
+          "description": "AI hint for the brand logo."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "logoUrl",
+        "logoHint"
+      ]
+    },
     "Order": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Order",
@@ -235,6 +266,12 @@
             "$ref": "#/entities/Category"
         },
         "description": "Stores all product categories."
+      },
+      "/brands": {
+        "schema": {
+            "$ref": "#/entities/Brand"
+        },
+        "description": "Stores all product brands."
       },
       "/users/{userId}/orders": {
         "schema": {

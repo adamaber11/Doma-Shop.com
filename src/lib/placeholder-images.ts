@@ -7,12 +7,4 @@ export type ImagePlaceholder = {
   imageHint: string;
 };
 
-export type BrandPlaceholder = {
-  id: string;
-  name: string;
-  logoUrl: string;
-  logoHint: string;
-};
-
 export const PlaceHolderImages: ImagePlaceholder[] = data.placeholderImages;
-export const Brands: BrandPlaceholder[] = data.brands;
