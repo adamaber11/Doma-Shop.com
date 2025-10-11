@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useCart } from '@/hooks/useCart';
+import { useCart } from '@/hooks/use-cart';
 import type { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,11 +15,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
   const { toast } = useToast();
 
   const handleAddToCart = () => {
-    addToCart({ ...product, quantity });
-    toast({
-      title: 'تمت الإضافة إلى السلة',
-      description: `${quantity} x ${product.name}`,
-    });
+    addToCart(product, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
