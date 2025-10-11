@@ -49,7 +49,7 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="space-y-8">
-        <h1 className="text-4xl font-headline font-bold">لوحة التحكم</h1>
+        <h1 className="text-4xl font-headline font-bold">نظرة عامة</h1>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -104,7 +104,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>نظرة عامة</CardTitle>
+            <CardTitle>نظرة عامة على المبيعات</CardTitle>
             <CardDescription>
               عرض المبيعات والإيرادات خلال الأشهر الماضية.
             </CardDescription>
