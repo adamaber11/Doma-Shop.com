@@ -59,11 +59,11 @@ const productSchema = z.object({
   brand: z.string().optional(),
   imageUrls: z.string().optional(),
   imageHints: z.string().optional(),
-  rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5').optional(),
+  rating: z.coerce.number().min(0, 'التقييم يجب أن يكون بين 0 و 5').optional(),
   sizes: z.string().optional(),
-  isFeatured: z.boolean().default(false),
-  isDeal: z.boolean().default(false),
-  isBestSeller: z.boolean().default(false),
+  isFeatured: z.boolean().optional().default(false),
+  isDeal: z.boolean().optional().default(false),
+  isBestSeller: z.boolean().optional().default(false),
   dealDurationHours: z.coerce.number().optional().nullable(),
   material: z.string().optional(),
   countryOfOrigin: z.string().optional(),
@@ -484,3 +484,5 @@ export default function ManageProductsPage() {
     </div>
   );
 }
+
+    
