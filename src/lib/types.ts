@@ -79,6 +79,7 @@ export interface OrderItem {
 
 export interface ShippingAddress {
   fullName: string;
+  phone: string;
   address: string;
   city: string;
   governorate: string;

@@ -334,6 +334,10 @@
             "type": "string",
             "description": "Full name of the recipient."
         },
+        "phone": {
+            "type": "string",
+            "description": "Phone number of the recipient."
+        },
         "address": {
           "type": "string",
           "description": "Address line."
@@ -353,6 +357,7 @@
       },
       "required": [
         "fullName",
+        "phone",
         "address",
         "city",
         "governorate",

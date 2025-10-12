@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, 'الاسم الكامل مطلوب'),
+  phone: z.string().min(10, 'رقم الهاتف مطلوب'),
   address: z.string().min(5, 'العنوان مطلوب'),
   city: z.string().min(2, 'المدينة مطلوبة'),
   governorate: z.string().min(2, 'المحافظة مطلوبة'),
@@ -45,6 +46,7 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: '',
+      phone: '',
       address: '',
       city: '',
       governorate: '',
@@ -83,6 +85,7 @@ export default function CheckoutPage() {
 
     const shippingAddress: ShippingAddress = {
       fullName: values.fullName,
+      phone: values.phone,
       address: values.address,
       city: values.city,
       governorate: values.governorate,
@@ -156,6 +159,19 @@ export default function CheckoutPage() {
                         <FormLabel>الاسم الكامل</FormLabel>
                         <FormControl>
                           <Input placeholder="أدخل اسمك الكامل" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>رقم الهاتف</FormLabel>
+                        <FormControl>
+                          <Input placeholder="أدخل رقم هاتفك" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
