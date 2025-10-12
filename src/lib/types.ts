@@ -48,6 +48,10 @@ export interface Category {
   id: string;
   name: string;
   parentId: string | null;
+  imageUrl?: string;
+  imageHint?: string;
+  description?: string;
+  callToActionText?: string;
 }
 
 export interface Brand {

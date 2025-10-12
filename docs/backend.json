@@ -199,6 +199,23 @@
         "parentId": {
           "type": [ "string", "null" ],
           "description": "The ID of the parent category. If null, it's a main category."
+        },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the category's showcase image."
+        },
+        "imageHint": {
+          "type": "string",
+          "description": "AI hint for the category's image."
+        },
+        "description": {
+          "type": "string",
+          "description": "A short description for the category card."
+        },
+        "callToActionText": {
+          "type": "string",
+          "description": "Text for the call-to-action button on the category card."
         }
       },
       "required": [

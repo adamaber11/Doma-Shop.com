@@ -78,13 +78,6 @@ export default function Home() {
   );
   const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
-  const categoryImages = [
-    { url: 'https://picsum.photos/seed/cat1/600/400', hint: 'mens fashion' },
-    { url: 'https://picsum.photos/seed/cat2/600/400', hint: 'womens fashion' },
-    { url: 'https://picsum.photos/seed/cat3/600/400', hint: 'modern electronics' },
-    { url: 'https://picsum.photos/seed/cat4/600/400', hint: 'home decor' },
-  ];
-
   return (
     <div className="flex flex-col gap-5">
       {isLoadingHero ? (
@@ -167,8 +160,8 @@ export default function Home() {
                 ))
               )}
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
           </Carousel>
         </div>
       </section>
@@ -202,8 +195,8 @@ export default function Home() {
               ))
             )}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className="hidden md:flex" />
+          <CarouselNext className="hidden md:flex" />
         </Carousel>
       </section>
 
@@ -236,8 +229,8 @@ export default function Home() {
               ))
             )}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className="hidden md:flex" />
+          <CarouselNext className="hidden md:flex" />
         </Carousel>
       </section>
 
@@ -254,23 +247,33 @@ export default function Home() {
                       categories?.map((category, index) => (
                           <Link key={category.id} href={`/category/${encodeURIComponent(category.name)}`} className="group block">
                               <div className="relative overflow-hidden rounded-lg shadow-md aspect-[4/5] border-4 border-white">
-                                  <Image
-                                      src={categoryImages[index % categoryImages.length].url}
-                                      alt={category.name}
-                                      fill
-                                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                      data-ai-hint={categoryImages[index % categoryImages.length].hint}
-                                  />
+                                  {category.imageUrl ? (
+                                    <Image
+                                        src={category.imageUrl}
+                                        alt={category.name}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                        data-ai-hint={category.imageHint || 'category image'}
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full bg-secondary flex items-center justify-center">
+                                      <span className="text-muted-foreground">No Image</span>
+                                    </div>
+                                  )}
                                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-300" />
                                   <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
                                       <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                                           <h3 className="font-headline text-3xl font-bold drop-shadow-lg">{category.name}</h3>
-                                          <p className="mt-2 text-sm max-w-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                              اكتشف مجموعتنا الواسعة من {category.name.toLowerCase()}.
-                                          </p>
-                                          <Button variant="outline" className="mt-4 bg-transparent text-white border-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white hover:text-black">
-                                              تسوق الآن
-                                          </Button>
+                                          {category.description && (
+                                            <p className="mt-2 text-sm max-w-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                {category.description}
+                                            </p>
+                                          )}
+                                          {category.callToActionText && (
+                                            <Button variant="outline" className="mt-4 bg-transparent text-white border-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white hover:text-black">
+                                                {category.callToActionText}
+                                            </Button>
+                                          )}
                                       </div>
                                   </div>
                               </div>
@@ -310,8 +313,8 @@ export default function Home() {
               ))
             )}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious className="hidden md:flex" />
+          <CarouselNext className="hidden md:flex" />
         </Carousel>
       </section>
 

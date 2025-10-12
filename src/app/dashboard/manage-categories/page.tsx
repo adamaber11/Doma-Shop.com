@@ -35,10 +35,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import Image from 'next/image';
+import { Textarea } from '@/components/ui/textarea';
 
 const categorySchema = z.object({
   name: z.string().min(2, 'اسم الفئة مطلوب'),
   parentId: z.string().nullable().optional(),
+  imageUrl: z.string().url('رابط الصورة مطلوب').optional().or(z.literal('')),
+  imageHint: z.string().min(2, 'تلميح الصورة مطلوب').optional().or(z.literal('')),
+  description: z.string().min(10, 'الوصف مطلوب').optional().or(z.literal('')),
+  callToActionText: z.string().min(2, 'نص الزر مطلوب').optional().or(z.literal('')),
 });
 
 type CategoryFormData = z.infer<typeof categorySchema>;
@@ -57,7 +63,14 @@ export default function ManageCategoriesPage() {
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
-    defaultValues: { name: '', parentId: null },
+    defaultValues: {
+      name: '',
+      parentId: null,
+      imageUrl: '',
+      imageHint: '',
+      description: '',
+      callToActionText: '',
+    },
   });
 
   const categoryMap = useMemo(() => {
@@ -68,9 +81,23 @@ export default function ManageCategoriesPage() {
   const handleOpenForm = (category: Category | null = null) => {
     setEditingCategory(category);
     if (category) {
-      form.reset({ name: category.name, parentId: category.parentId });
+      form.reset({
+        name: category.name,
+        parentId: category.parentId,
+        imageUrl: category.imageUrl || '',
+        imageHint: category.imageHint || '',
+        description: category.description || '',
+        callToActionText: category.callToActionText || '',
+      });
     } else {
-      form.reset({ name: '', parentId: null });
+      form.reset({
+        name: '',
+        parentId: null,
+        imageUrl: '',
+        imageHint: '',
+        description: '',
+        callToActionText: '',
+      });
     }
     setIsFormOpen(true);
   };
@@ -79,12 +106,17 @@ export default function ManageCategoriesPage() {
     if (!firestore) return;
 
     try {
+      const dataToSave = {
+        ...values,
+        parentId: values.parentId || null
+      };
+
       if (editingCategory) {
         const categoryRef = doc(firestore, 'categories', editingCategory.id);
-        await updateDoc(categoryRef, { ...values, parentId: values.parentId || null });
+        await updateDoc(categoryRef, dataToSave);
         toast({ title: 'تم تحديث الفئة بنجاح!' });
       } else {
-        await addDoc(collection(firestore, 'categories'), { ...values, parentId: values.parentId || null });
+        await addDoc(collection(firestore, 'categories'), dataToSave);
         toast({ title: 'تمت إضافة الفئة بنجاح!' });
       }
       setIsFormOpen(false);
@@ -97,7 +129,6 @@ export default function ManageCategoriesPage() {
   async function handleDelete(categoryId: string) {
     if (!firestore) return;
     try {
-      // Simple deletion. For a real app, you might want to check for sub-categories or products.
       await deleteDoc(doc(firestore, 'categories', categoryId));
       toast({ title: 'تم حذف الفئة بنجاح' });
     } catch (error) {
@@ -117,63 +148,40 @@ export default function ManageCategoriesPage() {
               إضافة فئة جديدة
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>{editingCategory ? 'تعديل الفئة' : 'إضافة فئة جديدة'}</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>اسم الفئة</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم الفئة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField
                   control={form.control}
                   name="parentId"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>الفئة الرئيسية (اختياري)</FormLabel>
-                      <Select
-                        onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
-                        value={field.value || 'none'}
-                        disabled={isLoadingCategories}
-                      >
+                      <Select onValueChange={(value) => field.onChange(value === 'none' ? null : value)} value={field.value || 'none'} disabled={isLoadingCategories}>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="اختر فئة رئيسية..." />
-                          </SelectTrigger>
+                          <SelectTrigger><SelectValue placeholder="اختر فئة رئيسية..." /></SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">-- لا يوجد --</SelectItem>
-                          {categories
-                            ?.filter(c => c.id !== editingCategory?.id) // Prevent self-parenting
-                            .map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
+                          {categories?.filter(c => c.id !== editingCategory?.id).map((category) => (<SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                <FormField control={form.control} name="imageUrl" render={({ field }) => (<FormItem><FormLabel>رابط الصورة</FormLabel><FormControl><Input placeholder="https://picsum.photos/seed/cat1/600/400" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="imageHint" render={({ field }) => (<FormItem><FormLabel>تلميح الصورة (AI)</FormLabel><FormControl><Input placeholder="مثال: mens fashion" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="callToActionText" render={({ field }) => (<FormItem><FormLabel>نص زر الإجراء</FormLabel><FormControl><Input placeholder="تسوق الآن" {...field} /></FormControl><FormMessage /></FormItem>)} />
+
                 <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="button" variant="outline">إلغاء</Button>
-                  </DialogClose>
-                  <Button type="submit" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ'}
-                  </Button>
+                  <DialogClose asChild><Button type="button" variant="outline">إلغاء</Button></DialogClose>
+                  <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ'}</Button>
                 </DialogFooter>
               </form>
             </Form>
@@ -190,6 +198,7 @@ export default function ManageCategoriesPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>الصورة</TableHead>
                 <TableHead>اسم الفئة</TableHead>
                 <TableHead>الفئة الرئيسية</TableHead>
                 <TableHead>الإجراءات</TableHead>
@@ -197,10 +206,13 @@ export default function ManageCategoriesPage() {
             </TableHeader>
             <TableBody>
               {isLoadingCategories ? (
-                <TableRow><TableCell colSpan={3} className="text-center">جاري تحميل الفئات...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={4} className="text-center">جاري تحميل الفئات...</TableCell></TableRow>
               ) : categories && categories.length > 0 ? (
                 categories.map((category) => (
                   <TableRow key={category.id}>
+                    <TableCell>
+                      {category.imageUrl && <Image src={category.imageUrl} alt={category.name} width={60} height={40} className="object-cover rounded-md" />}
+                    </TableCell>
                     <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell>{category.parentId ? categoryMap.get(category.parentId) || 'غير معروف' : '—'}</TableCell>
                     <TableCell className="flex gap-2">
@@ -227,12 +239,11 @@ export default function ManageCategoriesPage() {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
-
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
-                <TableRow><TableCell colSpan={3} className="text-center">لم يتم العثور على فئات.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={4} className="text-center">لم يتم العثور على فئات.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
