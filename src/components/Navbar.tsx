@@ -15,7 +15,7 @@ export default function Navbar() {
       ];
 
   return (
-    <nav className="bg-card border-b">
+    <nav className="sticky top-0 z-40 bg-card border-b">
         <div className="container mx-auto px-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center justify-start gap-8">
