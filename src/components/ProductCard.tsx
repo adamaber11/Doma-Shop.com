@@ -38,7 +38,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const imageHint = product.imageHints?.[0] || 'product';
 
   return (
-    <Link href={`/products/${product.id}`} className="block group w-[200px] h-[450px]">
+    <Link href={`/products/${product.id}`} className="block group w-[250px] h-[400px]">
       <Card className="flex flex-col overflow-hidden h-full duration-300">
         <CardHeader className="p-0 relative">
             <div className="relative w-full h-52 overflow-hidden">
@@ -63,7 +63,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <StarRating rating={product.rating} />
             <span className="text-xs text-muted-foreground">({product.rating})</span>
           </div>
-           <p className="text-base font-semibold text-destructive">
+           <p className="text-sm font-semibold text-destructive">
             {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
           </p>
           <p className="text-xs text-muted-foreground mt-2 line-clamp-2 h-[2.5rem]">
