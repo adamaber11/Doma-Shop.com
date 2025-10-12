@@ -1,4 +1,3 @@
-
 'use client';
 
 import { notFound, useParams } from 'next/navigation';
@@ -25,7 +24,7 @@ function ProductPageSkeleton() {
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
           <div className="space-y-4">
-              <Skeleton className="w-full aspect-[3/4] rounded-lg" />
+              <Skeleton className="w-full aspect-[4/5] rounded-lg" />
               <div className="grid grid-cols-5 gap-2">
                   <Skeleton className="w-full aspect-square rounded-md" />
                   <Skeleton className="w-full aspect-square rounded-md" />
@@ -129,7 +128,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
         <div className="space-y-4">
           <div className="bg-card p-4 rounded-lg shadow-sm border relative">
             <Image
@@ -137,7 +136,7 @@ export default function ProductDetailPage() {
               alt={name}
               width={600}
               height={800}
-              className="w-full h-auto object-cover rounded-md aspect-[3/4]"
+              className="w-full h-auto object-cover rounded-md aspect-[4/5]"
               data-ai-hint={selectedImageHint}
               priority
             />

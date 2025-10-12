@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -50,7 +49,7 @@ export default function ProductCard({ product }: { product: Product }) {
     <div onClick={handleCardClick} className="block group w-full h-full cursor-pointer">
       <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
-            <div className="relative w-full h-[300px] overflow-hidden">
+            <div className="relative w-full aspect-[4/5] overflow-hidden">
                 <Image
                     src={imageUrl1}
                     alt={product.name}

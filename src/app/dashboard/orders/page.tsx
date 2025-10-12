@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -112,7 +111,7 @@ function OrderDetailsDialog({ order, onClose, onStatusUpdate }: { order: OrderWi
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="max-w-[90vw] sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>تفاصيل الطلب #{order.orderNumber || order.id.substring(0, 7)}</DialogTitle>
           <DialogDescription>
@@ -167,7 +166,7 @@ function OrderDetailsDialog({ order, onClose, onStatusUpdate }: { order: OrderWi
         {/* Order Items */}
         <div>
           <h3 className="font-semibold mb-2">المنتجات</h3>
-          <div className="border rounded-md">
+          <div className="border rounded-md overflow-x-auto">
             {isLoadingItems ? (
               <div className="p-4 text-center">جاري تحميل المنتجات...</div>
             ) : items.length > 0 ? (
@@ -300,69 +299,71 @@ export default function DashboardOrdersPage() {
           <CardDescription>عرض وإدارة جميع طلبات العملاء.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>رقم الطلب</TableHead>
-                <TableHead>التاريخ</TableHead>
-                <TableHead>العميل</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead>المجموع</TableHead>
-                <TableHead>الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-28" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-20" /></TableCell>
-                  </TableRow>
-                ))
-              ) : orders && orders.length > 0 ? (
-                orders.map((order) => (
-                  <TableRow key={order.id} className={cn(order.status === 'Processing' && 'bg-primary/5 hover:bg-primary/10')}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {order.status === 'Processing' && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" title="طلب جديد"></span>}
-                        #{order.orderNumber || order.id.substring(0,7)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {order.orderDate
-                        ? new Date(order.orderDate.toDate()).toLocaleDateString('ar-AE')
-                        : 'غير متوفر'}
-                    </TableCell>
-                     <TableCell>{order.customerName}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusVariant(order.status)}>
-                        {statusTranslations[order.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {(order.totalAmount ?? 0).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(order)}>
-                        <Eye className="h-4 w-4 mr-1" />
-                        عرض
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center h-24">
-                    لم يتم العثور على طلبات.
-                  </TableCell>
+                  <TableHead>رقم الطلب</TableHead>
+                  <TableHead>التاريخ</TableHead>
+                  <TableHead>العميل</TableHead>
+                  <TableHead>الحالة</TableHead>
+                  <TableHead>المجموع</TableHead>
+                  <TableHead>الإجراءات</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-20" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : orders && orders.length > 0 ? (
+                  orders.map((order) => (
+                    <TableRow key={order.id} className={cn(order.status === 'Processing' && 'bg-primary/5 hover:bg-primary/10')}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {order.status === 'Processing' && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" title="طلب جديد"></span>}
+                          #{order.orderNumber || order.id.substring(0,7)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {order.orderDate
+                          ? new Date(order.orderDate.toDate()).toLocaleDateString('ar-AE')
+                          : 'غير متوفر'}
+                      </TableCell>
+                       <TableCell>{order.customerName}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusVariant(order.status)}>
+                          {statusTranslations[order.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {(order.totalAmount ?? 0).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(order)}>
+                          <Eye className="h-4 w-4 mr-1" />
+                          عرض
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center h-24">
+                      لم يتم العثور على طلبات.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
       <OrderDetailsDialog 

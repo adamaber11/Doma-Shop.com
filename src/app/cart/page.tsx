@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -13,8 +12,8 @@ export default function CartPage() {
   const { cartItems, updateQuantity, removeFromCart, totalPrice, cartCount } = useCart();
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
-      <h1 className="text-4xl font-headline font-bold mb-8">سلة التسوق</h1>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-6xl">
+      <h1 className="text-4xl font-headline font-bold mb-8 text-center">سلة التسوق</h1>
 
       {cartCount === 0 ? (
         <div className="text-center py-20 bg-card rounded-lg">
@@ -26,19 +25,19 @@ export default function CartPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
             {cartItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-4 p-4 bg-card rounded-lg shadow-sm">
+              <div key={item.id} className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-card rounded-lg shadow-sm">
                 <Image
                   src={item.imageUrls[0]}
                   alt={item.name}
                   width={100}
                   height={100}
-                  className="rounded-md object-cover"
+                  className="rounded-md object-cover w-24 h-24 sm:w-24 sm:h-24"
                   data-ai-hint={item.imageHints[0]}
                 />
-                <div className="flex-grow">
+                <div className="flex-grow text-center sm:text-right">
                   <h3 className="font-semibold text-lg">{item.name}</h3>
                   {item.selectedSize && (
                     <p className="text-sm text-muted-foreground">المقاس: {item.selectedSize}</p>
@@ -47,7 +46,7 @@ export default function CartPage() {
                     {item.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mt-2 sm:mt-0">
                   <Button variant="outline" size="icon" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                     <Minus className="h-4 w-4" />
                   </Button>
@@ -69,7 +68,7 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="md:col-span-1">
+          <div className="lg:col-span-1">
             <div className="bg-card p-6 rounded-lg shadow-sm sticky top-24">
               <h2 className="text-2xl font-headline font-semibold mb-4">ملخص الطلب</h2>
               <div className="space-y-2">

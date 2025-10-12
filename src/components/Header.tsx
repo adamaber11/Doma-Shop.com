@@ -42,18 +42,22 @@ export default function Header() {
   return (
     <header className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-2 md:gap-8">
           <Logo />
         </div>
 
         <div className="flex-1 flex justify-center px-4">
-          <div className="relative w-full max-w-sm">
+          <div className="relative w-full max-w-sm hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="بحث..." className="pl-9" />
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          <Button variant="ghost" size="icon" className="md:hidden">
+            <Search className="h-6 w-6" />
+            <span className="sr-only">Search</span>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">

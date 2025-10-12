@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -56,7 +55,7 @@ function MessageDetailsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpen}>
-      <DialogContent className="sm:max-w-2xl" onOpenAutoFocus={handleMarkAsReadClick}>
+      <DialogContent className="max-w-[90vw] sm:max-w-2xl" onOpenAutoFocus={handleMarkAsReadClick}>
         <DialogHeader>
           <DialogTitle>{message.subject}</DialogTitle>
           <DialogDescription>
@@ -118,67 +117,69 @@ export default function DashboardMessagesPage() {
           <CardDescription>عرض وإدارة جميع الرسائل الواردة من العملاء.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>الحالة</TableHead>
-                <TableHead>الاسم</TableHead>
-                <TableHead>الموضوع</TableHead>
-                <TableHead>التاريخ</TableHead>
-                <TableHead>الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-5 w-12" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-28" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-48" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-8 w-20" /></TableCell>
-                  </TableRow>
-                ))
-              ) : fetchedMessages && fetchedMessages.length > 0 ? (
-                fetchedMessages.map((message) => (
-                  <TableRow key={message.id} className={cn(!message.isRead && 'bg-primary/5 hover:bg-primary/10')}>
-                    <TableCell>
-                      {!message.isRead ? (
-                        <Badge variant="outline" className="text-green-600 border-green-600">
-                           <span className="relative flex h-2 w-2 mr-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
-                           </span>
-                           جديد
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">مقروء</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{message.name}</TableCell>
-                    <TableCell>{message.subject}</TableCell>
-                    <TableCell>
-                      {message.createdAt
-                        ? new Date(message.createdAt.toDate()).toLocaleDateString('ar-AE')
-                        : 'غير متوفر'}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedMessage(message)}>
-                        <Eye className="h-4 w-4 mr-1" />
-                        عرض
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center h-24">
-                    لا توجد رسائل واردة حاليًا.
-                  </TableCell>
+                  <TableHead>الحالة</TableHead>
+                  <TableHead>الاسم</TableHead>
+                  <TableHead>الموضوع</TableHead>
+                  <TableHead>التاريخ</TableHead>
+                  <TableHead>الإجراءات</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-5 w-12" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-28" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-20" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : fetchedMessages && fetchedMessages.length > 0 ? (
+                  fetchedMessages.map((message) => (
+                    <TableRow key={message.id} className={cn(!message.isRead && 'bg-primary/5 hover:bg-primary/10')}>
+                      <TableCell>
+                        {!message.isRead ? (
+                          <Badge variant="outline" className="text-green-600 border-green-600">
+                             <span className="relative flex h-2 w-2 mr-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
+                             </span>
+                             جديد
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">مقروء</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">{message.name}</TableCell>
+                      <TableCell>{message.subject}</TableCell>
+                      <TableCell>
+                        {message.createdAt
+                          ? new Date(message.createdAt.toDate()).toLocaleDateString('ar-AE')
+                          : 'غير متوفر'}
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedMessage(message)}>
+                          <Eye className="h-4 w-4 mr-1" />
+                          عرض
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center h-24">
+                      لا توجد رسائل واردة حاليًا.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
       <MessageDetailsDialog

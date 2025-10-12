@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, forwardRef, useEffect } from 'react';
@@ -240,7 +239,7 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="max-w-[90vw] sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'تعديل المنتج' : 'إضافة منتج جديد'}</DialogTitle>
           <DialogFormDescription>
@@ -249,19 +248,19 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <ScrollArea className="h-[65vh] w-full pr-6">
+            <ScrollArea className="h-[70vh] w-full pr-6">
               <div className="space-y-4 my-4">
                 <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (EGP)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <FormField control={form.control} name="originalPrice" render={({ field }) => (<FormItem><FormLabel>السعر الأصلي (اختياري)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                    <FormField control={form.control} name="stock" render={({ field }) => (<FormItem><FormLabel>الكمية المتاحة</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
                    <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="category"
@@ -319,9 +318,9 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
                                 <Button type="button" variant="ghost" size="icon" className="absolute top-2 left-2 h-6 w-6" onClick={() => remove(index)}>
                                     <X className="h-4 w-4" />
                                 </Button>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (<FormItem><FormLabel>اسم اللون</FormLabel><FormControl><Input placeholder="أحمر" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name={`variants.${index}.hex`} render={({ field }) => (<FormItem><FormLabel>كود اللون (Hex)</FormLabel><FormControl><Input type="color" className='p-0 h-10' {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                    <FormField control={form.control} name={`variants.${index}.hex`} render={({ field }) => (<FormItem><FormLabel>كود اللون (Hex)</FormLabel><FormControl><Input type="color" className='p-0 h-10 w-full' {...field} /></FormControl><FormMessage /></FormItem>)} />
                                 </div>
                                 <FormField control={form.control} name={`variants.${index}.imageUrls`} render={({ field }) => (<FormItem><FormLabel>روابط صور اللون</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                                 <FormField control={form.control} name={`variants.${index}.imageHints`} render={({ field }) => (<FormItem><FormLabel>تلميحات صور اللون</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -342,7 +341,7 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
 
                 <Separator className="my-6" />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField control={form.control} name="material" render={({ field }) => (<FormItem><FormLabel>الخامة</FormLabel><FormControl><Input placeholder="قطن، جلد، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <FormField control={form.control} name="countryOfOrigin" render={({ field }) => (<FormItem><FormLabel>بلد الصنع</FormLabel><FormControl><Input placeholder="تركيا، فيتنام، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
@@ -471,12 +470,12 @@ export default function ManageProductsPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-headline font-bold">إدارة المنتجات</h1>
+        <h1 className="text-2xl sm:text-4xl font-headline font-bold">إدارة المنتجات</h1>
         { !isLoading && categories && brands && (
            <ProductForm categories={categories} brands={brands} onFormSubmit={handleFormSubmit}>
               <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                إضافة منتج جديد
+                <PlusCircle className="mr-0 sm:mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">إضافة منتج جديد</span>
               </Button>
            </ProductForm>
         )}
@@ -488,73 +487,75 @@ export default function ManageProductsPage() {
           <CardDescription>عرض وتعديل وحذف المنتجات الموجودة في متجرك.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[80px]">الصورة</TableHead>
-                <TableHead>اسم المنتج</TableHead>
-                <TableHead>السعر</TableHead>
-                <TableHead>الكمية</TableHead>
-                <TableHead>مميز</TableHead>
-                <TableHead>عرض</TableHead>
-                <TableHead>الأكثر مبيعًا</TableHead>
-                <TableHead>الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoadingProducts ? (
-                <TableRow><TableCell colSpan={8} className="text-center">جاري تحميل المنتجات...</TableCell></TableRow>
-              ) : products && products.length > 0 ? (
-                products.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      {product.imageUrls && product.imageUrls.length > 0 &&
-                        <Image src={product.imageUrls[0]} alt={product.name} width={64} height={64} className="rounded-md object-cover" />
-                      }
-                    </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</TableCell>
-                    <TableCell>{product.stock}</TableCell>
-                    <TableCell>{product.isFeatured ? 'نعم' : 'لا'}</TableCell>
-                    <TableCell>{product.isDeal ? 'نعم' : 'لا'}</TableCell>
-                    <TableCell>{product.isBestSeller ? 'نعم' : 'لا'}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        {!isLoading && categories && brands && (
-                          <ProductForm product={product} categories={categories} brands={brands} onFormSubmit={handleFormSubmit}>
-                             <Button variant="ghost" size="icon">
-                               <Edit className="h-4 w-4" />
-                             </Button>
-                          </ProductForm>
-                        )}
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                <Trash2 className="h-4 w-4" />
-                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>هل أنت متأكد تمامًا؟</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                هذا الإجراء لا يمكن التراجع عنه. سيؤدي هذا إلى حذف المنتج بشكل دائم.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(product.id)}>متابعة</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow><TableCell colSpan={8} className="text-center">لم يتم العثور على منتجات.</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[80px]">الصورة</TableHead>
+                  <TableHead>اسم المنتج</TableHead>
+                  <TableHead>السعر</TableHead>
+                  <TableHead>الكمية</TableHead>
+                  <TableHead>مميز</TableHead>
+                  <TableHead>عرض</TableHead>
+                  <TableHead>الأكثر مبيعًا</TableHead>
+                  <TableHead>الإجراءات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoadingProducts ? (
+                  <TableRow><TableCell colSpan={8} className="text-center">جاري تحميل المنتجات...</TableCell></TableRow>
+                ) : products && products.length > 0 ? (
+                  products.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell>
+                        {product.imageUrls && product.imageUrls.length > 0 &&
+                          <Image src={product.imageUrls[0]} alt={product.name} width={64} height={64} className="rounded-md object-cover" />
+                        }
+                      </TableCell>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>{product.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</TableCell>
+                      <TableCell>{product.stock}</TableCell>
+                      <TableCell>{product.isFeatured ? 'نعم' : 'لا'}</TableCell>
+                      <TableCell>{product.isDeal ? 'نعم' : 'لا'}</TableCell>
+                      <TableCell>{product.isBestSeller ? 'نعم' : 'لا'}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1 sm:gap-2">
+                          {!isLoading && categories && brands && (
+                            <ProductForm product={product} categories={categories} brands={brands} onFormSubmit={handleFormSubmit}>
+                               <Button variant="ghost" size="icon">
+                                 <Edit className="h-4 w-4" />
+                               </Button>
+                            </ProductForm>
+                          )}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                               <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                               </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>هل أنت متأكد تمامًا؟</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  هذا الإجراء لا يمكن التراجع عنه. سيؤدي هذا إلى حذف المنتج بشكل دائم.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(product.id)}>متابعة</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow><TableCell colSpan={8} className="text-center">لم يتم العثور على منتجات.</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
