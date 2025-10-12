@@ -91,6 +91,7 @@ export default function CouponsPage() {
   const [hasPlayed, setHasPlayed] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [windowSize, setWindowSize] = useState<{ width: number; height: number; }>({ width: 0, height: 0 });
 
   useEffect(() => {
     setIsClient(true);
@@ -98,22 +99,29 @@ export default function CouponsPage() {
     if (played) {
       setHasPlayed(true);
     }
+    setWindowSize({ width: window.innerWidth, height: window.innerHeight });
   }, []);
 
   const handleBoxClick = (index: number) => {
-    if (hasPlayed || flippedIndex !== null) return;
+    if (hasPlayed || flippedIndex !== null || !couponGame) return;
 
     setFlippedIndex(index);
     localStorage.setItem('hasPlayedCouponGame', 'true');
     setHasPlayed(true);
 
-    if (couponGame && index === couponGame.correctCouponIndex) {
+    if (index === couponGame.correctCouponIndex) {
       setShowConfetti(true);
       toast({
         title: '🎉 تهانينا! لقد فزت بخصم!',
         description: `استخدم الكود ${couponGame.coupons[index].value} للحصول على خصم ${couponGame.discountPercentage}%`,
         duration: 10000,
       });
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'حظ أوفر!',
+            description: 'لم يحالفك الحظ هذه المرة، حاول مرة أخرى لاحقًا.',
+        });
     }
   };
 
@@ -155,7 +163,7 @@ export default function CouponsPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-       {showConfetti && <Confetti recycle={false} onConfettiComplete={() => setShowConfetti(false)} />}
+       {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} recycle={false} onConfettiComplete={() => setShowConfetti(false)} />}
       <div className="text-center">
         <h1 className="text-4xl font-headline font-bold">جرّب حظك واربح كوبون خصم!</h1>
         <p className="mt-2 text-lg text-muted-foreground">
@@ -169,7 +177,7 @@ export default function CouponsPage() {
             key={index}
             coupon={coupon.value}
             isCorrect={index === couponGame.correctCouponIndex}
-            isFlipped={flippedIndex === index}
+            isFlipped={flippedIndex === index || (hasPlayed && index === flippedIndex)}
             onClick={() => handleBoxClick(index)}
             disabled={hasPlayed}
           />
