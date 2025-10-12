@@ -133,6 +133,28 @@ export default function Home() {
         </div>
       </section>
 
+      <section id="daily-deals" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h2 className="font-headline text-3xl font-bold text-center mb-8">
+          العروض اليومية
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {isLoadingDailyDeals ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="space-y-2">
+                    <Skeleton className="h-80 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-5 w-1/2" />
+                    <Skeleton className="h-8 w-1/4" />
+                  </div>
+              ))
+            ) : (
+              dailyDeals?.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+              ))
+            )}
+        </div>
+      </section>
+
       <section id="featured-products" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="font-headline text-3xl font-bold text-center mb-8">
           منتجاتنا المميزة
@@ -185,28 +207,6 @@ export default function Home() {
               ))
             ) : (
               bestSellers?.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-              ))
-            )}
-        </div>
-      </section>
-      
-      <section id="daily-deals" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="font-headline text-3xl font-bold text-center mb-8">
-          العروض اليومية
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {isLoadingDailyDeals ? (
-              Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="space-y-2">
-                    <Skeleton className="h-80 w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-5 w-1/2" />
-                    <Skeleton className="h-8 w-1/4" />
-                  </div>
-              ))
-            ) : (
-              dailyDeals?.map((product) => (
                   <ProductCard key={product.id} product={product} />
               ))
             )}
