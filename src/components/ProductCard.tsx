@@ -70,7 +70,7 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.description}
           </p>
         </CardContent>
-        <CardFooter className="p-4 pt-0 mt-auto">
+        <CardFooter className="p-4 pt-0">
             <Button 
                 onClick={handleAddToCart} 
                 aria-label={`Add ${product.name} to cart`}
