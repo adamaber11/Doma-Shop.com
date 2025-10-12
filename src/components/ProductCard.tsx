@@ -37,6 +37,11 @@ export default function ProductCard({ product }: { product: Product }) {
   const imageHint1 = product.imageHints?.[0] || 'product';
   const imageUrl2 = product.imageUrls?.[1];
   const imageHint2 = product.imageHints?.[1];
+  
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercentage = hasDiscount 
+    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
+    : 0;
 
   return (
     <Link href={`/products/${product.id}`} className="block group w-[250px] h-[430px]">
@@ -59,6 +64,11 @@ export default function ProductCard({ product }: { product: Product }) {
                     data-ai-hint={imageHint2 || 'product alternate'}
                     />
                 )}
+                 {hasDiscount && (
+                    <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md">
+                        خصم {discountPercentage}%
+                    </div>
+                )}
             </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow flex flex-col">
@@ -69,9 +79,16 @@ export default function ProductCard({ product }: { product: Product }) {
           <CardTitle className="font-headline text-base group-hover:text-blue-600 group-hover:underline">
             {product.name}
           </CardTitle>
-           <p className="text-sm font-semibold text-destructive group-hover:text-green-600 group-hover:underline">
-            {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
-          </p>
+           <div className="flex items-baseline gap-2">
+             <p className="text-sm font-semibold text-destructive group-hover:text-green-600 group-hover:underline">
+                {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+             </p>
+             {hasDiscount && (
+                <p className="text-xs text-muted-foreground line-through">
+                    {product.originalPrice?.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                </p>
+             )}
+           </div>
           <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
             {product.description}
           </p>

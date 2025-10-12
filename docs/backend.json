@@ -51,6 +51,10 @@
           "type": "number",
           "description": "Price of the product."
         },
+        "originalPrice": {
+          "type": "number",
+          "description": "The original price of the product, before any discount."
+        },
         "imageUrls": {
           "type": "array",
           "description": "URLs of the product images.",

@@ -68,16 +68,18 @@ export default function ProductDetailPage() {
   }
   
   // This check is now safe because we've already handled the loading and !product cases
-  const { name, description, price, rating, imageUrls, imageHints, sizes } = product!;
+  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice } = product!;
   const selectedImageUrl = imageUrls?.[selectedImageIndex] || '';
   const selectedImageHint = imageHints?.[selectedImageIndex] || '';
   const hasSizes = sizes && sizes.length > 0;
+  const hasDiscount = originalPrice && originalPrice > price;
+  const discountPercentage = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
         <div className="space-y-4">
-          <div className="bg-card p-4 rounded-lg shadow-sm border">
+          <div className="bg-card p-4 rounded-lg shadow-sm border relative">
             <Image
               src={selectedImageUrl}
               alt={name}
@@ -87,6 +89,11 @@ export default function ProductDetailPage() {
               data-ai-hint={selectedImageHint}
               priority
             />
+             {hasDiscount && (
+                <div className="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-md">
+                    خصم {discountPercentage}%
+                </div>
+            )}
           </div>
           {imageUrls && imageUrls.length > 1 && (
             <div className="grid grid-cols-5 gap-2">
@@ -120,9 +127,16 @@ export default function ProductDetailPage() {
               <span className="text-sm text-muted-foreground">({rating.toFixed(1)})</span>
             </div>
           </div>
-          <p className="text-3xl font-semibold">
-            {price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
-          </p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-3xl font-semibold text-destructive">
+                {price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+            </p>
+            {hasDiscount && (
+                <p className="text-xl text-muted-foreground line-through">
+                    {originalPrice?.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                </p>
+            )}
+          </div>
           <Separator />
 
           <p className="text-muted-foreground leading-relaxed">{description}</p>
