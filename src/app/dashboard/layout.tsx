@@ -12,6 +12,7 @@ function DashboardNav() {
     { href: '/dashboard/manage-products', label: 'إدارة المنتجات' },
     { href: '/dashboard/manage-categories', label: 'إدارة الفئات' },
     { href: '/dashboard/manage-brands', label: 'إدارة العلامات التجارية' },
+    { href: '/dashboard/manage-coupons', label: 'إدارة الكوبونات' },
   ];
 
   return (
