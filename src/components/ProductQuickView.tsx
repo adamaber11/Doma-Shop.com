@@ -28,7 +28,7 @@ import Reviews from './Reviews';
 
 function QuickViewSkeleton() {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-12 items-start p-4 sm:p-6">
             <div className="space-y-4">
                 <Skeleton className="w-full aspect-[3/4] rounded-lg" />
                 <div className="grid grid-cols-5 gap-2">
@@ -39,9 +39,9 @@ function QuickViewSkeleton() {
                 </div>
             </div>
           <div className="space-y-6">
-            <Skeleton className="h-12 w-3/4" />
+            <Skeleton className="h-10 w-3/4" />
             <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-10 w-1/3" />
+            <Skeleton className="h-8 w-1/3" />
             <Separator />
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-full" />
@@ -122,7 +122,7 @@ export default function ProductQuickView() {
     <Sheet open={isQuickViewOpen} onOpenChange={closeQuickView}>
       <SheetContent side="left" className="w-full sm:max-w-4xl p-0">
         <ScrollArea className="h-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-12 items-start p-4 sm:p-6">
                 {/* Image Gallery */}
                 <div className="space-y-4">
                 <div className="bg-card p-4 rounded-lg shadow-sm border relative">
@@ -167,9 +167,9 @@ export default function ProductQuickView() {
                 </div>
 
                 {/* Product Details */}
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                 <div className="space-y-2">
-                    <div className="flex gap-4 items-center text-sm text-muted-foreground">
+                    <div className="flex gap-4 items-center text-xs sm:text-sm text-muted-foreground">
                         <Link onClick={closeQuickView} href={`/category/${encodeURIComponent(category)}`} className="hover:text-primary hover:underline flex items-center gap-1">
                             <Tag className="w-4 h-4" /> {category}
                         </Link>
@@ -179,27 +179,27 @@ export default function ProductQuickView() {
                         </Link>
                     </div>
                     <SheetHeader>
-                        <SheetTitle className="text-3xl font-headline font-bold text-right">{name}</SheetTitle>
+                        <SheetTitle className="text-2xl sm:text-3xl font-headline font-bold text-right">{name}</SheetTitle>
                     </SheetHeader>
                     <div className="flex items-center gap-2">
                         <StarRating rating={rating} />
-                        <span className="text-sm text-muted-foreground">({rating.toFixed(1)})</span>
-                        <a href="#reviews" className="text-sm text-muted-foreground hover:underline">({reviewSummary?.totalReviews || 0} تقييمات)</a>
+                        <span className="text-xs sm:text-sm text-muted-foreground">({rating.toFixed(1)})</span>
+                        <a href="#reviews" className="text-xs sm:text-sm text-muted-foreground hover:underline">({reviewSummary?.totalReviews || 0} تقييمات)</a>
                     </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                    <p className="text-3xl font-semibold text-destructive">
+                    <p className="text-2xl sm:text-3xl font-semibold text-destructive">
                         {price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                     </p>
                     {hasDiscount && (
-                        <p className="text-xl text-muted-foreground line-through">
+                        <p className="text-lg sm:text-xl text-muted-foreground line-through">
                             {originalPrice?.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                         </p>
                     )}
                 </div>
                 <Separator />
 
-                <SheetDescription className="text-muted-foreground leading-relaxed text-right">{description}</SheetDescription>
+                <SheetDescription className="text-muted-foreground leading-relaxed text-right text-sm">{description}</SheetDescription>
                 
                 <div className="space-y-4 pt-2">
                     {(material || countryOfOrigin) && (
@@ -302,19 +302,19 @@ export default function ProductQuickView() {
                 </div>
             </div>
             
-            <div className='p-6 pt-0' id="reviews">
+            <div className='p-4 sm:p-6 pt-0' id="reviews">
                 <Separator />
             </div>
 
-            <div className='p-6 pt-0'>
+            <div className='p-4 sm:p-6 pt-0'>
                 <Reviews productId={productId} />
             </div>
             
-            <div className='p-6 pt-0'>
+            <div className='p-4 sm:p-6 pt-0'>
                 <Separator />
             </div>
 
-            <div className='p-6 pt-0'>
+            <div className='p-4 sm:p-6 pt-0'>
                 {firestore && <ProductRecommendations currentProduct={product} />}
             </div>
         </ScrollArea>
@@ -322,7 +322,3 @@ export default function ProductQuickView() {
     </Sheet>
   );
 }
-
-    
-
-    
