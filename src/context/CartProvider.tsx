@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: Product, quantity: number, selectedSize?: string) => void;
+  addToCart: (product: Product, quantity: number, selectedSize?: string, selectedColor?: string) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -39,10 +39,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [cartItems, isClient]);
 
-  const addToCart = useCallback((product: Product, quantity: number, selectedSize?: string) => {
+  const addToCart = useCallback((product: Product, quantity: number, selectedSize?: string, selectedColor?: string) => {
     setCartItems(prevItems => {
-      // Cart item ID is now a combination of product ID and size
-      const cartItemId = selectedSize ? `${product.id}-${selectedSize}` : product.id;
+      // Cart item ID is now a combination of product ID, size, and color
+      const cartItemId = `${product.id}${selectedSize ? `-${selectedSize}` : ''}${selectedColor ? `-${selectedColor}` : ''}`;
       const existingItem = prevItems.find(i => i.id === cartItemId);
       
       let newItems;
@@ -55,6 +55,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             ...product, 
             quantity, 
             selectedSize,
+            selectedColor,
             id: cartItemId, // The unique ID for the cart item
             productId: product.id, // The original product ID
         };
@@ -62,7 +63,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       toast({
         title: 'تمت الإضافة إلى السلة',
-        description: `${quantity} x ${product.name} ${selectedSize ? `(المقاس: ${selectedSize})` : ''}`,
+        description: `${quantity} x ${product.name} ${selectedSize ? `(المقاس: ${selectedSize})` : ''} ${selectedColor ? `(اللون: ${selectedColor})` : ''}`,
       });
       return newItems;
     });

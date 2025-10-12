@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm, useWatch, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -12,9 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { addDoc, collection, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
-import type { Product, Category, Brand } from '@/lib/types';
+import type { Product, Category, Brand, ProductVariant } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
+
+const variantSchema = z.object({
+  color: z.string().min(1, "اسم اللون مطلوب"),
+  hex: z.string().regex(/^#[0-9a-fA-F]{6}$/, "كود الهيكس غير صالح"),
+  imageUrls: z.string().min(1, 'رابط صورة واحد على الأقل مطلوب'),
+  imageHints: z.string().min(1, 'تلميح صورة واحد على الأقل مطلوب'),
+});
 
 const productSchema = z.object({
   name: z.string().min(2, 'اسم المنتج مطلوب'),
@@ -49,8 +57,8 @@ const productSchema = z.object({
   originalPrice: z.coerce.number().optional().nullable(),
   category: z.string().min(1, 'الفئة مطلوبة'),
   brand: z.string().min(1, 'العلامة التجارية مطلوبة'),
-  imageUrls: z.string().min(1, 'رابط صورة واحد على الأقل مطلوب'),
-  imageHints: z.string().min(1, 'تلميح صورة واحد على الأقل مطلوب'),
+  imageUrls: z.string().optional(), // Optional now, required if no variants
+  imageHints: z.string().optional(), // Optional now
   rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5'),
   sizes: z.string().optional(),
   isFeatured: z.boolean().default(false),
@@ -59,6 +67,10 @@ const productSchema = z.object({
   material: z.string().optional(),
   countryOfOrigin: z.string().optional(),
   features: z.string().optional(),
+  variants: z.array(variantSchema).optional(),
+}).refine(data => data.variants?.length || data.imageUrls, {
+    message: "يجب توفير صور افتراضية على الأقل إذا لم يتم تحديد ألوان مختلفة.",
+    path: ["imageUrls"],
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -87,7 +99,13 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
       material: '',
       countryOfOrigin: '',
       features: '',
+      variants: [],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "variants",
   });
 
   const isDeal = useWatch({
@@ -99,14 +117,21 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
     if (!firestore) return;
 
     try {
+        const variants: ProductVariant[] | undefined = values.variants?.map(v => ({
+            ...v,
+            imageUrls: v.imageUrls.split(',').map(url => url.trim()),
+            imageHints: v.imageHints.split(',').map(hint => hint.trim()),
+        }));
+
       const newProductData: Omit<Product, 'id'> = {
         name: values.name,
         description: values.description,
         price: values.price,
         category: values.category,
         brand: values.brand,
-        imageUrls: values.imageUrls.split(',').map(url => url.trim()),
-        imageHints: values.imageHints.split(',').map(hint => hint.trim()),
+        imageUrls: values.imageUrls?.split(',').map(url => url.trim()) || [],
+        imageHints: values.imageHints?.split(',').map(hint => hint.trim()) || [],
+        variants: variants,
         rating: values.rating,
         sizes: values.sizes?.split(',').map(s => s.trim()) || [],
         isFeatured: values.isFeatured,
@@ -139,7 +164,7 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
           إضافة منتج جديد
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>إضافة منتج جديد</DialogTitle>
           <UIDialogDescription>
@@ -148,7 +173,7 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <ScrollArea className="h-[60vh] w-full pr-6">
+            <ScrollArea className="h-[65vh] w-full pr-6">
               <div className="space-y-4 my-4">
                 <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -168,7 +193,7 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="اختر فئة..." />
-                            </SelectTrigger>
+                            </Trigger>
                           </FormControl>
                           <SelectContent>
                             {categories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
@@ -190,7 +215,7 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="اختر علامة تجارية..." />
-                            </SelectTrigger>
+                            </Trigger>
                           </FormControl>
                           <SelectContent>
                             {brands.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
@@ -203,8 +228,42 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
                     <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
                 
-                <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                
+                <Separator className="my-6" />
+
+                <div>
+                    <h3 className="text-lg font-medium mb-2">الألوان المتوفرة</h3>
+                    <div className="space-y-4">
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="p-4 border rounded-md relative space-y-3">
+                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 left-2 h-6 w-6" onClick={() => remove(index)}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (<FormItem><FormLabel>اسم اللون</FormLabel><FormControl><Input placeholder="أحمر" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                    <FormField control={form.control} name={`variants.${index}.hex`} render={({ field }) => (<FormItem><FormLabel>كود اللون (Hex)</FormLabel><FormControl><Input type="color" className='p-0 h-10' {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                </div>
+                                <FormField control={form.control} name={`variants.${index}.imageUrls`} render={({ field }) => (<FormItem><FormLabel>روابط صور اللون</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                <FormField control={form.control} name={`variants.${index}.imageHints`} render={({ field }) => (<FormItem><FormLabel>تلميحات صور اللون</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                            </div>
+                        ))}
+                    </div>
+                     <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => append({ color: '', hex: '#000000', imageUrls: '', imageHints: '' })}
+                    >
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        إضافة لون
+                    </Button>
+                </div>
+
+                <Separator className="my-6" />
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormField control={form.control} name="material" render={({ field }) => (<FormItem><FormLabel>الخامة</FormLabel><FormControl><Input placeholder="قطن، جلد، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <FormField control={form.control} name="countryOfOrigin" render={({ field }) => (<FormItem><FormLabel>بلد الصنع</FormLabel><FormControl><Input placeholder="تركيا، فيتنام، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -400,5 +459,3 @@ export default function ManageProductsPage() {
     </div>
   );
 }
-
-    

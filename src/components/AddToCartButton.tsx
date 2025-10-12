@@ -11,9 +11,10 @@ import { Check, Minus, Plus, ShoppingCart } from 'lucide-react';
 interface AddToCartButtonProps {
     product: Product;
     selectedSize?: string;
+    selectedColor?: string;
 }
 
-export default function AddToCartButton({ product, selectedSize }: AddToCartButtonProps) {
+export default function AddToCartButton({ product, selectedSize, selectedColor }: AddToCartButtonProps) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const { addToCart } = useCart();
@@ -28,13 +29,22 @@ export default function AddToCartButton({ product, selectedSize }: AddToCartButt
         });
         return;
     }
+    if (product.variants && product.variants.length > 0 && !selectedColor) {
+        toast({
+            variant: "destructive",
+            title: "خطأ",
+            description: "يرجى اختيار لون قبل إضافة المنتج إلى السلة.",
+        });
+        return;
+    }
 
-    addToCart(product, quantity, selectedSize);
+    addToCart(product, quantity, selectedSize, selectedColor);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
-  const isAddToCartDisabled = product.sizes && product.sizes.length > 0 && !selectedSize;
+  const isAddToCartDisabled = (product.sizes && product.sizes.length > 0 && !selectedSize) ||
+                              (product.variants && product.variants.length > 0 && !selectedColor);
 
   return (
     <div className="flex items-center gap-4">
@@ -65,7 +75,7 @@ export default function AddToCartButton({ product, selectedSize }: AddToCartButt
         size="lg"
         className="flex-grow bg-accent text-accent-foreground hover:bg-accent/90"
         onClick={handleAddToCart}
-        disabled={isAddToCartDisabled}
+        disabled={!!isAddToCartDisabled}
       >
         {added ? (
           <>

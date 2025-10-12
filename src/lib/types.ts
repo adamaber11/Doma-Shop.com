@@ -1,13 +1,21 @@
 import { Timestamp } from "firebase/firestore";
 
+export interface ProductVariant {
+  color: string;
+  hex: string;
+  imageUrls: string[];
+  imageHints: string[];
+}
+
 export interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
   originalPrice?: number;
-  imageUrls: string[];
-  imageHints: string[];
+  imageUrls: string[]; // Default images if no variants
+  imageHints: string[]; // Default hints
+  variants?: ProductVariant[];
   rating: number;
   category: string;
   brand: string;
@@ -21,10 +29,11 @@ export interface Product {
 }
 
 export interface CartItem extends Product {
-  id: string; // Product ID + optional size
+  id: string; // Product ID + optional size + optional color
   productId: string;
   quantity: number;
   selectedSize?: string;
+  selectedColor?: string;
 }
 
 export interface Category {
@@ -61,6 +70,7 @@ export interface OrderItem {
   quantity: number;
   itemPrice: number;
   selectedSize?: string;
+  selectedColor?: string;
 }
 
 export interface ShippingAddress {
@@ -70,5 +80,3 @@ export interface ShippingAddress {
   country: string;
   postalCode: string;
 }
-
-    

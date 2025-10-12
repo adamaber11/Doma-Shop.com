@@ -57,7 +57,7 @@
         },
         "imageUrls": {
           "type": "array",
-          "description": "URLs of the product images.",
+          "description": "Default URLs of the product images, used if no variants exist.",
           "items": {
             "type": "string",
             "format": "uri"
@@ -65,10 +65,17 @@
         },
         "imageHints": {
           "type": "array",
-          "description": "AI hints for the product images.",
+          "description": "Default AI hints for the product images.",
           "items": {
             "type": "string"
           }
+        },
+        "variants": {
+            "type": "array",
+            "description": "Color and image variants for the product.",
+            "items": {
+                "$ref": "#/entities/ProductVariant"
+            }
         },
         "rating": {
             "type": "number",
@@ -129,6 +136,38 @@
         "category",
         "brand"
       ]
+    },
+    "ProductVariant": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "ProductVariant",
+        "type": "object",
+        "description": "Represents a color variant of a product.",
+        "properties": {
+            "color": {
+                "type": "string",
+                "description": "Name of the color (e.g., 'Red', 'Midnight Blue')."
+            },
+            "hex": {
+                "type": "string",
+                "description": "Hexadecimal code for the color (e.g., '#FF0000')."
+            },
+            "imageUrls": {
+                "type": "array",
+                "description": "URLs of the images for this color variant.",
+                "items": {
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "imageHints": {
+                "type": "array",
+                "description": "AI hints for the images of this color variant.",
+                "items": {
+                    "type": "string"
+                }
+            }
+        },
+        "required": ["color", "hex", "imageUrls", "imageHints"]
     },
     "Category": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -256,6 +295,10 @@
         "selectedSize": {
             "type": "string",
             "description": "The size selected for the item, if applicable."
+        },
+        "selectedColor": {
+            "type": "string",
+            "description": "The color selected for the item, if applicable."
         }
       },
       "required": [
@@ -342,5 +385,3 @@
     }
   }
 }
-
-    

@@ -9,7 +9,7 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import StarRating from '@/components/StarRating';
 import { Separator } from '@/components/ui/separator';
 import AddToCartButton from '@/components/AddToCartButton';
@@ -20,8 +20,9 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';
 import Link from 'next/link';
-import { Tag, CheckCircle } from 'lucide-react';
+import { Tag, CheckCircle, Check } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 function QuickViewSkeleton() {
     return (
@@ -55,27 +56,54 @@ export default function ProductQuickView() {
   const { isQuickViewOpen, closeQuickView, product } = useQuickView();
   const firestore = useFirestore();
 
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState<number | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
 
   // Reset state when product changes
   useEffect(() => {
     if (product) {
+      const hasVariants = product.variants && product.variants.length > 0;
+      setSelectedVariantIndex(hasVariants ? 0 : null);
       setSelectedImageIndex(0);
       setSelectedSize(product.sizes && product.sizes.length > 0 ? undefined : '');
     }
   }, [product]);
 
+  const currentImages = useMemo(() => {
+    if (product?.variants && selectedVariantIndex !== null && product.variants[selectedVariantIndex]) {
+      return product.variants[selectedVariantIndex].imageUrls;
+    }
+    return product?.imageUrls || [];
+  }, [product, selectedVariantIndex]);
+
+  const currentImageHints = useMemo(() => {
+    if (product?.variants && selectedVariantIndex !== null && product.variants[selectedVariantIndex]) {
+      return product.variants[selectedVariantIndex].imageHints;
+    }
+    return product?.imageHints || [];
+  }, [product, selectedVariantIndex]);
+
+  // Ensure image index is valid for current images
+  useEffect(() => {
+    if (selectedImageIndex >= currentImages.length) {
+      setSelectedImageIndex(0);
+    }
+  }, [currentImages, selectedImageIndex]);
+
+
   if (!product) {
     return null;
   }
 
-  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features } = product;
-  const selectedImageUrl = imageUrls?.[selectedImageIndex] || '';
-  const selectedImageHint = imageHints?.[selectedImageIndex] || '';
+  const { name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, variants } = product;
+  const selectedImageUrl = currentImages[selectedImageIndex] || '';
+  const selectedImageHint = currentImageHints[selectedImageIndex] || '';
   const hasSizes = sizes && sizes.length > 0;
+  const hasVariants = variants && variants.length > 0;
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercentage = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+  const selectedColorName = hasVariants && selectedVariantIndex !== null ? variants[selectedVariantIndex].color : undefined;
   
   return (
     <Sheet open={isQuickViewOpen} onOpenChange={closeQuickView}>
@@ -100,9 +128,9 @@ export default function ProductQuickView() {
                         </div>
                     )}
                 </div>
-                {imageUrls && imageUrls.length > 1 && (
+                {currentImages && currentImages.length > 1 && (
                     <div className="grid grid-cols-5 gap-2">
-                    {imageUrls.map((url, index) => (
+                    {currentImages.map((url, index) => (
                         <button
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
@@ -117,7 +145,7 @@ export default function ProductQuickView() {
                             width={100}
                             height={100}
                             className="w-full h-full object-cover"
-                            data-ai-hint={imageHints?.[index]}
+                            data-ai-hint={currentImageHints?.[index]}
                         />
                         </button>
                     ))}
@@ -191,6 +219,38 @@ export default function ProductQuickView() {
                     )}
                 </div>
 
+                {hasVariants && (
+                    <div className="space-y-3 pt-2">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-medium text-foreground">اللون:</h3>
+                            <span className="text-sm text-muted-foreground">{selectedColorName}</span>
+                        </div>
+                         <TooltipProvider>
+                            <div className="flex flex-wrap gap-2">
+                                {variants.map((variant, index) => (
+                                    <Tooltip key={variant.color}>
+                                        <TooltipTrigger asChild>
+                                            <button
+                                                onClick={() => setSelectedVariantIndex(index)}
+                                                className={cn(
+                                                    'h-8 w-8 rounded-full border-2 transition-all flex items-center justify-center',
+                                                    selectedVariantIndex === index ? 'border-primary ring-2 ring-primary/50' : 'border-border hover:border-primary/50'
+                                                )}
+                                                style={{ backgroundColor: variant.hex }}
+                                                aria-label={`Select color ${variant.color}`}
+                                            >
+                                                {selectedVariantIndex === index && <Check className="h-5 w-5 text-white mix-blend-difference" />}
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{variant.color}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                ))}
+                            </div>
+                        </TooltipProvider>
+                    </div>
+                )}
 
                 {hasSizes && (
                     <div className="space-y-4 pt-2">
@@ -211,7 +271,7 @@ export default function ProductQuickView() {
                 )}
 
                 <div className="pt-4 space-y-4">
-                    <AddToCartButton product={product} selectedSize={selectedSize} />
+                    <AddToCartButton product={product} selectedSize={selectedSize} selectedColor={selectedColorName} />
                     {isDeal && dealEndDate && <CountdownTimer endDate={dealEndDate} />}
                 </div>
 
@@ -235,5 +295,3 @@ export default function ProductQuickView() {
     </Sheet>
   );
 }
-
-    
