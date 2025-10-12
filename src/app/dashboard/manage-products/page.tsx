@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const productSchema = z.object({
   name: z.string().min(2, 'اسم المنتج مطلوب'),
@@ -110,16 +111,17 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
         <DialogHeader>
           <DialogTitle>إضافة منتج جديد</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
-              <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>)} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-               <FormField
+        <ScrollArea className="max-h-[70vh] p-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
                   control={form.control}
                   name="category"
                   render={({ field }) => (
@@ -159,16 +161,17 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
                     </FormItem>
                   )}
                 />
-            </div>
-             <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-            <DialogFooter>
-              <DialogClose asChild><Button type="button" variant="outline">إلغاء</Button></DialogClose>
-              <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ المنتج'}</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+              </div>
+              <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <DialogFooter className="pt-4">
+                <DialogClose asChild><Button type="button" variant="outline">إلغاء</Button></DialogClose>
+                <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ المنتج'}</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
