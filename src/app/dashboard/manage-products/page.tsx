@@ -68,14 +68,14 @@ const productSchema = z.object({
   countryOfOrigin: z.string().optional(),
   features: z.string().optional(),
   variants: z.array(variantSchema).optional(),
-}).refine(data => data.variants?.length || data.imageUrls, {
+}).refine(data => (data.variants && data.variants.length > 0) || (data.imageUrls && data.imageUrls.length > 0), {
     message: "يجب توفير صور افتراضية على الأقل إذا لم يتم تحديد ألوان مختلفة.",
     path: ["imageUrls"],
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-function AddProductDialog({ categories, brands, onProductAdded }: { categories: Category[], brands: Brand[], onProductAdded: () => void }) {
+function ProductFormDialog({ categories, brands, onProductAdded }: { categories: Category[], brands: Brand[], onProductAdded: () => void }) {
   const { toast } = useToast();
   const firestore = useFirestore();
   const [isOpen, setIsOpen] = useState(false);
@@ -383,7 +383,7 @@ export default function ManageProductsPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-headline font-bold">إدارة المنتجات</h1>
         { !isLoading && categories && brands && (
-           <AddProductDialog categories={categories} brands={brands} onProductAdded={handleProductAdded} />
+           <ProductFormDialog categories={categories} brands={brands} onProductAdded={handleProductAdded} />
         )}
       </div>
 
