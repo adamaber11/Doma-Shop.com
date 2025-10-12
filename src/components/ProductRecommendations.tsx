@@ -6,6 +6,7 @@ import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
 
 export default function ProductRecommendations({ currentProduct }: { currentProduct: Product }) {
   const firestore = useFirestore();
@@ -13,93 +14,73 @@ export default function ProductRecommendations({ currentProduct }: { currentProd
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function getRecommendations(product: Product) {
+    async function getRecommendations() {
       if (!firestore) return;
       setIsLoading(true);
 
       try {
-        // Query for products in the same category
-        const categoryQuery = query(
+        // Query for best-selling products, excluding the current one
+        const bestSellersQuery = query(
           collection(firestore, 'products'),
-          where('category', '==', product.category),
-          where('id', '!=', product.id),
-          limit(4)
+          where('isBestSeller', '==', true),
+          where('id', '!=', currentProduct.id),
+          limit(8)
         );
 
-        // Query for products of the same brand
-        const brandQuery = query(
-          collection(firestore, 'products'),
-          where('brand', '==', product.brand),
-          where('id', '!=', product.id),
-          limit(4)
-        );
-
-        const [categorySnapshot, brandSnapshot] = await Promise.all([
-          getDocs(categoryQuery),
-          getDocs(brandQuery),
-        ]);
-
-        const categoryProducts = categorySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        const brandProducts = brandSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-
-        // Combine and deduplicate results
-        const combinedRecommendations = new Map<string, Product>();
-        [...categoryProducts, ...brandProducts].forEach(p => {
-          if (p.id !== product.id) {
-            combinedRecommendations.set(p.id, p);
-          }
-        });
-        
-        // Take up to 4 unique recommendations
-        const finalRecommendations = Array.from(combinedRecommendations.values()).slice(0, 4);
-
-        setRecommendations(finalRecommendations);
+        const querySnapshot = await getDocs(bestSellersQuery);
+        const bestSellers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        setRecommendations(bestSellers);
 
       } catch (error) {
         console.error("Failed to get product recommendations:", error);
-        setRecommendations([]); // Clear recommendations on error
+        setRecommendations([]);
       } finally {
         setIsLoading(false);
       }
     }
 
-    getRecommendations(currentProduct);
+    getRecommendations();
   }, [firestore, currentProduct]);
 
-  if (isLoading) {
-    return (
-         <section>
-            <h2 className="font-headline text-3xl font-bold text-center mb-8">
-                قد يعجبك أيضاً
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                    <Skeleton className="h-80 w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-5 w-1/2" />
-                    <Skeleton className="h-8 w-1/4" />
-                </div>
-                ))}
-            </div>
-      </section>
-    )
-  }
-
-  if (recommendations.length === 0) {
+  if (recommendations.length === 0 && !isLoading) {
     return null;
   }
 
   return (
     <section>
       <h2 className="font-headline text-3xl font-bold text-center mb-8">
-        قد يعجبك أيضاً
+        الأكثر مبيعًا
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {recommendations.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+       <Carousel
+          opts={{
+            align: "start",
+            direction: "rtl",
+          }}
+          className="w-full"
+        >
+          <CarouselContent>
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                <CarouselItem key={index} className="p-2 basis-1/2 md:basis-1/4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-80 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-5 w-1/2" />
+                    <Skeleton className="h-8 w-1/4" />
+                  </div>
+                </CarouselItem>
+              ))
+            ) : (
+              recommendations.map((product) => (
+                <CarouselItem key={product.id} className="p-2 basis-1/2 md:basis-1/4">
+                  <ProductCard product={product} />
+                </CarouselItem>
+              ))
+            )}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
     </section>
   );
 }
