@@ -20,7 +20,7 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Tooltip,
+  ResponsiveContainer,
   Legend,
 } from 'recharts';
 
@@ -110,33 +110,35 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="w-full h-[300px]">
-              <BarChart
-                accessibilityLayer
-                data={chartData}
-                margin={{
-                  top: 20,
-                  right: 20,
-                  bottom: 20,
-                  left: 20,
-                }}
-              >
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => value.slice(0, 3)}
-                />
-                <YAxis />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="dot" />}
-                />
-                <Legend />
-                <Bar dataKey="sales" fill="var(--color-sales)" radius={4} />
-                <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
-              </BarChart>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  accessibilityLayer
+                  data={chartData}
+                  margin={{
+                    top: 20,
+                    right: 20,
+                    bottom: 20,
+                    left: 20,
+                  }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => value.slice(0, 3)}
+                  />
+                  <YAxis />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dot" />}
+                  />
+                  <Legend />
+                  <Bar dataKey="sales" fill="var(--color-sales)" radius={4} />
+                  <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
+                </BarChart>
+              </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>
