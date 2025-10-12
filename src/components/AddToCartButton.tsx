@@ -21,30 +21,12 @@ export default function AddToCartButton({ product, selectedSize, selectedColor }
   const { toast } = useToast();
 
   const handleAddToCart = () => {
-    if (product.sizes && product.sizes.length > 0 && !selectedSize) {
-        toast({
-            variant: "destructive",
-            title: "خطأ",
-            description: "يرجى اختيار مقاس قبل إضافة المنتج إلى السلة.",
-        });
-        return;
-    }
-    if (product.variants && product.variants.length > 0 && !selectedColor) {
-        toast({
-            variant: "destructive",
-            title: "خطأ",
-            description: "يرجى اختيار لون قبل إضافة المنتج إلى السلة.",
-        });
-        return;
-    }
-
     addToCart(product, quantity, selectedSize, selectedColor);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
-  const isAddToCartDisabled = (product.sizes && product.sizes.length > 0 && !selectedSize) ||
-                              (product.variants && product.variants.length > 0 && !selectedColor);
+  const isAddToCartDisabled = false;
 
   return (
     <div className="flex items-center gap-4">
