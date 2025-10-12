@@ -43,7 +43,7 @@ function CouponBox({
         <div className="absolute backface-hidden h-full w-full rounded-lg bg-gradient-to-br from-primary to-primary/70 flex flex-col items-center justify-center p-4 shadow-lg">
           <Gift className="h-1/2 w-1/2 text-primary-foreground" />
           <p className="text-primary-foreground font-bold text-lg mt-2 text-center">
-            اخترني الآن
+            اخترني لكسب الكوبون الصحيح
           </p>
         </div>
         {/* Back */}
