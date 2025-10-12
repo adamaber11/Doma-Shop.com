@@ -22,6 +22,7 @@ function DashboardNav() {
     { href: '/dashboard/manage-shipping', label: 'إدارة الشحن' },
     { href: '/dashboard/manage-hero', label: 'إدارة الواجهة' },
     { href: '/dashboard/manage-socials', label: 'إدارة التواصل الاجتماعي' },
+    { href: '/dashboard/manage-popup', label: 'إدارة الإعلان المنبثق' },
   ];
 
   return (

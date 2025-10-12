@@ -543,6 +543,53 @@
         "averageRating": { "type": "number" }
       },
       "required": ["totalReviews", "averageRating"]
+    },
+    "PopupModal": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "PopupModal",
+        "type": "object",
+        "description": "Represents the content and settings for the promotional popup modal.",
+        "properties": {
+            "isActive": {
+                "type": "boolean",
+                "description": "Controls whether the popup is currently active and should be shown to users."
+            },
+            "title": {
+                "type": "string",
+                "description": "The main headline of the popup."
+            },
+            "content": {
+                "type": "string",
+                "description": "The main text content or description within the popup."
+            },
+            "imageUrl": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL for the image displayed in the popup."
+            },
+            "imageHint": {
+                "type": "string",
+                "description": "AI hint for the popup image."
+            },
+            "callToActionText": {
+                "type": "string",
+                "description": "Text for the call-to-action button (e.g., 'Shop Now')."
+            },
+            "callToActionLink": {
+                "type": "string",
+                "format": "uri",
+                "description": "The destination URL for the call-to-action button."
+            }
+        },
+        "required": [
+            "isActive",
+            "title",
+            "content",
+            "imageUrl",
+            "imageHint",
+            "callToActionText",
+            "callToActionLink"
+        ]
     }
   },
   "auth": {
@@ -617,6 +664,12 @@
             "$ref": "#/entities/OrderCounter"
         },
         "description": "Stores the counter for generating sequential order numbers. This is a single-document collection."
+      },
+      "/settings/popupModal": {
+          "schema": {
+              "$ref": "#/entities/PopupModal"
+          },
+          "description": "Stores the configuration for the promotional popup modal. This is a single-document collection."
       }
     }
   }

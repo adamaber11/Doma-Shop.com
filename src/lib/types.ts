@@ -140,3 +140,14 @@ export interface Review {
     comment: string;
     createdAt: Timestamp;
 }
+
+export interface PopupModal {
+    id: string;
+    isActive: boolean;
+    title: string;
+    content: string;
+    imageUrl: string;
+    imageHint: string;
+    callToActionText: string;
+    callToActionLink: string;
+}

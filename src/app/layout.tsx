@@ -10,6 +10,7 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import Navbar from '@/components/Navbar';
 import { QuickViewProvider } from '@/context/QuickViewProvider';
 import ProductQuickView from '@/components/ProductQuickView';
+import PromotionalPopup from '@/components/PromotionalPopup';
 
 export const metadata: Metadata = {
   title: {
@@ -45,6 +46,7 @@ export default function RootLayout({
               </div>
               <Toaster />
               <ProductQuickView />
+              <PromotionalPopup />
             </QuickViewProvider>
           </CartProvider>
         </FirebaseClientProvider>
