@@ -61,6 +61,7 @@ export interface Order {
   total?: number; // For mock data compatibility
   status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   shippingAddress?: ShippingAddress;
+  shippingCost?: number;
   items?: CartItem[];
 }
 
@@ -80,7 +81,7 @@ export interface ShippingAddress {
   fullName: string;
   address: string;
   city: string;
-  country: string;
+  governorate: string;
   postalCode: string;
 }
 
@@ -102,3 +103,11 @@ export interface SocialLinks {
     instagram?: string;
     tiktok?: string;
 }
+
+export interface ShippingGovernorate {
+    id: string;
+    name: string;
+    shippingCost: number;
+}
+
+    

@@ -255,7 +255,11 @@
         },
         "totalAmount": {
           "type": "number",
-          "description": "Total amount of the order."
+          "description": "Total amount of the order, including shipping."
+        },
+        "shippingCost": {
+          "type": "number",
+          "description": "Cost of shipping for the order."
         },
         "status": {
           "type": "string",
@@ -271,6 +275,7 @@
         "userId",
         "orderDate",
         "totalAmount",
+        "shippingCost",
         "status",
         "shippingAddress"
       ]
@@ -337,9 +342,9 @@
           "type": "string",
           "description": "City of the address."
         },
-        "country": {
+        "governorate": {
           "type": "string",
-          "description": "Country of the address."
+          "description": "Governorate/State of the address."
         },
         "postalCode": {
           "type": "string",
@@ -350,7 +355,7 @@
         "fullName",
         "address",
         "city",
-        "country",
+        "governorate",
         "postalCode"
       ]
     },
@@ -427,6 +432,27 @@
           "description": "URL to the TikTok profile."
         }
       }
+    },
+    "ShippingGovernorate": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "ShippingGovernorate",
+        "type": "object",
+        "description": "Represents a shipping governorate and its associated cost.",
+        "properties": {
+            "id": {
+                "type": "string",
+                "description": "Unique identifier for the governorate."
+            },
+            "name": {
+                "type": "string",
+                "description": "Name of the governorate."
+            },
+            "shippingCost": {
+                "type": "number",
+                "description": "The shipping cost for this governorate."
+            }
+        },
+        "required": ["id", "name", "shippingCost"]
     }
   },
   "auth": {
@@ -477,7 +503,15 @@
           "$ref": "#/entities/SocialLinks"
         },
         "description": "Stores the social media links for the website footer. This is a single-document collection."
+      },
+      "/shippingGovernorates": {
+        "schema": {
+            "$ref": "#/entities/ShippingGovernorate"
+        },
+        "description": "Stores the shipping governorates and their costs."
       }
     }
   }
 }
+
+    

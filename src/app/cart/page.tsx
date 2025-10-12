@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -76,14 +77,14 @@ export default function CartPage() {
                   <span>المجموع الفرعي</span>
                   <span>{totalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between text-muted-foreground">
                   <span>الشحن</span>
-                  <span>مجاني</span>
+                  <span>سيتم تحديده عند الدفع</span>
                 </div>
               </div>
               <Separator className="my-4" />
               <div className="flex justify-between font-bold text-lg">
-                <span>المجموع الإجمالي</span>
+                <span>المجموع الإجمالي (تقريبي)</span>
                 <span>{totalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
               </div>
               <Button asChild size="lg" className="w-full mt-6 bg-accent text-accent-foreground hover:bg-accent/90">
@@ -96,3 +97,5 @@ export default function CartPage() {
     </div>
   );
 }
+
+    

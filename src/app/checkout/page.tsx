@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -11,21 +12,20 @@ import { useCart } from '@/hooks/use-cart';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { useAuth, useFirestore, useUser } from '@/firebase';
-import { addDoc, collection, serverTimestamp, doc, writeBatch } from 'firebase/firestore';
-import type { ShippingAddress, OrderItem } from '@/lib/types';
-import { useState } from 'react';
+import { useAuth, useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, serverTimestamp, doc, writeBatch } from 'firebase/firestore';
+import type { ShippingAddress, OrderItem, ShippingGovernorate } from '@/lib/types';
+import { useState, useMemo } from 'react';
 import { Truck } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const shippingSchema = z.object({
+const checkoutSchema = z.object({
   fullName: z.string().min(2, 'الاسم الكامل مطلوب'),
   address: z.string().min(5, 'العنوان مطلوب'),
   city: z.string().min(2, 'المدينة مطلوبة'),
-  country: z.string().min(2, 'الدولة مطلوبة'),
+  governorate: z.string().min(2, 'المحافظة مطلوبة'),
   postalCode: z.string().min(3, 'الرمز البريدي مطلوب'),
 });
-
-const checkoutSchema = shippingSchema;
 
 export default function CheckoutPage() {
   const { totalPrice, cartItems, clearCart } = useCart();
@@ -33,6 +33,13 @@ export default function CheckoutPage() {
   const router = useRouter();
   const firestore = useFirestore();
   const { user } = useUser();
+  const [selectedGovernorateCost, setSelectedGovernorateCost] = useState<number | null>(null);
+
+  const governoratesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'shippingGovernorates') : null),
+    [firestore]
+  );
+  const { data: governorates, isLoading: isLoadingGovernorates } = useCollection<ShippingGovernorate>(governoratesQuery);
 
   const form = useForm<z.infer<typeof checkoutSchema>>({
     resolver: zodResolver(checkoutSchema),
@@ -40,12 +47,25 @@ export default function CheckoutPage() {
       fullName: '',
       address: '',
       city: '',
-      country: '',
+      governorate: '',
       postalCode: '',
     },
   });
 
-  const finalTotal = totalPrice;
+  const finalTotal = useMemo(() => {
+      return totalPrice + (selectedGovernorateCost ?? 0);
+  }, [totalPrice, selectedGovernorateCost]);
+
+  const handleGovernorateChange = (governorateId: string) => {
+    const selected = governorates?.find(g => g.id === governorateId);
+    if (selected) {
+        setSelectedGovernorateCost(selected.shippingCost);
+        form.setValue('governorate', selected.name);
+    } else {
+        setSelectedGovernorateCost(null);
+        form.setValue('governorate', '');
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof checkoutSchema>) {
     if (!user || !firestore) {
@@ -56,12 +76,16 @@ export default function CheckoutPage() {
       });
       return;
     }
+    if (selectedGovernorateCost === null) {
+        toast({ variant: 'destructive', title: 'خطأ', description: 'يرجى اختيار محافظة الشحن.' });
+        return;
+    }
 
     const shippingAddress: ShippingAddress = {
       fullName: values.fullName,
       address: values.address,
       city: values.city,
-      country: values.country,
+      governorate: values.governorate,
       postalCode: values.postalCode,
     };
     
@@ -73,6 +97,7 @@ export default function CheckoutPage() {
         userId: user.uid,
         orderDate: serverTimestamp(),
         totalAmount: finalTotal,
+        shippingCost: selectedGovernorateCost,
         status: 'Processing',
         shippingAddress: shippingAddress,
       });
@@ -138,10 +163,37 @@ export default function CheckoutPage() {
                   />
                   <FormField
                     control={form.control}
+                    name="governorate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>المحافظة</FormLabel>
+                        <Select
+                          onValueChange={(value) => handleGovernorateChange(value)}
+                          disabled={isLoadingGovernorates || !governorates}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر محافظتك..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {governorates?.map((g) => (
+                              <SelectItem key={g.id} value={g.id}>
+                                {g.name} ({g.shippingCost.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>العنوان</FormLabel>
+                        <FormLabel>العنوان التفصيلي</FormLabel>
                         <FormControl>
                           <Input placeholder="شارع، مبنى، شقة" {...field} />
                         </FormControl>
@@ -149,10 +201,9 @@ export default function CheckoutPage() {
                       </FormItem>
                     )}
                   />
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>المدينة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="country" render={({ field }) => (<FormItem><FormLabel>الدولة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="postalCode" render={({ field }) => (<FormItem><FormLabel>الرمز البريدي</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>المدينة / المنطقة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="postalCode" render={({ field }) => (<FormItem><FormLabel>الرمز البريدي (اختياري)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
                 </CardContent>
               </Card>
@@ -201,6 +252,14 @@ export default function CheckoutPage() {
                     <span>المجموع الفرعي</span>
                     <span>{totalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
                 </div>
+                 <div className="flex justify-between">
+                    <span>الشحن</span>
+                    <span>
+                        {selectedGovernorateCost !== null 
+                            ? selectedGovernorateCost.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' }) 
+                            : '---'}
+                    </span>
+                </div>
             </div>
             <Separator className="my-4" />
             <div className="flex justify-between font-bold text-lg">
@@ -213,3 +272,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    
