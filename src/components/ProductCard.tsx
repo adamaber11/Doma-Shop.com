@@ -8,9 +8,8 @@ import { Button } from './ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
-import { ShoppingCart, Eye } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
@@ -34,35 +33,40 @@ export default function ProductCard({ product }: { product: Product }) {
     });
   };
 
-  const imageUrl = product.imageUrls?.[0] || 'https://picsum.photos/seed/placeholder/600/800';
-  const imageHint = product.imageHints?.[0] || 'product';
+  const imageUrl1 = product.imageUrls?.[0] || 'https://picsum.photos/seed/placeholder/600/800';
+  const imageHint1 = product.imageHints?.[0] || 'product';
+  const imageUrl2 = product.imageUrls?.[1];
+  const imageHint2 = product.imageHints?.[1];
 
   return (
     <Link href={`/products/${product.id}`} className="block group w-[250px] h-[400px]">
-      <Card className="flex flex-col overflow-hidden h-full duration-300">
+      <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
             <div className="relative w-full h-52 overflow-hidden">
                 <Image
-                src={imageUrl}
-                alt={product.name}
-                fill
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                data-ai-hint={imageHint}
+                    src={imageUrl1}
+                    alt={product.name}
+                    fill
+                    className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+                    data-ai-hint={imageHint1}
                 />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <Eye className="h-10 w-10 text-white" />
-                </div>
+                {imageUrl2 && (
+                    <Image
+                    src={imageUrl2}
+                    alt={product.name}
+                    fill
+                    className="w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    data-ai-hint={imageHint2 || 'product alternate'}
+                    />
+                )}
             </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow flex flex-col">
           <div className="flex justify-between items-center mb-1">
             <p className="text-xs text-muted-foreground">{product.category}</p>
-            <div className="flex items-center gap-1">
-              <StarRating rating={product.rating} />
-              <span className="text-xs text-muted-foreground">({product.rating})</span>
-            </div>
+            <StarRating rating={product.rating} />
           </div>
-          <CardTitle className="font-headline text-base mb-1 h-12 overflow-hidden group-hover:text-primary">
+          <CardTitle className="font-headline text-base mb-1 h-12 overflow-hidden group-hover:text-blue-600 group-hover:underline">
             {product.name}
           </CardTitle>
            <p className="text-sm font-semibold text-destructive">
