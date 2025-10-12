@@ -16,7 +16,7 @@ export default function StarRating({ rating, maxRating = 5, className }: StarRat
           <Star
             key={index}
             className={cn(
-              'h-4 w-4',
+              'h-3 w-3',
               rating >= starValue
                 ? 'text-yellow-400 fill-yellow-400'
                 : 'text-gray-300 fill-gray-300'
