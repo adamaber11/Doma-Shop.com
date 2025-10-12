@@ -24,7 +24,7 @@ import {
   Legend,
 } from 'recharts';
 import { useFirestore } from '@/firebase';
-import { collectionGroup, getDocs, query, where } from 'firebase/firestore';
+import { collectionGroup, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { useEffect, useState, useMemo } from 'react';
 import type { Order } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -59,59 +59,73 @@ export default function DashboardPage() {
       if (!firestore) return;
 
       setIsLoading(true);
+      
+      const processOrders = (allOrders: Order[]) => {
+          // Calculate stats
+          const revenue = allOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+          const sales = allOrders.length;
+          const customers = new Set(allOrders.map(order => order.userId)).size;
+
+          setTotalRevenue(revenue);
+          setTotalSales(sales);
+          setTotalCustomers(customers);
+
+          // Process data for chart
+          const monthlySummary: { [key: string]: { sales: number; revenue: number } } = {};
+          const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+
+          allOrders.forEach(order => {
+            if (order.orderDate) {
+              const date = order.orderDate.toDate();
+              const month = date.getMonth(); // 0-11
+              const year = date.getFullYear();
+              const key = `${year}-${month}`;
+
+              if (!monthlySummary[key]) {
+                monthlySummary[key] = { sales: 0, revenue: 0 };
+              }
+              monthlySummary[key].sales += 1;
+              monthlySummary[key].revenue += order.totalAmount || 0;
+            }
+          });
+          
+          const chartData = Object.keys(monthlySummary).map(key => {
+            const [year, monthIndex] = key.split('-');
+            return {
+              month: `${monthNames[parseInt(monthIndex)]} ${year}`,
+              sales: monthlySummary[key].sales,
+              revenue: monthlySummary[key].revenue,
+            };
+          }).slice(-6); // Get last 6 months of data
+
+          setMonthlyData(chartData);
+      };
+
       try {
+        // Try the query with ordering first
         const ordersQuery = query(
           collectionGroup(firestore, 'orders'),
-          where('status', '!=', 'Cancelled')
+          where('status', '!=', 'Cancelled'),
+          orderBy('orderDate', 'desc')
         );
         const querySnapshot = await getDocs(ordersQuery);
-        
-        const allOrders: Order[] = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-        } as Order));
-
-        // Calculate stats
-        const revenue = allOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-        const sales = allOrders.length;
-        const customers = new Set(allOrders.map(order => order.userId)).size;
-
-        setTotalRevenue(revenue);
-        setTotalSales(sales);
-        setTotalCustomers(customers);
-
-        // Process data for chart
-        const monthlySummary: { [key: string]: { sales: number; revenue: number } } = {};
-        const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-
-        allOrders.forEach(order => {
-          if (order.orderDate) {
-            const date = order.orderDate.toDate();
-            const month = date.getMonth(); // 0-11
-            const year = date.getFullYear();
-            const key = `${year}-${month}`;
-
-            if (!monthlySummary[key]) {
-              monthlySummary[key] = { sales: 0, revenue: 0 };
-            }
-            monthlySummary[key].sales += 1;
-            monthlySummary[key].revenue += order.totalAmount || 0;
-          }
-        });
-        
-        const chartData = Object.keys(monthlySummary).map(key => {
-          const [year, monthIndex] = key.split('-');
-          return {
-            month: `${monthNames[parseInt(monthIndex)]} ${year}`,
-            sales: monthlySummary[key].sales,
-            revenue: monthlySummary[key].revenue,
-          };
-        }).slice(-6); // Get last 6 months of data
-
-        setMonthlyData(chartData);
+        const allOrders: Order[] = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+        processOrders(allOrders);
 
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error("Error fetching ordered dashboard data, trying fallback:", error);
+        try {
+            // Fallback query without ordering if the index doesn't exist
+            const fallbackQuery = query(
+              collectionGroup(firestore, 'orders'),
+              where('status', '!=', 'Cancelled')
+            );
+            const fallbackSnapshot = await getDocs(fallbackQuery);
+            const fallbackOrders: Order[] = fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+            processOrders(fallbackOrders);
+        } catch (fallbackError) {
+            console.error("Error fetching dashboard data with fallback:", fallbackError);
+        }
       } finally {
         setIsLoading(false);
       }
