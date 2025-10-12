@@ -73,7 +73,7 @@ export default function Home() {
   const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
   
   const categoriesQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'categories'), where('parentId', '==', null), limit(4)) : null),
+    () => (firestore ? query(collection(firestore, 'categories'), where('parentId', '==', null), limit(3)) : null),
     [firestore]
   );
   const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
@@ -214,7 +214,7 @@ export default function Home() {
               Array.from({ length: 4 }).map((_, index) => (
                 <CarouselItem key={index} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                   <div className="space-y-2">
-                    <Skeleton className="h-80 w-full" />
+                    <Skeleton className="aspect-square w-full" />
                     <Skeleton className="h-6 w-3/4" />
                     <Skeleton className="h-5 w-1/2" />
                     <Skeleton className="h-8 w-1/4" />
@@ -236,9 +236,9 @@ export default function Home() {
 
       <section id="shop-by-category" className="bg-card py-12">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {isLoadingCategories ? (
-                      Array.from({ length: 4 }).map((_, i) => (
+                      Array.from({ length: 3 }).map((_, i) => (
                           <div key={i} className="space-y-2">
                               <Skeleton className="h-64 w-full" />
                           </div>
@@ -260,7 +260,7 @@ export default function Home() {
                                       <span className="text-muted-foreground">No Image</span>
                                     </div>
                                   )}
-                                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-300" />
+                                  <div className="absolute inset-0 bg-transparent group-hover:bg-black/50 transition-colors duration-300" />
                                   <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
                                       <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                                           <h3 className="font-headline text-3xl font-bold drop-shadow-lg">{category.name}</h3>
@@ -298,7 +298,7 @@ export default function Home() {
               Array.from({ length: 4 }).map((_, index) => (
                 <CarouselItem key={index} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                   <div className="space-y-2">
-                    <Skeleton className="h-80 w-full" />
+                    <Skeleton className="aspect-square w-full" />
                     <Skeleton className="h-6 w-3/4" />
                     <Skeleton className="h-5 w-1/2" />
                     <Skeleton className="h-8 w-1/4" />
