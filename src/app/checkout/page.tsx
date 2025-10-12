@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useCart } from '@/hooks/use-cart';
 import { Separator } from '@/components/ui/separator';
@@ -15,6 +15,7 @@ import { useAuth, useFirestore, useUser } from '@/firebase';
 import { addDoc, collection, serverTimestamp, doc, writeBatch } from 'firebase/firestore';
 import type { ShippingAddress, OrderItem } from '@/lib/types';
 import { useState } from 'react';
+import { Truck } from 'lucide-react';
 
 const shippingSchema = z.object({
   fullName: z.string().min(2, 'الاسم الكامل مطلوب'),
@@ -24,13 +25,7 @@ const shippingSchema = z.object({
   postalCode: z.string().min(3, 'الرمز البريدي مطلوب'),
 });
 
-const paymentSchema = z.object({
-  cardNumber: z.string().length(16, 'رقم البطاقة يجب أن يكون 16 رقمًا'),
-  expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, 'الصيغة الصحيحة MM/YY'),
-  cvc: z.string().length(3, 'CVC يجب أن يكون 3 أرقام'),
-});
-
-const checkoutSchema = shippingSchema.merge(paymentSchema);
+const checkoutSchema = shippingSchema;
 
 export default function CheckoutPage() {
   const { totalPrice, cartItems, clearCart } = useCart();
@@ -47,9 +42,6 @@ export default function CheckoutPage() {
       city: '',
       country: '',
       postalCode: '',
-      cardNumber: '',
-      expiryDate: '',
-      cvc: '',
     },
   });
 
@@ -74,10 +66,8 @@ export default function CheckoutPage() {
     };
     
     try {
-      // Use a batch write to save order and order items atomically
       const batch = writeBatch(firestore);
 
-      // 1. Create the main order document
       const orderRef = doc(collection(firestore, `users/${user.uid}/orders`));
       batch.set(orderRef, {
         userId: user.uid,
@@ -87,13 +77,12 @@ export default function CheckoutPage() {
         shippingAddress: shippingAddress,
       });
 
-      // 2. Create a document for each item in the order
       for (const item of cartItems) {
         const orderItemRef = doc(collection(firestore, `users/${user.uid}/orders/${orderRef.id}/items`));
         const orderItem: Omit<OrderItem, 'id' | 'orderId'> = {
             productId: item.productId,
             name: item.name,
-            imageUrl: item.imageUrls[0], // Save the first image URL for the order item
+            imageUrl: item.imageUrls[0],
             quantity: item.quantity,
             itemPrice: item.price,
             selectedSize: item.selectedSize,
@@ -170,18 +159,21 @@ export default function CheckoutPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>معلومات الدفع</CardTitle>
+                  <CardTitle>طريقة الدفع</CardTitle>
+                  <CardDescription>الدفع نقدًا عند استلام طلبك.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField control={form.control} name="cardNumber" render={({ field }) => (<FormItem><FormLabel>رقم البطاقة</FormLabel><FormControl><Input placeholder="•••• •••• •••• ••••" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="expiryDate" render={({ field }) => (<FormItem><FormLabel>تاريخ الانتهاء</FormLabel><FormControl><Input placeholder="MM/YY" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="cvc" render={({ field }) => (<FormItem><FormLabel>CVC</FormLabel><FormControl><Input placeholder="•••" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  </div>
+                <CardContent>
+                    <div className="flex items-center p-4 border rounded-md bg-muted">
+                        <Truck className="h-6 w-6 mr-4 text-muted-foreground" />
+                        <div className='flex flex-col'>
+                            <span className="font-semibold">الدفع عند الاستلام</span>
+                            <span className="text-sm text-muted-foreground">سيتم تحصيل المبلغ عند توصيل الطلب.</span>
+                        </div>
+                    </div>
                 </CardContent>
               </Card>
               <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'جاري المعالجة...' : `ادفع ${finalTotal.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}`}
+                {form.formState.isSubmitting ? 'جاري المعالجة...' : `تأكيد الطلب`}
               </Button>
             </form>
           </Form>
