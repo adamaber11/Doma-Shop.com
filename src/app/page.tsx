@@ -30,13 +30,13 @@ export default function Home() {
   const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
 
   const bestSellersQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'products'), orderBy('rating', 'desc'), limit(4)) : null),
+    () => (firestore ? query(collection(firestore, 'products'), orderBy('rating', 'desc'), limit(8)) : null),
     [firestore]
   );
   const { data: bestSellers, isLoading: isLoadingBestSellers } = useCollection<Product>(bestSellersQuery);
 
   const dailyDealsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'products'), where('isDeal', '==', true), limit(4)) : null),
+    () => (firestore ? query(collection(firestore, 'products'), where('isDeal', '==', true), limit(8)) : null),
     [firestore]
   );
   const { data: dailyDeals, isLoading: isLoadingDailyDeals } = useCollection<Product>(dailyDealsQuery);
@@ -137,22 +137,36 @@ export default function Home() {
         <h2 className="font-headline text-3xl font-bold text-center mb-8">
           العروض اليومية
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Carousel
+          opts={{
+            align: "start",
+            direction: "rtl",
+          }}
+          className="w-full max-w-6xl mx-auto"
+        >
+          <CarouselContent>
             {isLoadingDailyDeals ? (
-              Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="space-y-2">
+              Array.from({ length: 8 }).map((_, index) => (
+                <CarouselItem key={index} className="sm:basis-1/2 lg:basis-1/4 p-2">
+                  <div className="space-y-2">
                     <Skeleton className="h-80 w-full" />
                     <Skeleton className="h-6 w-3/4" />
                     <Skeleton className="h-5 w-1/2" />
                     <Skeleton className="h-8 w-1/4" />
                   </div>
+                </CarouselItem>
               ))
             ) : (
               dailyDeals?.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                <CarouselItem key={product.id} className="sm:basis-1/2 lg:basis-1/4 p-2">
+                  <ProductCard product={product} />
+                </CarouselItem>
               ))
             )}
-        </div>
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </section>
 
       <section id="featured-products" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -195,22 +209,36 @@ export default function Home() {
         <h2 className="font-headline text-3xl font-bold text-center mb-8">
           الأكثر مبيعًا
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Carousel
+          opts={{
+            align: "start",
+            direction: "rtl",
+          }}
+          className="w-full max-w-6xl mx-auto"
+        >
+          <CarouselContent>
             {isLoadingBestSellers ? (
-              Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="space-y-2">
+              Array.from({ length: 8 }).map((_, index) => (
+                <CarouselItem key={index} className="sm:basis-1/2 lg:basis-1/4 p-2">
+                  <div className="space-y-2">
                     <Skeleton className="h-80 w-full" />
                     <Skeleton className="h-6 w-3/4" />
                     <Skeleton className="h-5 w-1/2" />
                     <Skeleton className="h-8 w-1/4" />
                   </div>
+                </CarouselItem>
               ))
             ) : (
               bestSellers?.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                <CarouselItem key={product.id} className="sm:basis-1/2 lg:basis-1/4 p-2">
+                  <ProductCard product={product} />
+                </CarouselItem>
               ))
             )}
-        </div>
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </section>
 
     </div>
