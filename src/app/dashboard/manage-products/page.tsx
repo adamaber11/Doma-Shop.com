@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import { useForm, useWatch, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -75,277 +75,278 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-function ProductFormDialog({ categories, brands, onProductAdded }: { categories: Category[], brands: Brand[], onProductAdded: () => void }) {
-  const { toast } = useToast();
-  const firestore = useFirestore();
-  const [isOpen, setIsOpen] = useState(false);
+const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], brands: Brand[], onProductAdded: () => void }>(
+  function ProductFormDialog({ categories, brands, onProductAdded }, ref) {
+    const { toast } = useToast();
+    const firestore = useFirestore();
+    const [isOpen, setIsOpen] = useState(false);
 
-  const form = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-      price: 0,
-      originalPrice: undefined,
-      category: '',
-      brand: '',
-      imageUrls: '',
-      imageHints: '',
-      rating: 0,
-      sizes: '',
-      isFeatured: false,
-      isDeal: false,
-      dealDurationHours: undefined,
-      material: '',
-      countryOfOrigin: '',
-      features: '',
-      variants: [],
-    },
-  });
+    const form = useForm<ProductFormData>({
+      resolver: zodResolver(productSchema),
+      defaultValues: {
+        name: '',
+        description: '',
+        price: 0,
+        originalPrice: undefined,
+        category: '',
+        brand: '',
+        imageUrls: '',
+        imageHints: '',
+        rating: 0,
+        sizes: '',
+        isFeatured: false,
+        isDeal: false,
+        dealDurationHours: undefined,
+        material: '',
+        countryOfOrigin: '',
+        features: '',
+        variants: [],
+      },
+    });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "variants",
-  });
+    const { fields, append, remove } = useFieldArray({
+      control: form.control,
+      name: "variants",
+    });
 
-  const isDeal = useWatch({
-    control: form.control,
-    name: 'isDeal'
-  });
+    const isDeal = useWatch({
+      control: form.control,
+      name: 'isDeal'
+    });
 
-  async function onSubmit(values: ProductFormData) {
-    if (!firestore) return;
+    async function onSubmit(values: ProductFormData) {
+      if (!firestore) return;
 
-    try {
-        const variants: ProductVariant[] | undefined = values.variants?.map(v => ({
-            ...v,
-            imageUrls: v.imageUrls.split(',').map(url => url.trim()),
-            imageHints: v.imageHints.split(',').map(hint => hint.trim()),
-        }));
+      try {
+          const variants: ProductVariant[] | undefined = values.variants?.map(v => ({
+              ...v,
+              imageUrls: v.imageUrls.split(',').map(url => url.trim()),
+              imageHints: v.imageHints.split(',').map(hint => hint.trim()),
+          }));
 
-      const newProductData: Omit<Product, 'id'> = {
-        name: values.name,
-        description: values.description,
-        price: values.price,
-        category: values.category,
-        brand: values.brand,
-        imageUrls: values.imageUrls?.split(',').map(url => url.trim()) || [],
-        imageHints: values.imageHints?.split(',').map(hint => hint.trim()) || [],
-        variants: variants,
-        rating: values.rating,
-        sizes: values.sizes?.split(',').map(s => s.trim()) || [],
-        isFeatured: values.isFeatured,
-        isDeal: values.isDeal,
-        originalPrice: values.originalPrice || undefined,
-        dealEndDate: values.isDeal && values.dealDurationHours 
-          ? Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000) 
-          : undefined,
-        material: values.material,
-        countryOfOrigin: values.countryOfOrigin,
-        features: values.features?.split(',').map(f => f.trim()) || [],
-      };
-      
-      await addDoc(collection(firestore, 'products'), newProductData);
-      toast({ title: 'تمت إضافة المنتج بنجاح!' });
-      form.reset();
-      setIsOpen(false);
-      onProductAdded();
-    } catch (error) {
-      console.error("Error adding product:", error);
-      toast({ variant: 'destructive', title: 'حدث خطأ ما' });
+        const newProductData: Omit<Product, 'id'> = {
+          name: values.name,
+          description: values.description,
+          price: values.price,
+          category: values.category,
+          brand: values.brand,
+          imageUrls: values.imageUrls?.split(',').map(url => url.trim()) || [],
+          imageHints: values.imageHints?.split(',').map(hint => hint.trim()) || [],
+          variants: variants,
+          rating: values.rating,
+          sizes: values.sizes?.split(',').map(s => s.trim()) || [],
+          isFeatured: values.isFeatured,
+          isDeal: values.isDeal,
+          originalPrice: values.originalPrice || undefined,
+          dealEndDate: values.isDeal && values.dealDurationHours 
+            ? Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000) 
+            : undefined,
+          material: values.material,
+          countryOfOrigin: values.countryOfOrigin,
+          features: values.features?.split(',').map(f => f.trim()) || [],
+        };
+        
+        await addDoc(collection(firestore, 'products'), newProductData);
+        toast({ title: 'تمت إضافة المنتج بنجاح!' });
+        form.reset();
+        setIsOpen(false);
+        onProductAdded();
+      } catch (error) {
+        console.error("Error adding product:", error);
+        toast({ variant: 'destructive', title: 'حدث خطأ ما' });
+      }
     }
-  }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          إضافة منتج جديد
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px]">
-        <DialogHeader>
-          <DialogTitle>إضافة منتج جديد</DialogTitle>
-          <UIDialogDescription>
-            املأ النموذج أدناه لإضافة منتج جديد إلى متجرك.
-          </UIDialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <ScrollArea className="h-[65vh] w-full pr-6">
-              <div className="space-y-4 my-4">
-                <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField control={form.control} name="originalPrice" render={({ field }) => (<FormItem><FormLabel>السعر الأصلي (اختياري)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
-                </div>
-                 <div className="grid grid-cols-2 gap-4">
-                  <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>الفئة</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="اختر فئة..." />
-                            </Trigger>
-                          </FormControl>
-                          <SelectContent>
-                            {categories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="brand"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>العلامة التجارية</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="اختر علامة تجارية..." />
-                            </Trigger>
-                          </FormControl>
-                          <SelectContent>
-                            {brands.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                    <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                </div>
-                
-                <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                
-                <Separator className="my-6" />
-
-                <div>
-                    <h3 className="text-lg font-medium mb-2">الألوان المتوفرة</h3>
-                    <div className="space-y-4">
-                        {fields.map((field, index) => (
-                            <div key={field.id} className="p-4 border rounded-md relative space-y-3">
-                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 left-2 h-6 w-6" onClick={() => remove(index)}>
-                                    <X className="h-4 w-4" />
-                                </Button>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (<FormItem><FormLabel>اسم اللون</FormLabel><FormControl><Input placeholder="أحمر" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                    <FormField control={form.control} name={`variants.${index}.hex`} render={({ field }) => (<FormItem><FormLabel>كود اللون (Hex)</FormLabel><FormControl><Input type="color" className='p-0 h-10' {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                </div>
-                                <FormField control={form.control} name={`variants.${index}.imageUrls`} render={({ field }) => (<FormItem><FormLabel>روابط صور اللون</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                <FormField control={form.control} name={`variants.${index}.imageHints`} render={({ field }) => (<FormItem><FormLabel>تلميحات صور اللون</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            </div>
-                        ))}
-                    </div>
-                     <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => append({ color: '', hex: '#000000', imageUrls: '', imageHints: '' })}
-                    >
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        إضافة لون
-                    </Button>
-                </div>
-
-                <Separator className="my-6" />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField control={form.control} name="material" render={({ field }) => (<FormItem><FormLabel>الخامة</FormLabel><FormControl><Input placeholder="قطن، جلد، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField control={form.control} name="countryOfOrigin" render={({ field }) => (<FormItem><FormLabel>بلد الصنع</FormLabel><FormControl><Input placeholder="تركيا، فيتنام، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                </div>
-                <FormField control={form.control} name="features" render={({ field }) => (<FormItem><FormLabel>ميزات إضافية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="مقاوم للماء، جودة عالية، ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-
-
-                <div className="grid grid-cols-2 gap-4 pt-4">
+    return (
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            إضافة منتج جديد
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>إضافة منتج جديد</DialogTitle>
+            <UIDialogDescription>
+              املأ النموذج أدناه لإضافة منتج جديد إلى متجرك.
+            </UIDialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <ScrollArea className="h-[65vh] w-full pr-6">
+                <div className="space-y-4 my-4">
+                  <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="originalPrice" render={({ field }) => (<FormItem><FormLabel>السعر الأصلي (اختياري)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+                  </div>
+                   <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField
                       control={form.control}
-                      name="isFeatured"
+                      name="category"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                          <div className="space-y-0.5">
-                            <FormLabel>منتج مميز</FormLabel>
-                            <FormDescription>
-                              إظهار هذا المنتج في قسم "منتجاتنا المميزة".
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                     <FormField
-                      control={form.control}
-                      name="isDeal"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                          <div className="space-y-0.5">
-                            <FormLabel>عرض اليوم</FormLabel>
-                            <FormDescription>
-                               إظهار هذا المنتج في قسم "العروض اليومية".
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                </div>
-                 <div className={cn("transition-all duration-300 overflow-hidden", isDeal ? "max-h-40 opacity-100" : "max-h-0 opacity-0")}>
-                    <div className="pt-4">
-                        <FormField
-                        control={form.control}
-                        name="dealDurationHours"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>مدة العرض (بالساعات)</FormLabel>
+                        <FormItem>
+                          <FormLabel>الفئة</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                                <Input type="number" placeholder="24" {...field} value={field.value ?? ''} />
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر فئة..." />
+                              </SelectTrigger>
                             </FormControl>
-                            <FormDescription>
-                                سيتم بدء العد التنازلي من الآن.
-                            </FormDescription>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                    </div>
-                </div>
-              </div>
-            </ScrollArea>
-            <DialogFooter className="pt-4">
-              <DialogClose asChild><Button type="button" variant="outline">إلغاء</Button></DialogClose>
-              <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ المنتج'}</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
-}
+                            <SelectContent>
+                              {categories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="brand"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>العلامة التجارية</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر علامة تجارية..." />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {brands.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                      <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  </div>
+                  
+                  <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  
+                  <Separator className="my-6" />
 
+                  <div>
+                      <h3 className="text-lg font-medium mb-2">الألوان المتوفرة</h3>
+                      <div className="space-y-4">
+                          {fields.map((field, index) => (
+                              <div key={field.id} className="p-4 border rounded-md relative space-y-3">
+                                  <Button type="button" variant="ghost" size="icon" className="absolute top-2 left-2 h-6 w-6" onClick={() => remove(index)}>
+                                      <X className="h-4 w-4" />
+                                  </Button>
+                                  <div className="grid grid-cols-2 gap-4">
+                                      <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (<FormItem><FormLabel>اسم اللون</FormLabel><FormControl><Input placeholder="أحمر" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                      <FormField control={form.control} name={`variants.${index}.hex`} render={({ field }) => (<FormItem><FormLabel>كود اللون (Hex)</FormLabel><FormControl><Input type="color" className='p-0 h-10' {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                  </div>
+                                  <FormField control={form.control} name={`variants.${index}.imageUrls`} render={({ field }) => (<FormItem><FormLabel>روابط صور اللون</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                  <FormField control={form.control} name={`variants.${index}.imageHints`} render={({ field }) => (<FormItem><FormLabel>تلميحات صور اللون</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                              </div>
+                          ))}
+                      </div>
+                       <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="mt-4"
+                          onClick={() => append({ color: '', hex: '#000000', imageUrls: '', imageHints: '' })}
+                      >
+                          <PlusCircle className="mr-2 h-4 w-4" />
+                          إضافة لون
+                      </Button>
+                  </div>
+
+                  <Separator className="my-6" />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="material" render={({ field }) => (<FormItem><FormLabel>الخامة</FormLabel><FormControl><Input placeholder="قطن، جلد، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="countryOfOrigin" render={({ field }) => (<FormItem><FormLabel>بلد الصنع</FormLabel><FormControl><Input placeholder="تركيا، فيتنام، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  </div>
+                  <FormField control={form.control} name="features" render={({ field }) => (<FormItem><FormLabel>ميزات إضافية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="مقاوم للماء، جودة عالية، ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+
+
+                  <div className="grid grid-cols-2 gap-4 pt-4">
+                      <FormField
+                        control={form.control}
+                        name="isFeatured"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5">
+                              <FormLabel>منتج مميز</FormLabel>
+                              <FormDescription>
+                                إظهار هذا المنتج في قسم "منتجاتنا المميزة".
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                       <FormField
+                        control={form.control}
+                        name="isDeal"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5">
+                              <FormLabel>عرض اليوم</FormLabel>
+                              <FormDescription>
+                                 إظهار هذا المنتج في قسم "العروض اليومية".
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                  </div>
+                   <div className={cn("transition-all duration-300 overflow-hidden", isDeal ? "max-h-40 opacity-100" : "max-h-0 opacity-0")}>
+                      <div className="pt-4">
+                          <FormField
+                          control={form.control}
+                          name="dealDurationHours"
+                          render={({ field }) => (
+                              <FormItem>
+                              <FormLabel>مدة العرض (بالساعات)</FormLabel>
+                              <FormControl>
+                                  <Input type="number" placeholder="24" {...field} value={field.value ?? ''} />
+                              </FormControl>
+                              <FormDescription>
+                                  سيتم بدء العد التنازلي من الآن.
+                              </FormDescription>
+                              <FormMessage />
+                              </FormItem>
+                          )}
+                          />
+                      </div>
+                  </div>
+                </div>
+              </ScrollArea>
+              <DialogFooter className="pt-4">
+                <DialogClose asChild><Button type="button" variant="outline">إلغاء</Button></DialogClose>
+                <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ المنتج'}</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+)
 
 export default function ManageProductsPage() {
   const { toast } = useToast();
