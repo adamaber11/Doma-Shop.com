@@ -213,7 +213,7 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
 
           if (isEditing) {
             const productRef = doc(firestore, 'products', product.id);
-            await updateDoc(productRef, productData);
+            await updateDoc(productRef, productData as any); // Use `any` to bypass strict partial type-check which updateDoc has
             toast({ title: 'تم تحديث المنتج بنجاح!' });
           } else {
             await addDoc(collection(firestore, 'products'), productData);
