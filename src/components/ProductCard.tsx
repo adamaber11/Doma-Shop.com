@@ -74,7 +74,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <Button 
                 onClick={handleAddToCart} 
                 aria-label={`Add ${product.name} to cart`}
-                className="w-full bg-yellow-400 text-black hover:bg-yellow-500 rounded-full"
+                className="w-full bg-yellow-400 text-black hover:bg-yellow-500 rounded-full pb-[5px]"
             >
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 أضف إلى العربة
