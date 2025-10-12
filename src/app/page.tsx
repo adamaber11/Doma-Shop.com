@@ -169,8 +169,8 @@ export default function Home() {
                 ))
               )}
             </CarouselContent>
-            <CarouselPrevious className='hidden sm:flex' />
-            <CarouselNext className='hidden sm:flex'/>
+            <CarouselPrevious />
+            <CarouselNext />
           </Carousel>
         </div>
       </section>
@@ -206,8 +206,8 @@ export default function Home() {
               ))
             )}
           </CarouselContent>
-          <CarouselPrevious className='hidden sm:flex' />
-          <CarouselNext className='hidden sm:flex' />
+          <CarouselPrevious />
+          <CarouselNext />
         </Carousel>
       </section>
 
@@ -242,8 +242,8 @@ export default function Home() {
               ))
             )}
           </CarouselContent>
-          <CarouselPrevious className='hidden sm:flex' />
-          <CarouselNext className='hidden sm:flex' />
+          <CarouselPrevious />
+          <CarouselNext />
         </Carousel>
       </section>
 
@@ -313,8 +313,8 @@ export default function Home() {
               ))
             )}
           </CarouselContent>
-          <CarouselPrevious className='hidden sm:flex' />
-          <CarouselNext className='hidden sm:flex' />
+          <CarouselPrevious />
+          <CarouselNext />
         </Carousel>
       </section>
 
