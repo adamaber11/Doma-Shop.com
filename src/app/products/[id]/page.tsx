@@ -201,18 +201,6 @@ export default function ProductDetailPage() {
           <p className="text-muted-foreground leading-relaxed">{description}</p>
           
            <div className="space-y-4 pt-2">
-              <div className="flex items-center gap-2 text-sm">
-                  <Package className="h-5 w-5 text-muted-foreground" />
-                  {stock > 0 ? (
-                      <span className="text-green-600 font-semibold">
-                          متوفر ({stock} قطعة)
-                      </span>
-                  ) : (
-                      <span className="text-red-600 font-semibold">
-                          غير متوفر حاليًا
-                      </span>
-                  )}
-              </div>
               {(material || countryOfOrigin) && (
                   <div className="grid grid-cols-2 gap-4 text-sm">
                       {material && (
@@ -246,9 +234,23 @@ export default function ProductDetailPage() {
 
             {hasVariants && (
                 <div className="space-y-3 pt-2">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-medium text-foreground">اللون:</h3>
-                        <span className="text-sm text-muted-foreground">{selectedColorName || 'يرجى التحديد'}</span>
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-medium text-foreground">اللون:</h3>
+                            <span className="text-sm text-muted-foreground">{selectedColorName || 'يرجى التحديد'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                            <Package className="h-5 w-5 text-muted-foreground" />
+                            {stock > 0 ? (
+                                <span className="text-green-600 font-semibold">
+                                    متوفر ({stock} قطعة)
+                                </span>
+                            ) : (
+                                <span className="text-red-600 font-semibold">
+                                    غير متوفر حاليًا
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <TooltipProvider>
                         <div className="flex flex-wrap gap-2">
@@ -319,5 +321,3 @@ export default function ProductDetailPage() {
     </div>
   );
 }
-
-    
