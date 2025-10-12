@@ -115,3 +115,13 @@ export interface ShippingGovernorate {
 export interface OrderCounter {
     currentNumber: number;
 }
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  createdAt: Timestamp;
+  isRead: boolean;
+}

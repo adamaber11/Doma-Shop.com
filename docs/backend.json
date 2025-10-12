@@ -475,6 +475,45 @@
             }
         },
         "required": ["currentNumber"]
+    },
+    "ContactMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContactMessage",
+      "type": "object",
+      "description": "Represents a message sent through the contact form.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the message."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the person sending the message."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email of the person sending the message.",
+          "format": "email"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject of the message."
+        },
+        "message": {
+          "type": "string",
+          "description": "The content of the message."
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Whether the message has been read by an admin."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date the message was sent.",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "name", "email", "subject", "message", "createdAt"]
     }
   },
   "auth": {
@@ -513,6 +552,12 @@
             "$ref": "#/entities/OrderItem"
         },
         "description": "Stores items for a specific order."
+      },
+       "/contactMessages": {
+        "schema": {
+          "$ref": "#/entities/ContactMessage"
+        },
+        "description": "Stores messages sent from the contact form."
       },
       "/settings/heroSection": {
         "schema": {
