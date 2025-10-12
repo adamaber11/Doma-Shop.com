@@ -56,12 +56,10 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
 
-  // Show skeleton while loading
   if (isLoading) {
     return <ProductPageSkeleton />;
   }
 
-  // After loading, if product is still null, then it's a 404
   if (!product) {
     notFound();
   }

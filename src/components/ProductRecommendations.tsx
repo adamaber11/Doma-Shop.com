@@ -32,33 +32,42 @@ export default function ProductRecommendations({ currentProduct }: { currentProd
         
         const recommendedNames = result.recommendations
           .split(',')
-          .map(name => name.trim());
+          .map(name => name.trim())
+          .filter(name => name); // Filter out empty strings
           
+        let recommendedProducts: Product[] = [];
         if (recommendedNames.length > 0) {
           const q = query(
             collection(firestore, 'products'), 
             where('name', 'in', recommendedNames),
-            where('name', '!=', currentProduct.name),
+            where('id', '!=', currentProduct.id),
             limit(4)
           );
           const recommendedProductsSnapshot = await getDocs(q);
-          const recommendedProducts = recommendedProductsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-          setRecommendations(recommendedProducts);
-        } else {
-            // Fallback to simple category-based recommendations
+          recommendedProducts = recommendedProductsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        }
+        
+        // Fallback if AI gives no recommendations or less than 4
+        if (recommendedProducts.length < 4) {
+          const fallbackLimit = 4 - recommendedProducts.length;
+          const currentIds = [currentProduct.id, ...recommendedProducts.map(p => p.id)];
+          
           const q = query(
               collection(firestore, 'products'),
               where('category', '==', currentProduct.category),
-              where('id', '!=', currentProduct.id),
-              limit(4)
+              where('id', 'not-in', currentIds),
+              limit(fallbackLimit)
           );
           const fallbackSnapshot = await getDocs(q);
-          setRecommendations(fallbackSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as Product)));
+          const fallbackProducts = fallbackSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as Product));
+          setRecommendations([...recommendedProducts, ...fallbackProducts]);
+        } else {
+          setRecommendations(recommendedProducts);
         }
 
       } catch (error) {
         console.error("Failed to get product recommendations:", error);
-        // Fallback to simple category-based recommendations
+        // Fallback to simple category-based recommendations on error
         if (firestore) {
             const q = query(
                 collection(firestore, 'products'),
