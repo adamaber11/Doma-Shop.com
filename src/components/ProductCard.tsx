@@ -60,16 +60,19 @@ export default function ProductCard({ product }: { product: Product }) {
             <CardTitle className="font-headline text-lg mb-1 h-12 overflow-hidden group-hover:text-primary">
               {product.name}
             </CardTitle>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1 shrink-0 pt-1">
                 <StarRating rating={product.rating} />
                 <span className="text-xs text-muted-foreground">({product.rating})</span>
             </div>
           </div>
-          <p className="text-lg font-semibold text-primary mt-auto">
+          <p className="text-lg font-semibold text-primary">
             {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
           </p>
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-2 h-[2.5em]">
+            {product.description}
+          </p>
         </CardContent>
-        <CardFooter className="p-4 pt-0">
+        <CardFooter className="p-4 pt-0 mt-auto">
             <Button 
                 onClick={handleAddToCart} 
                 aria-label={`Add ${product.name} to cart`}
