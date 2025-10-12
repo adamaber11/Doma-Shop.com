@@ -14,6 +14,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';
+import Link from 'next/link';
+import { Tag } from 'lucide-react';
 
 function ProductPageSkeleton() {
   return (
@@ -69,7 +71,7 @@ export default function ProductDetailPage() {
   }
   
   // This check is now safe because we've already handled the loading and !product cases
-  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice, isDeal, dealEndDate } = product!;
+  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice, isDeal, dealEndDate, category, brand } = product!;
   const selectedImageUrl = imageUrls?.[selectedImageIndex] || '';
   const selectedImageHint = imageHints?.[selectedImageIndex] || '';
   const hasSizes = sizes && sizes.length > 0;
@@ -122,6 +124,15 @@ export default function ProductDetailPage() {
         </div>
         <div className="space-y-6">
           <div className="space-y-2">
+            <div className="flex gap-4 items-center text-sm text-muted-foreground">
+                <Link href={`/category/${encodeURIComponent(category)}`} className="hover:text-primary hover:underline flex items-center gap-1">
+                    <Tag className="w-4 h-4" /> {category}
+                </Link>
+                <span>/</span>
+                <Link href={`/brand/${encodeURIComponent(brand)}`} className="hover:text-primary hover:underline">
+                    {brand}
+                </Link>
+            </div>
             <h1 className="text-4xl font-headline font-bold">{name}</h1>
             <div className="flex items-center gap-2">
               <StarRating rating={rating} />
