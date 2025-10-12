@@ -1,17 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { Gift, Scissors, Sparkles, XCircle, Timer } from 'lucide-react';
+import { Gift, Scissors, Sparkles, XCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { CouponGame } from '@/lib/types';
 import Confetti from 'react-confetti';
 import { useToast } from '@/hooks/use-toast';
-import { addHours, differenceInSeconds } from 'date-fns';
 
 function CouponBox({
   coupon,
@@ -44,7 +43,7 @@ function CouponBox({
         <div className="absolute backface-hidden h-full w-full rounded-lg bg-gradient-to-br from-primary to-primary/70 flex flex-col items-center justify-center p-4 shadow-lg">
           <Gift className="h-1/2 w-1/2 text-primary-foreground" />
           <p className="text-primary-foreground font-bold text-lg mt-2 text-center">
-            اختر واكسب
+            اخترني الآن
           </p>
         </div>
         {/* Back */}
@@ -69,7 +68,7 @@ function CouponBox({
             <>
               <XCircle className="h-8 w-8 text-white" />
               <p className="font-bold text-white mt-2">حظ أوفر!</p>
-              <p className="text-white text-sm">حاول مرة أخرى لاحقًا</p>
+              <p className="text-white text-sm">لقد انتهت محاولتك</p>
             </>
           )}
         </div>
@@ -78,40 +77,10 @@ function CouponBox({
   );
 }
 
-function Countdown({ nextPlayTime }: { nextPlayTime: Date }) {
-    const [timeLeft, setTimeLeft] = useState(differenceInSeconds(nextPlayTime, new Date()));
-
-    useEffect(() => {
-        if (timeLeft <= 0) return;
-
-        const timer = setInterval(() => {
-            setTimeLeft(prev => prev - 1);
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [timeLeft]);
-
-    if (timeLeft <= 0) {
-        return <p>يمكنك اللعب الآن!</p>;
-    }
-
-    const hours = Math.floor(timeLeft / 3600);
-    const minutes = Math.floor((timeLeft % 3600) / 60);
-    const seconds = timeLeft % 60;
-
-    return (
-        <div className="flex items-center justify-center gap-2 text-lg font-mono text-primary">
-            <Timer className="h-5 w-5" />
-            <span>
-                {String(hours).padStart(2, '0')}:{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-            </span>
-        </div>
-    );
-}
-
 export default function CouponsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { user } = useUser();
   
   const couponGameRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'couponGames', 'active') : null),
@@ -120,29 +89,27 @@ export default function CouponsPage() {
   const { data: couponGame, isLoading } = useDoc<CouponGame>(couponGameRef);
 
   const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
-  const [lastPlayed, setLastPlayed] = useState<Date | null>(null);
+  const [hasPlayed, setHasPlayed] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [windowSize, setWindowSize] = useState<{ width: number; height: number; }>({ width: 0, height: 0 });
 
   useEffect(() => {
     setIsClient(true);
-    const playedTimestamp = localStorage.getItem('couponGameLastPlayed');
-    if (playedTimestamp) {
-      setLastPlayed(new Date(parseInt(playedTimestamp, 10)));
+    const playedStatus = localStorage.getItem('couponGameHasPlayed');
+    if (playedStatus === 'true') {
+      setHasPlayed(true);
     }
     setWindowSize({ width: window.innerWidth, height: window.innerHeight });
   }, []);
 
-  const nextPlayTime = lastPlayed ? addHours(lastPlayed, 24) : null;
-  const canPlay = !nextPlayTime || new Date() >= nextPlayTime;
+  const canPlay = !hasPlayed;
 
   const handleBoxClick = (index: number) => {
     if (!canPlay || flippedIndex !== null || !couponGame) return;
 
-    const now = new Date();
-    setLastPlayed(now);
-    localStorage.setItem('couponGameLastPlayed', String(now.getTime()));
+    setHasPlayed(true);
+    localStorage.setItem('couponGameHasPlayed', 'true');
     setFlippedIndex(index);
 
     const isCorrect = index === couponGame.correctCouponIndex;
@@ -158,14 +125,14 @@ export default function CouponsPage() {
         toast({
             variant: 'destructive',
             title: 'حظ أوفر!',
-            description: 'لم يحالفك الحظ هذه المرة، حاول مرة أخرى لاحقًا.',
+            description: 'لم يحالفك الحظ هذه المرة.',
         });
     }
   };
 
   const handleReset = () => {
-    localStorage.removeItem('couponGameLastPlayed');
-    setLastPlayed(null);
+    localStorage.removeItem('couponGameHasPlayed');
+    setHasPlayed(false);
     setFlippedIndex(null);
     setShowConfetti(false);
   };
@@ -199,7 +166,7 @@ export default function CouponsPage() {
     );
   }
   
-  const hasAlreadyPlayedToday = !canPlay || flippedIndex !== null;
+  const alreadyPlayed = !canPlay || flippedIndex !== null;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -207,9 +174,9 @@ export default function CouponsPage() {
       <div className="text-center">
         <h1 className="text-4xl font-headline font-bold">جرّب حظك واربح كوبون خصم!</h1>
         <p className="mt-2 text-lg text-muted-foreground">
-            {hasAlreadyPlayedToday
-             ? "لقد استخدمت محاولتك لهذا اليوم. عد غدًا لتجربة حظك مرة أخرى!"
-             : "لديك محاولة واحدة. اختر صندوقًا واكتشف ما إذا كنت محظوظًا اليوم!"
+            {alreadyPlayed
+             ? "لقد استخدمت محاولتك الوحيدة. حظًا أوفر في المرة القادمة!"
+             : "لديك محاولة واحدة فقط. اختر صندوقًا واكتشف ما إذا كنت محظوظًا!"
             }
         </p>
       </div>
@@ -222,23 +189,20 @@ export default function CouponsPage() {
             isRevealed={flippedIndex === index}
             isCorrectGuess={flippedIndex === index && index === couponGame.correctCouponIndex}
             onClick={() => handleBoxClick(index)}
-            disabled={hasAlreadyPlayedToday}
+            disabled={alreadyPlayed}
           />
         ))}
       </div>
       
-      {hasAlreadyPlayedToday && (
+      {alreadyPlayed && user?.email === 'adamaber50@gmail.com' && process.env.NODE_ENV === 'development' && (
         <Card className="mt-12 max-w-md mx-auto text-center bg-secondary">
           <CardContent className="p-6">
              <h3 className="text-xl font-semibold">
-                المحاولة التالية بعد:
+                إعادة تعيين اللعبة (للمطور)
             </h3>
-             {nextPlayTime && <Countdown nextPlayTime={nextPlayTime} />}
-             {process.env.NODE_ENV === 'development' && (
-                <Button onClick={handleReset} variant="link" className="mt-4">
-                    (للمطور) إعادة تعيين المحاولة
-                </Button>
-            )}
+            <Button onClick={handleReset} variant="link" className="mt-2">
+                إعادة تعيين المحاولة
+            </Button>
           </CardContent>
         </Card>
       )}
