@@ -55,6 +55,7 @@ export default function ProductCard({ product }: { product: Product }) {
             </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow">
+          <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
           <CardTitle className="font-headline text-lg mb-2 h-12 overflow-hidden group-hover:text-primary">
             {product.name}
           </CardTitle>
