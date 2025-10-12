@@ -20,7 +20,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
@@ -54,11 +53,11 @@ const productSchema = z.object({
   description: z.string().min(10, 'الوصف مطلوب (10 أحرف على الأقل)'),
   price: z.coerce.number().min(0, 'السعر يجب أن يكون رقمًا موجبًا'),
   originalPrice: z.coerce.number().optional().nullable(),
-  category: z.string().min(1, 'الفئة مطلوبة'),
-  brand: z.string().min(1, 'العلامة التجارية مطلوبة'),
-  imageUrls: z.string().optional(), // Optional now, required if no variants
-  imageHints: z.string().optional(), // Optional now
-  rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5'),
+  category: z.string().optional(),
+  brand: z.string().optional(),
+  imageUrls: z.string().optional(),
+  imageHints: z.string().optional(),
+  rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5').optional(),
   sizes: z.string().optional(),
   isFeatured: z.boolean().default(false),
   isDeal: z.boolean().default(false),
@@ -68,9 +67,6 @@ const productSchema = z.object({
   countryOfOrigin: z.string().optional(),
   features: z.string().optional(),
   variants: z.array(variantSchema).optional(),
-}).refine(data => (data.variants && data.variants.length > 0) || (data.imageUrls && data.imageUrls.length > 0), {
-    message: "يجب توفير صور افتراضية على الأقل إذا لم يتم تحديد ألوان مختلفة.",
-    path: ["imageUrls"],
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -129,12 +125,12 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
           name: values.name,
           description: values.description,
           price: values.price,
-          category: values.category,
-          brand: values.brand,
+          category: values.category || 'غير مصنف',
+          brand: values.brand || 'غير محدد',
           imageUrls: values.imageUrls?.split(',').map(url => url.trim()) || [],
           imageHints: values.imageHints?.split(',').map(hint => hint.trim()) || [],
           variants: variants,
-          rating: values.rating,
+          rating: values.rating || 0,
           sizes: values.sizes?.split(',').map(s => s.trim()) || [],
           isFeatured: values.isFeatured,
           isDeal: values.isDeal,
@@ -185,13 +181,13 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                     <FormField control={form.control} name="originalPrice" render={({ field }) => (<FormItem><FormLabel>السعر الأصلي (اختياري)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
                    <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5) (اختياري)</FormLabel><FormControl><Input type="number" step="0.1" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField
                       control={form.control}
                       name="category"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>الفئة</FormLabel>
+                          <FormLabel>الفئة (اختياري)</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -213,7 +209,7 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                       name="brand"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>العلامة التجارية</FormLabel>
+                          <FormLabel>العلامة التجارية (اختياري)</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -485,3 +481,5 @@ export default function ManageProductsPage() {
     </div>
   );
 }
+
+    
