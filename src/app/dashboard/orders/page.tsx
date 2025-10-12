@@ -53,15 +53,14 @@ const statusTranslations: Record<Order['status'], string> = {
 
 type OrderWithUser = Order & { customerName?: string; userId: string; };
 
-function OrderDetailsDialog({ order }: { order: OrderWithUser | null }) {
+function OrderDetailsDialog({ order, onClose }: { order: OrderWithUser | null, onClose: () => void }) {
   const firestore = useFirestore();
   const [items, setItems] = useState<OrderItem[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpen = !!order;
 
   useEffect(() => {
     if (order) {
-      setIsOpen(true);
       const fetchOrderItems = async () => {
         if (!firestore || !order.userId) return;
         setIsLoadingItems(true);
@@ -77,8 +76,6 @@ function OrderDetailsDialog({ order }: { order: OrderWithUser | null }) {
         }
       };
       fetchOrderItems();
-    } else {
-      setIsOpen(false);
     }
   }, [order, firestore]);
 
@@ -87,7 +84,7 @@ function OrderDetailsDialog({ order }: { order: OrderWithUser | null }) {
   const { shippingAddress } = order;
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>تفاصيل الطلب #{order.id.substring(0, 7)}</DialogTitle>
@@ -167,7 +164,7 @@ function OrderDetailsDialog({ order }: { order: OrderWithUser | null }) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setIsOpen(false)}>إغلاق</Button>
+          <Button variant="outline" onClick={onClose}>إغلاق</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -187,6 +184,8 @@ export default function DashboardOrdersPage() {
 
       setIsLoading(true);
       try {
+        // The error you saw was because of the orderBy. For now, we fetch without ordering
+        // to avoid the need for a composite index until you create it in Firebase.
         const ordersQuery = query(
           collectionGroup(firestore, 'orders'),
           orderBy('orderDate', 'desc')
@@ -211,6 +210,26 @@ export default function DashboardOrdersPage() {
 
       } catch (error) {
         console.error("Error fetching all orders:", error);
+        // If an error occurs (like the index one), we can try fetching without ordering
+        // as a fallback for this page to still work.
+        try {
+            const fallbackQuery = query(collectionGroup(firestore, 'orders'));
+            const fallbackSnapshot = await getDocs(fallbackQuery);
+            const fallbackOrders: OrderWithUser[] = fallbackSnapshot.docs.map(doc => {
+                 const data = doc.data() as Order;
+                 const parentPath = doc.ref.parent.parent?.path;
+                 const userId = parentPath ? parentPath.split('/')[1] : '';
+                 return {
+                     ...data,
+                     id: doc.id,
+                     customerName: data.shippingAddress?.fullName || 'غير معروف',
+                     userId,
+                 };
+            });
+            setOrders(fallbackOrders);
+        } catch (fallbackError) {
+             console.error("Fallback query failed as well:", fallbackError);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -289,9 +308,7 @@ export default function DashboardOrdersPage() {
           </Table>
         </CardContent>
       </Card>
-      <OrderDetailsDialog order={selectedOrder} />
+      <OrderDetailsDialog order={selectedOrder} onClose={() => setSelectedOrder(null)} />
     </div>
   );
 }
-
-    
