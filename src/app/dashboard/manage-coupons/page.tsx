@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
-import { Gift, Trash2 } from 'lucide-react';
+import { Gift } from 'lucide-react';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import type { CouponGame } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const couponSchema = z.object({
     coupons: z.array(z.object({ value: z.string().min(1, 'حقل الكوبون مطلوب') })).length(7, 'يجب إدخال 7 كوبونات'),
@@ -19,6 +24,13 @@ const couponSchema = z.object({
 
 export default function ManageCouponsPage() {
     const { toast } = useToast();
+    const firestore = useFirestore();
+
+    const couponGameRef = useMemoFirebase(
+      () => (firestore ? doc(firestore, 'couponGames', 'active') : null),
+      [firestore]
+    );
+    const { data: couponGame, isLoading } = useDoc<CouponGame>(couponGameRef);
 
     const form = useForm<z.infer<typeof couponSchema>>({
         resolver: zodResolver(couponSchema),
@@ -29,19 +41,30 @@ export default function ManageCouponsPage() {
         },
     });
 
-    const { fields, append, remove } = useFieldArray({
+    useEffect(() => {
+        if (couponGame) {
+            form.reset(couponGame);
+        }
+    }, [couponGame, form]);
+
+    const { fields } = useFieldArray({
         control: form.control,
         name: 'coupons',
     });
 
-    function onSubmit(values: z.infer<typeof couponSchema>) {
-        console.log(values);
-        const correctCoupon = values.coupons[values.correctCouponIndex].value;
-        toast({
-            title: "تم حفظ لعبة الكوبونات",
-            description: `الكوبون الصحيح هو "${correctCoupon}" بنسبة خصم ${values.discountPercentage}%.`,
-        });
-        // Here you would typically save this to your database (e.g., Firestore)
+    async function onSubmit(values: z.infer<typeof couponSchema>) {
+        if (!firestore) return;
+
+        try {
+            await setDoc(doc(firestore, 'couponGames', 'active'), values);
+            toast({
+                title: "تم حفظ لعبة الكوبونات",
+                description: `تم تحديث لعبة الكوبونات بنجاح.`,
+            });
+        } catch (error) {
+            console.error("Error saving coupon game:", error);
+            toast({ variant: 'destructive', title: 'حدث خطأ ما' });
+        }
     }
 
     return (
@@ -49,68 +72,77 @@ export default function ManageCouponsPage() {
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-4xl font-headline font-bold">إدارة الكوبونات</h1>
             </div>
-
             <Card className="max-w-4xl mx-auto">
                 <CardHeader>
-                    <CardTitle>إنشاء لعبة كوبونات جديدة</CardTitle>
+                    <CardTitle>إعدادات لعبة الكوبونات</CardTitle>
                     <CardDescription>
-                        أنشئ 7 كوبونات، واحد منها صحيح. يمكن للعميل تجربة حظه مرة واحدة فقط.
+                        أدخل 7 أكواد للكوبونات، واختر الكوبون الصحيح، ثم حدد نسبة الخصم. يمكن لكل عميل تجربة حظه مرة واحدة فقط.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <div className="space-y-4">
-                                <FormLabel>أكواد الكوبونات (7 كوبونات)</FormLabel>
-                                <RadioGroup
-                                    onValueChange={(value) => form.setValue('correctCouponIndex', parseInt(value))}
-                                    defaultValue={form.getValues('correctCouponIndex').toString()}
-                                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                                >
-                                    {fields.map((field, index) => (
-                                        <FormField
-                                            key={field.id}
-                                            control={form.control}
-                                            name={`coupons.${index}.value`}
-                                            render={({ field }) => (
-                                                <FormItem className="flex items-center gap-4 p-3 border rounded-lg bg-background">
-                                                    <FormControl>
-                                                        <RadioGroupItem value={index.toString()} id={`r-${index}`} />
-                                                    </FormControl>
-                                                    <FormLabel htmlFor={`r-${index}`} className="flex-grow m-0 !text-sm font-normal cursor-pointer">
-                                                        الكوبون الصحيح
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        <Input {...field} placeholder={`كود الكوبون #${index + 1}`} className="flex-grow"/>
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    ))}
-                                </RadioGroup>
+                    {isLoading ? (
+                         <div className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {Array.from({length: 7}).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
                             </div>
+                            <Skeleton className="h-10 w-1/3" />
+                            <Skeleton className="h-10 w-48" />
+                         </div>
+                    ) : (
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                                <div className="space-y-4">
+                                    <FormLabel>أكواد الكوبونات (7 كوبونات)</FormLabel>
+                                    <RadioGroup
+                                        onValueChange={(value) => form.setValue('correctCouponIndex', parseInt(value))}
+                                        value={form.watch('correctCouponIndex').toString()}
+                                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                    >
+                                        {fields.map((field, index) => (
+                                            <FormField
+                                                key={field.id}
+                                                control={form.control}
+                                                name={`coupons.${index}.value`}
+                                                render={({ field }) => (
+                                                    <FormItem className="flex items-center gap-4 p-3 border rounded-lg bg-background">
+                                                        <FormControl>
+                                                            <RadioGroupItem value={index.toString()} id={`r-${index}`} />
+                                                        </FormControl>
+                                                        <FormLabel htmlFor={`r-${index}`} className="flex-grow m-0 !text-sm font-normal cursor-pointer">
+                                                            الكوبون الصحيح
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} placeholder={`كود الكوبون #${index + 1}`} className="flex-grow"/>
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        ))}
+                                    </RadioGroup>
+                                </div>
 
-                            <FormField
-                                control={form.control}
-                                name="discountPercentage"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>نسبة الخصم للكوبون الصحيح (%)</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" placeholder="مثال: 15" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                                <FormField
+                                    control={form.control}
+                                    name="discountPercentage"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>نسبة الخصم للكوبون الصحيح (%)</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" placeholder="مثال: 15" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                            <Button type="submit" disabled={form.formState.isSubmitting}>
-                                <Gift className="mr-2 h-4 w-4" />
-                                {form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ لعبة الكوبونات'}
-                            </Button>
-                        </form>
-                    </Form>
+                                <Button type="submit" disabled={form.formState.isSubmitting}>
+                                    <Gift className="mr-2 h-4 w-4" />
+                                    {form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ لعبة الكوبونات'}
+                                </Button>
+                            </form>
+                        </Form>
+                    )}
                 </CardContent>
             </Card>
         </div>
