@@ -15,6 +15,9 @@ export interface Product {
   isFeatured?: boolean;
   isDeal?: boolean;
   dealEndDate?: Timestamp;
+  material?: string;
+  countryOfOrigin?: string;
+  features?: string[];
 }
 
 export interface CartItem extends Product {
@@ -67,3 +70,5 @@ export interface ShippingAddress {
   country: string;
   postalCode: string;
 }
+
+    

@@ -56,6 +56,9 @@ const productSchema = z.object({
   isFeatured: z.boolean().default(false),
   isDeal: z.boolean().default(false),
   dealDurationHours: z.coerce.number().optional().nullable(),
+  material: z.string().optional(),
+  countryOfOrigin: z.string().optional(),
+  features: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -81,6 +84,9 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
       isFeatured: false,
       isDeal: false,
       dealDurationHours: undefined,
+      material: '',
+      countryOfOrigin: '',
+      features: '',
     },
   });
 
@@ -109,6 +115,9 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
         dealEndDate: values.isDeal && values.dealDurationHours 
           ? Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000) 
           : undefined,
+        material: values.material,
+        countryOfOrigin: values.countryOfOrigin,
+        features: values.features?.split(',').map(f => f.trim()) || [],
       };
       
       await addDoc(collection(firestore, 'products'), newProductData);
@@ -196,6 +205,12 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
                 
                 <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="material" render={({ field }) => (<FormItem><FormLabel>الخامة</FormLabel><FormControl><Input placeholder="قطن، جلد، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="countryOfOrigin" render={({ field }) => (<FormItem><FormLabel>بلد الصنع</FormLabel><FormControl><Input placeholder="تركيا، فيتنام، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                <FormField control={form.control} name="features" render={({ field }) => (<FormItem><FormLabel>ميزات إضافية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="مقاوم للماء، جودة عالية، ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+
 
                 <div className="grid grid-cols-2 gap-4 pt-4">
                     <FormField
@@ -385,3 +400,5 @@ export default function ManageProductsPage() {
     </div>
   );
 }
+
+    

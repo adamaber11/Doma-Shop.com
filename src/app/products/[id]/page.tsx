@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';
 import Link from 'next/link';
-import { Tag } from 'lucide-react';
+import { Tag, CheckCircle } from 'lucide-react';
 
 function ProductPageSkeleton() {
   return (
@@ -71,7 +71,7 @@ export default function ProductDetailPage() {
   }
   
   // This check is now safe because we've already handled the loading and !product cases
-  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice, isDeal, dealEndDate, category, brand } = product!;
+  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features } = product!;
   const selectedImageUrl = imageUrls?.[selectedImageIndex] || '';
   const selectedImageHint = imageHints?.[selectedImageIndex] || '';
   const hasSizes = sizes && sizes.length > 0;
@@ -152,6 +152,38 @@ export default function ProductDetailPage() {
           <Separator />
 
           <p className="text-muted-foreground leading-relaxed">{description}</p>
+          
+          <div className="space-y-4 pt-2">
+              {(material || countryOfOrigin) && (
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                      {material && (
+                          <div>
+                              <h4 className="font-semibold">الخامة</h4>
+                              <p className="text-muted-foreground">{material}</p>
+                          </div>
+                      )}
+                      {countryOfOrigin && (
+                          <div>
+                              <h4 className="font-semibold">بلد الصنع</h4>
+                              <p className="text-muted-foreground">{countryOfOrigin}</p>
+                          </div>
+                      )}
+                  </div>
+              )}
+              {features && features.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2">ميزات إضافية</h4>
+                      <ul className="space-y-2">
+                          {features.map((feature, index) => (
+                              <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span>{feature}</span>
+                              </li>
+                          ))}
+                      </ul>
+                  </div>
+              )}
+          </div>
 
           {hasSizes && (
             <div className="space-y-4 pt-2">
@@ -184,3 +216,5 @@ export default function ProductDetailPage() {
     </div>
   );
 }
+
+    

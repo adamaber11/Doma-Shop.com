@@ -101,6 +101,21 @@
             "type": "string",
             "format": "date-time",
             "description": "The end date for the daily deal."
+        },
+        "material": {
+          "type": "string",
+          "description": "The material of the product."
+        },
+        "countryOfOrigin": {
+            "type": "string",
+            "description": "The country of origin for the product."
+        },
+        "features": {
+            "type": "array",
+            "description": "A list of key features for the product.",
+            "items": {
+                "type": "string"
+            }
         }
       },
       "required": [
@@ -327,3 +342,5 @@
     }
   }
 }
+
+    
