@@ -2,7 +2,7 @@
 
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import StarRating from '@/components/StarRating';
 import { Separator } from '@/components/ui/separator';
 import AddToCartButton from '@/components/AddToCartButton';
@@ -79,18 +79,18 @@ export default function ProductDetailPage() {
   }, [product, selectedVariantIndex]);
   
   // Reset states when product data loads
-  useState(() => {
+  useEffect(() => {
       if (product) {
           const hasSizes = product.sizes && product.sizes.length > 0;
           const hasVariants = product.variants && product.variants.length > 0;
-          setSelectedVariantIndex(null);
+          setSelectedVariantIndex(hasVariants ? null : -1);
           setSelectedImageIndex(0);
           setSelectedSize(hasSizes ? undefined : '');
       }
   }, [product]);
 
   // Ensure image index is valid for current images
-  useState(() => {
+  useEffect(() => {
     if (selectedImageIndex >= currentImages.length) {
       setSelectedImageIndex(0);
     }
@@ -117,7 +117,7 @@ export default function ProductDetailPage() {
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercentage = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
   
-  const selectedColorName = hasVariants && selectedVariantIndex !== null ? variants![selectedVariantIndex].color : undefined;
+  const selectedColorName = hasVariants && selectedVariantIndex !== null && selectedVariantIndex >= 0 ? variants![selectedVariantIndex].color : undefined;
 
   const isSelectionComplete = (!hasSizes || selectedSize !== undefined) && (!hasVariants || selectedVariantIndex !== null);
   const optionsNotSelectedMessage = [
@@ -248,7 +248,7 @@ export default function ProductDetailPage() {
                 <div className="space-y-3 pt-2">
                     <div className="flex items-center gap-2">
                         <h3 className="text-sm font-medium text-foreground">اللون:</h3>
-                        <span className="text-sm text-muted-foreground">{selectedColorName}</span>
+                        <span className="text-sm text-muted-foreground">{selectedColorName || 'يرجى التحديد'}</span>
                     </div>
                     <TooltipProvider>
                         <div className="flex flex-wrap gap-2">
@@ -319,3 +319,5 @@ export default function ProductDetailPage() {
     </div>
   );
 }
+
+    
