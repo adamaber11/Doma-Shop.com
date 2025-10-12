@@ -88,6 +88,14 @@
             "items": {
                 "type": "string"
             }
+        },
+        "isFeatured": {
+            "type": "boolean",
+            "description": "Whether the product is a featured product."
+        },
+        "isDeal": {
+            "type": "boolean",
+            "description": "Whether the product is part of a daily deal."
         }
       },
       "required": [

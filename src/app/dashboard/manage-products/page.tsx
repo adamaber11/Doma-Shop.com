@@ -39,6 +39,7 @@ import {
 import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 
 const productSchema = z.object({
   name: z.string().min(2, 'اسم المنتج مطلوب'),
@@ -51,6 +52,8 @@ const productSchema = z.object({
   imageHints: z.string().min(1, 'تلميح صورة واحد على الأقل مطلوب'),
   rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5'),
   sizes: z.string().optional(),
+  isFeatured: z.boolean().optional(),
+  isDeal: z.boolean().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -73,6 +76,8 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
       imageHints: '',
       rating: 0,
       sizes: '',
+      isFeatured: false,
+      isDeal: false,
     },
   });
 
@@ -90,6 +95,8 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
         imageHints: values.imageHints.split(',').map(hint => hint.trim()),
         rating: values.rating,
         sizes: values.sizes?.split(',').map(s => s.trim()) || [],
+        isFeatured: values.isFeatured,
+        isDeal: values.isDeal,
       };
       if (values.originalPrice && values.originalPrice > values.price) {
         newProduct.originalPrice = values.originalPrice;
@@ -180,6 +187,49 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
                 
                 <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                    <FormField
+                      control={form.control}
+                      name="isFeatured"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>منتج مميز</FormLabel>
+                            <FormDescription>
+                              إظهار هذا المنتج في قسم "منتجاتنا المميزة".
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="isDeal"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>عرض اليوم</FormLabel>
+                            <FormDescription>
+                               إظهار هذا المنتج في قسم "العروض اليومية".
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                </div>
               </div>
             </ScrollArea>
             <DialogFooter className="pt-4">
@@ -248,12 +298,14 @@ export default function ManageProductsPage() {
                 <TableHead>الفئة</TableHead>
                 <TableHead>السعر</TableHead>
                 <TableHead>السعر الأصلي</TableHead>
+                <TableHead>مميز</TableHead>
+                <TableHead>عرض</TableHead>
                 <TableHead>الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoadingProducts ? (
-                <TableRow><TableCell colSpan={6} className="text-center">جاري تحميل المنتجات...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center">جاري تحميل المنتجات...</TableCell></TableRow>
               ) : products && products.length > 0 ? (
                 products.map((product) => (
                   <TableRow key={product.id}>
@@ -264,6 +316,8 @@ export default function ManageProductsPage() {
                     <TableCell>{product.category}</TableCell>
                     <TableCell>{product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</TableCell>
                     <TableCell>{product.originalPrice ? product.originalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' }) : '—'}</TableCell>
+                    <TableCell>{product.isFeatured ? 'نعم' : 'لا'}</TableCell>
+                    <TableCell>{product.isDeal ? 'نعم' : 'لا'}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         {/* Edit button can be added here later */}
@@ -291,7 +345,7 @@ export default function ManageProductsPage() {
                   </TableRow>
                 ))
               ) : (
-                <TableRow><TableCell colSpan={6} className="text-center">لم يتم العثور على منتجات.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center">لم يتم العثور على منتجات.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -300,5 +354,3 @@ export default function ManageProductsPage() {
     </div>
   );
 }
-
-    

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useCollection } from '@/firebase';
-import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { collection, query, limit, orderBy, where } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product, Brand } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,7 +24,7 @@ export default function Home() {
   const heroImage = PlaceHolderImages.find(p => p.id === 'hero');
 
   const productsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'products'), limit(8)) : null),
+    () => (firestore ? query(collection(firestore, 'products'), where('isFeatured', '==', true), limit(8)) : null),
     [firestore]
   );
   const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
@@ -36,7 +36,7 @@ export default function Home() {
   const { data: bestSellers, isLoading: isLoadingBestSellers } = useCollection<Product>(bestSellersQuery);
 
   const dailyDealsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'products'), limit(4)) : null), // Simple query for deals for now
+    () => (firestore ? query(collection(firestore, 'products'), where('isDeal', '==', true), limit(4)) : null),
     [firestore]
   );
   const { data: dailyDeals, isLoading: isLoadingDailyDeals } = useCollection<Product>(dailyDealsQuery);

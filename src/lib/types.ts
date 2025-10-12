@@ -12,6 +12,8 @@ export interface Product {
   category: string;
   brand: string;
   sizes?: string[];
+  isFeatured?: boolean;
+  isDeal?: boolean;
 }
 
 export interface CartItem extends Product {
