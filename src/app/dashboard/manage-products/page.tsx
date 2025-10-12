@@ -20,8 +20,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription as DialogFormDescription,
   DialogFooter,
   DialogClose,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -166,9 +168,9 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
         <DialogContent className="sm:max-w-[800px]">
           <DialogHeader>
             <DialogTitle>إضافة منتج جديد</DialogTitle>
-            <CardDescription>
+            <DialogFormDescription>
               املأ النموذج أدناه لإضافة منتج جديد إلى متجرك.
-            </CardDescription>
+            </DialogFormDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -481,5 +483,3 @@ export default function ManageProductsPage() {
     </div>
   );
 }
-
-    
