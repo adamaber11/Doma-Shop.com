@@ -170,6 +170,9 @@ export default function CheckoutPage() {
                             <span className="text-sm text-muted-foreground">سيتم تحصيل المبلغ عند توصيل الطلب.</span>
                         </div>
                     </div>
+                     <p className="mt-4 text-center text-sm font-semibold text-destructive p-2 rounded-md border border-destructive/20 bg-destructive/10">
+                        الشحن من 3 إلى 7 أيام
+                    </p>
                 </CardContent>
               </Card>
               <Button type="submit" size="lg" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={form.formState.isSubmitting}>
