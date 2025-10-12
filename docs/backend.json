@@ -244,6 +244,10 @@
           "type": "string",
           "description": "Unique identifier for the order."
         },
+        "orderNumber": {
+            "type": "number",
+            "description": "Sequential, human-readable order number."
+        },
         "userId": {
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Order)"
@@ -458,6 +462,19 @@
             }
         },
         "required": ["id", "name", "shippingCost"]
+    },
+    "OrderCounter": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "OrderCounter",
+        "type": "object",
+        "description": "A counter to generate sequential order numbers.",
+        "properties": {
+            "currentNumber": {
+                "type": "number",
+                "description": "The last used order number."
+            }
+        },
+        "required": ["currentNumber"]
     }
   },
   "auth": {
@@ -514,9 +531,13 @@
             "$ref": "#/entities/ShippingGovernorate"
         },
         "description": "Stores the shipping governorates and their costs."
+      },
+      "/counters/orders": {
+        "schema": {
+            "$ref": "#/entities/OrderCounter"
+        },
+        "description": "Stores the counter for generating sequential order numbers. This is a single-document collection."
       }
     }
   }
 }
-
-    

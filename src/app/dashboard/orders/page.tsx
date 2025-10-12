@@ -87,7 +87,7 @@ function OrderDetailsDialog({ order, onClose }: { order: OrderWithUser | null, o
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>تفاصيل الطلب #{order.id.substring(0, 7)}</DialogTitle>
+          <DialogTitle>تفاصيل الطلب #{order.orderNumber || order.id.substring(0, 7)}</DialogTitle>
           <DialogDescription>
             بتاريخ {order.orderDate ? new Date(order.orderDate.toDate()).toLocaleString('ar-AE') : 'غير متوفر'}
           </DialogDescription>
@@ -184,8 +184,6 @@ export default function DashboardOrdersPage() {
 
       setIsLoading(true);
       try {
-        // The error you saw was because of the orderBy. For now, we fetch without ordering
-        // to avoid the need for a composite index until you create it in Firebase.
         const ordersQuery = query(
           collectionGroup(firestore, 'orders'),
           orderBy('orderDate', 'desc')
@@ -274,7 +272,7 @@ export default function DashboardOrdersPage() {
               ) : orders && orders.length > 0 ? (
                 orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">#{order.id.substring(0,7)}</TableCell>
+                    <TableCell className="font-medium">#{order.orderNumber || order.id.substring(0,7)}</TableCell>
                     <TableCell>
                       {order.orderDate
                         ? new Date(order.orderDate.toDate()).toLocaleDateString('ar-AE')

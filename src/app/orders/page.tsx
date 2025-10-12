@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Badge } from '@/components/ui/badge';
@@ -84,7 +85,7 @@ export default function OrdersPage() {
               ) : orders && orders.length > 0 ? (
                 orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">#{order.id.substring(0,7)}</TableCell>
+                    <TableCell className="font-medium">#{order.orderNumber || order.id.substring(0,7)}</TableCell>
                     <TableCell>
                       {order.orderDate
                         ? new Date(order.orderDate.toDate()).toLocaleDateString('ar-AE')

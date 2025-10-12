@@ -13,8 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth, useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, serverTimestamp, doc, writeBatch } from 'firebase/firestore';
-import type { ShippingAddress, OrderItem, ShippingGovernorate } from '@/lib/types';
+import { collection, serverTimestamp, doc, writeBatch, runTransaction } from 'firebase/firestore';
+import type { ShippingAddress, OrderItem, ShippingGovernorate, OrderCounter } from '@/lib/types';
 import { useState, useMemo } from 'react';
 import { Truck } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -93,41 +93,55 @@ export default function CheckoutPage() {
     };
     
     try {
-      const batch = writeBatch(firestore);
+        const newOrderNumber = await runTransaction(firestore, async (transaction) => {
+            const counterRef = doc(firestore, "counters", "orders");
+            const counterDoc = await transaction.get(counterRef);
+            
+            let nextOrderNumber;
+            if (!counterDoc.exists()) {
+                nextOrderNumber = 1;
+            } else {
+                const counterData = counterDoc.data() as OrderCounter;
+                nextOrderNumber = (counterData.currentNumber || 0) + 1;
+            }
+            
+            transaction.set(counterRef, { currentNumber: nextOrderNumber });
 
-      const orderRef = doc(collection(firestore, `users/${user.uid}/orders`));
-      batch.set(orderRef, {
-        userId: user.uid,
-        orderDate: serverTimestamp(),
-        totalAmount: finalTotal,
-        shippingCost: selectedGovernorateCost,
-        status: 'Processing',
-        shippingAddress: shippingAddress,
-      });
+            const orderRef = doc(collection(firestore, `users/${user.uid}/orders`));
+            transaction.set(orderRef, {
+                orderNumber: nextOrderNumber,
+                userId: user.uid,
+                orderDate: serverTimestamp(),
+                totalAmount: finalTotal,
+                shippingCost: selectedGovernorateCost,
+                status: 'Processing',
+                shippingAddress: shippingAddress,
+            });
 
-      for (const item of cartItems) {
-        const orderItemRef = doc(collection(firestore, `users/${user.uid}/orders/${orderRef.id}/items`));
-        const orderItem: Omit<OrderItem, 'id' | 'orderId'> = {
-            productId: item.productId,
-            name: item.name,
-            imageUrl: item.imageUrls[0],
-            quantity: item.quantity,
-            itemPrice: item.price,
-            selectedSize: item.selectedSize,
-        }
-        batch.set(orderItemRef, orderItem);
-      }
-
-      await batch.commit();
+            for (const item of cartItems) {
+                const orderItemRef = doc(collection(firestore, `users/${user.uid}/orders/${orderRef.id}/items`));
+                const orderItem: Omit<OrderItem, 'id' | 'orderId'> = {
+                    productId: item.productId,
+                    name: item.name,
+                    imageUrl: item.imageUrls[0],
+                    quantity: item.quantity,
+                    itemPrice: item.price,
+                    selectedSize: item.selectedSize,
+                }
+                transaction.set(orderItemRef, orderItem);
+            }
+            
+            return nextOrderNumber;
+        });
 
       toast({
         title: 'تم تقديم الطلب بنجاح!',
-        description: 'شكرًا لك على الشراء. سيتم توجيهك إلى صفحة الطلبات.',
+        description: `شكرًا لك على الشراء. رقم طلبك هو #${newOrderNumber}.`,
       });
       clearCart();
       setTimeout(() => {
         router.push('/orders');
-      }, 2000);
+      }, 3000);
 
     } catch (error) {
       console.error("Error placing order: ", error);
@@ -288,5 +302,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    
