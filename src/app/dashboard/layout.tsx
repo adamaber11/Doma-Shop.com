@@ -1,8 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/firebase';
+import { useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const ADMIN_EMAIL = 'adamaber50@gmail.com';
 
 function DashboardNav() {
   const pathname = usePathname();
@@ -39,11 +44,42 @@ function DashboardNav() {
   );
 }
 
+function DashboardSkeleton() {
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-1/4" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    // If loading is finished, check the user's status
+    if (!isUserLoading) {
+      // If no user is logged in OR the logged-in user is not the admin, redirect
+      if (!user || user.email !== ADMIN_EMAIL) {
+        router.replace('/');
+      }
+    }
+  }, [user, isUserLoading, router]);
+
+  // While loading, or if the user is not the admin (before redirect kicks in),
+  // show a skeleton screen or nothing to prevent content flashing.
+  if (isUserLoading || !user || user.email !== ADMIN_EMAIL) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <div>
       <DashboardNav />

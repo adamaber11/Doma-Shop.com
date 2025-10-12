@@ -18,6 +18,8 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
+const ADMIN_EMAIL = 'adamaber50@gmail.com';
+
 export default function Header() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
@@ -34,6 +36,8 @@ export default function Header() {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   }
+
+  const isAdmin = user?.email === ADMIN_EMAIL;
 
   return (
     <header className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -76,12 +80,16 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/orders"><Package className="mr-2 h-4 w-4" /> طلباتي</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> لوحة التحكم</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/orders"><ShoppingBag className="mr-2 h-4 w-4" /> طلبات العملاء</Link>
-                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" /> لوحة التحكم</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard/orders"><ShoppingBag className="mr-2 h-4 w-4" /> طلبات العملاء</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" /> تسجيل الخروج
