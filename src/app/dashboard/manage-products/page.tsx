@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
@@ -23,7 +23,7 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
-  DialogDescription,
+  DialogDescription as UIDialogDescription,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -97,13 +97,9 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
         sizes: values.sizes?.split(',').map(s => s.trim()) || [],
         isFeatured: values.isFeatured,
         isDeal: values.isDeal,
+        originalPrice: values.originalPrice || undefined,
       };
-      if (values.originalPrice && values.originalPrice > values.price) {
-        newProductData.originalPrice = values.originalPrice;
-      } else {
-        newProductData.originalPrice = undefined;
-      }
-
+      
       await addDoc(collection(firestore, 'products'), newProductData);
       toast({ title: 'تمت إضافة المنتج بنجاح!' });
       form.reset();
@@ -126,9 +122,9 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
       <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
           <DialogTitle>إضافة منتج جديد</DialogTitle>
-          <DialogDescription>
+          <UIDialogDescription>
             املأ النموذج أدناه لإضافة منتج جديد إلى متجرك.
-          </DialogDescription>
+          </UIDialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
