@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useFirestore } from '@/firebase';
-import { collection, collectionGroup, getDocs, query, orderBy, doc } from 'firebase/firestore';
+import { collection, collectionGroup, getDocs, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import type { Order, OrderItem, ShippingAddress } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,10 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import { Eye } from 'lucide-react';
+import { Eye, Edit } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 const getStatusVariant = (status: Order['status']) => {
   switch (status) {
@@ -53,14 +56,19 @@ const statusTranslations: Record<Order['status'], string> = {
 
 type OrderWithUser = Order & { customerName?: string; userId: string; };
 
-function OrderDetailsDialog({ order, onClose }: { order: OrderWithUser | null, onClose: () => void }) {
+function OrderDetailsDialog({ order, onClose, onStatusUpdate }: { order: OrderWithUser | null, onClose: () => void, onStatusUpdate: (orderId: string, newStatus: Order['status']) => void }) {
   const firestore = useFirestore();
+  const { toast } = useToast();
   const [items, setItems] = useState<OrderItem[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<Order['status'] | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const isOpen = !!order;
 
   useEffect(() => {
     if (order) {
+      setSelectedStatus(order.status);
       const fetchOrderItems = async () => {
         if (!firestore || !order.userId) return;
         setIsLoadingItems(true);
@@ -78,6 +86,25 @@ function OrderDetailsDialog({ order, onClose }: { order: OrderWithUser | null, o
       fetchOrderItems();
     }
   }, [order, firestore]);
+
+  const handleUpdateStatus = async () => {
+    if (!firestore || !order || !selectedStatus || selectedStatus === order.status) {
+      return;
+    }
+    setIsUpdating(true);
+    try {
+      const orderRef = doc(firestore, `users/${order.userId}/orders/${order.id}`);
+      await updateDoc(orderRef, { status: selectedStatus });
+      toast({ title: 'نجاح', description: 'تم تحديث حالة الطلب بنجاح.' });
+      onStatusUpdate(order.id, selectedStatus);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast({ variant: 'destructive', title: 'خطأ', description: 'فشل تحديث حالة الطلب.' });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
 
   if (!order) return null;
 
@@ -114,6 +141,25 @@ function OrderDetailsDialog({ order, onClose }: { order: OrderWithUser | null, o
               <div className="flex justify-between"><span>تكلفة الشحن:</span> <span>{(order.shippingCost ?? 0).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span></div>
               <Separator />
               <div className="flex justify-between font-bold text-base"><span>الإجمالي:</span> <span>{(order.totalAmount ?? 0).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span></div>
+            </div>
+             {/* Status Update */}
+            <div className="mt-4">
+                <h3 className="font-semibold mb-2">تغيير حالة الطلب</h3>
+                <div className="flex items-center gap-2">
+                    <Select value={selectedStatus ?? order.status} onValueChange={(value: Order['status']) => setSelectedStatus(value)}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="اختر حالة..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {(Object.keys(statusTranslations) as Array<Order['status']>).map(status => (
+                                <SelectItem key={status} value={status}>{statusTranslations[status]}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Button onClick={handleUpdateStatus} disabled={isUpdating || selectedStatus === order.status}>
+                        {isUpdating ? 'جاري التحديث...' : 'تحديث'}
+                    </Button>
+                </div>
             </div>
           </div>
         </div>
@@ -224,6 +270,8 @@ export default function DashboardOrdersPage() {
                      userId,
                  };
             });
+            // Sort manually if not ordered by Firestore
+            fallbackOrders.sort((a, b) => (b.orderDate?.toMillis() || 0) - (a.orderDate?.toMillis() || 0));
             setOrders(fallbackOrders);
         } catch (fallbackError) {
              console.error("Fallback query failed as well:", fallbackError);
@@ -235,6 +283,12 @@ export default function DashboardOrdersPage() {
 
     fetchAllOrders();
   }, [firestore]);
+  
+  const handleStatusUpdate = (orderId: string, newStatus: Order['status']) => {
+    setOrders(prevOrders => prevOrders.map(order => order.id === orderId ? { ...order, status: newStatus } : order));
+    // Also update the selected order if it's the one being changed
+    setSelectedOrder(prevOrder => prevOrder && prevOrder.id === orderId ? { ...prevOrder, status: newStatus } : prevOrder);
+  };
 
 
   return (
@@ -271,8 +325,13 @@ export default function DashboardOrdersPage() {
                 ))
               ) : orders && orders.length > 0 ? (
                 orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">#{order.orderNumber || order.id.substring(0,7)}</TableCell>
+                  <TableRow key={order.id} className={cn(order.status === 'Processing' && 'bg-primary/5 hover:bg-primary/10')}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {order.status === 'Processing' && <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" title="طلب جديد"></span>}
+                        #{order.orderNumber || order.id.substring(0,7)}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       {order.orderDate
                         ? new Date(order.orderDate.toDate()).toLocaleDateString('ar-AE')
@@ -306,7 +365,11 @@ export default function DashboardOrdersPage() {
           </Table>
         </CardContent>
       </Card>
-      <OrderDetailsDialog order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+      <OrderDetailsDialog 
+        order={selectedOrder} 
+        onClose={() => setSelectedOrder(null)}
+        onStatusUpdate={handleStatusUpdate}
+      />
     </div>
   );
 }
