@@ -9,7 +9,6 @@ function DashboardNav() {
   const navLinks = [
     { href: '/dashboard', label: 'نظرة عامة' },
     { href: '/dashboard/orders', label: 'طلبات العملاء' },
-    { href: '/dashboard/manage-products', label: 'إدارة المنتجات' },
     { href: '/dashboard/manage-categories', label: 'إدارة الفئات' },
     { href: '/dashboard/manage-brands', label: 'إدارة العلامات التجارية' },
   ];
