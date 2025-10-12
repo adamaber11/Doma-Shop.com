@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import type { Product } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -9,18 +8,22 @@ import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { ShoppingCart } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import CountdownTimer from './CountdownTimer';
+import { useQuickView } from '@/hooks/use-quick-view';
 
 export default function ProductCard({ product }: { product: Product }) {
+  const { openQuickView } = useQuickView();
   const { addToCart } = useCart();
   const { toast } = useToast();
-  const router = useRouter();
 
+  const handleCardClick = () => {
+    openQuickView(product);
+  };
+  
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent link navigation
+    e.stopPropagation(); // Prevent card click event when clicking the button
     if (product.sizes && product.sizes.length > 0) {
-        router.push(`/products/${product.id}`);
+        openQuickView(product); // Open quick view to select size
     } else {
         addToCart(product, 1);
         toast({
@@ -41,7 +44,7 @@ export default function ProductCard({ product }: { product: Product }) {
     : 0;
 
   return (
-    <Link href={`/products/${product.id}`} className="block group w-full h-full">
+    <div onClick={handleCardClick} className="block group w-full h-full cursor-pointer">
       <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
             <div className="relative w-full h-[300px] overflow-hidden">
@@ -105,6 +108,6 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
         </CardFooter>
       </Card>
-    </Link>
+    </div>
   );
 }

@@ -7,6 +7,8 @@ import Footer from '@/components/Footer';
 import { APP_NAME } from '@/lib/constants';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import Navbar from '@/components/Navbar';
+import { QuickViewProvider } from '@/context/QuickViewProvider';
+import ProductQuickView from '@/components/ProductQuickView';
 
 export const metadata: Metadata = {
   title: {
@@ -31,15 +33,18 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <FirebaseClientProvider>
           <CartProvider>
-            <div className="flex min-h-screen flex-col">
-              <Header />
-              <Navbar />
-              <main className="flex-grow">
-                {children}
-              </main>
-              <Footer />
-            </div>
-            <Toaster />
+            <QuickViewProvider>
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <Navbar />
+                <main className="flex-grow">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+              <Toaster />
+              <ProductQuickView />
+            </QuickViewProvider>
           </CartProvider>
         </FirebaseClientProvider>
       </body>
