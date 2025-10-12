@@ -28,7 +28,7 @@ import Reviews from './Reviews';
 
 function QuickViewSkeleton() {
     return (
-      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start p-6">
             <div className="space-y-4">
                 <Skeleton className="w-full aspect-[3/4] rounded-lg" />
                 <div className="grid grid-cols-5 gap-2">
@@ -122,7 +122,7 @@ export default function ProductQuickView() {
     <Sheet open={isQuickViewOpen} onOpenChange={closeQuickView}>
       <SheetContent side="left" className="w-full sm:max-w-4xl p-0">
         <ScrollArea className="h-full">
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start p-6">
                 {/* Image Gallery */}
                 <div className="space-y-4">
                 <div className="bg-card p-4 rounded-lg shadow-sm border relative">
@@ -302,7 +302,7 @@ export default function ProductQuickView() {
                 </div>
             </div>
             
-            <div className='p-6' id="reviews">
+            <div className='p-6 pt-0' id="reviews">
                 <Separator />
             </div>
 
@@ -322,5 +322,7 @@ export default function ProductQuickView() {
     </Sheet>
   );
 }
+
+    
 
     
