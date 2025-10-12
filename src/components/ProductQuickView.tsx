@@ -294,11 +294,6 @@ export default function ProductQuickView() {
                     {isDeal && dealEndDate && <CountdownTimer endDate={dealEndDate} />}
                 </div>
 
-                <div className="pt-4">
-                    <Button asChild variant="link" className="p-0" onClick={closeQuickView}>
-                        <Link href={`/products/${product.id}`}>عرض صفحة المنتج الكاملة →</Link>
-                    </Button>
-                </div>
                 </div>
             </div>
             
