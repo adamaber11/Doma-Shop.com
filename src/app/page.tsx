@@ -24,13 +24,13 @@ function HeroSectionSkeleton() {
     <section className="relative h-[60vh] w-full overflow-hidden bg-secondary shadow-lg">
       <Skeleton className="w-full h-full" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-      <div className="absolute inset-0 flex items-end p-4 md:p-12">
+      <div className="absolute inset-0 flex items-center justify-center text-center p-6 md:items-end md:p-12 md:text-right">
         <div className="container mx-auto">
           <div className="max-w-md space-y-4">
-            <Skeleton className="h-12 md:h-16 w-3/4" />
-            <Skeleton className="h-5 md:h-6 w-full" />
-            <Skeleton className="h-5 md:h-6 w-5/6" />
-            <div className="flex items-center gap-4 pt-4">
+            <Skeleton className="h-12 md:h-16 w-3/4 mx-auto md:mx-0" />
+            <Skeleton className="h-5 md:h-6 w-full mx-auto md:mx-0" />
+            <Skeleton className="h-5 md:h-6 w-5/6 mx-auto md:mx-0" />
+            <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 pt-4">
               <Skeleton className="h-12 w-32" />
               <Skeleton className="h-12 w-32" />
             </div>
@@ -189,20 +189,20 @@ export default function Home() {
             data-ai-hint={heroData.imageHint}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute inset-0 flex items-end p-4 md:p-12">
+          <div className="absolute inset-0 flex justify-center items-center text-center p-6 md:items-end md:p-12 md:text-right">
             <div className="container mx-auto">
-              <div className="max-w-md text-white">
-                <h1 className="font-headline text-4xl md:text-6xl font-bold !leading-tight drop-shadow-md">
+              <div className="max-w-md text-white mx-auto md:mx-0">
+                <h1 className="font-headline text-3xl md:text-6xl font-bold !leading-tight drop-shadow-md">
                   {heroData.headline}
                 </h1>
-                <p className="mt-4 text-base md:text-lg text-primary-foreground/90 drop-shadow">
+                <p className="mt-4 text-base md:text-lg text-white/90 drop-shadow">
                   {heroData.subheading}
                 </p>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-6">
-                  <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 mt-6">
+                  <Button asChild size="lg" className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90">
                     <Link href={heroData.primaryActionLink}>{heroData.primaryActionText}</Link>
                   </Button>
-                  <Button asChild size="lg" variant="outline" className="text-white border-white bg-transparent hover:bg-white/10 hover:text-white">
+                  <Button asChild size="lg" variant="outline" className="w-full sm:w-auto text-white border-white bg-transparent hover:bg-white/10 hover:text-white">
                     <Link href={heroData.secondaryActionLink}>{heroData.secondaryActionText}</Link>
                   </Button>
                 </div>
