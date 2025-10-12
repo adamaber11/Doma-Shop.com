@@ -22,6 +22,7 @@ export interface Product {
   sizes?: string[];
   isFeatured?: boolean;
   isDeal?: boolean;
+  isBestSeller?: boolean;
   dealEndDate?: Timestamp;
   material?: string;
   countryOfOrigin?: string;

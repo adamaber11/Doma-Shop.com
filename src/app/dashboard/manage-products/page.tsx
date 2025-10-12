@@ -23,7 +23,6 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
-  DialogDescription as UIDialogDescription,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -63,6 +62,7 @@ const productSchema = z.object({
   sizes: z.string().optional(),
   isFeatured: z.boolean().default(false),
   isDeal: z.boolean().default(false),
+  isBestSeller: z.boolean().default(false),
   dealDurationHours: z.coerce.number().optional().nullable(),
   material: z.string().optional(),
   countryOfOrigin: z.string().optional(),
@@ -96,6 +96,7 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
         sizes: '',
         isFeatured: false,
         isDeal: false,
+        isBestSeller: false,
         dealDurationHours: undefined,
         material: '',
         countryOfOrigin: '',
@@ -137,6 +138,7 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
           sizes: values.sizes?.split(',').map(s => s.trim()) || [],
           isFeatured: values.isFeatured,
           isDeal: values.isDeal,
+          isBestSeller: values.isBestSeller,
           originalPrice: values.originalPrice || undefined,
           dealEndDate: values.isDeal && values.dealDurationHours 
             ? Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000) 
@@ -168,9 +170,9 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
         <DialogContent className="sm:max-w-[800px]">
           <DialogHeader>
             <DialogTitle>إضافة منتج جديد</DialogTitle>
-            <UIDialogDescription>
+            <CardDescription>
               املأ النموذج أدناه لإضافة منتج جديد إلى متجرك.
-            </UIDialogDescription>
+            </CardDescription>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -272,7 +274,7 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                   <FormField control={form.control} name="features" render={({ field }) => (<FormItem><FormLabel>ميزات إضافية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="مقاوم للماء، جودة عالية، ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
 
 
-                  <div className="grid grid-cols-2 gap-4 pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                       <FormField
                         control={form.control}
                         name="isFeatured"
@@ -281,7 +283,7 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                             <div className="space-y-0.5">
                               <FormLabel>منتج مميز</FormLabel>
                               <FormDescription>
-                                إظهار هذا المنتج في قسم "منتجاتنا المميزة".
+                                عرضه في قسم "منتجاتنا المميزة".
                               </FormDescription>
                             </div>
                             <FormControl>
@@ -301,7 +303,27 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                             <div className="space-y-0.5">
                               <FormLabel>عرض اليوم</FormLabel>
                               <FormDescription>
-                                 إظهار هذا المنتج في قسم "العروض اليومية".
+                                 عرضه في قسم "العروض اليومية".
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                       <FormField
+                        control={form.control}
+                        name="isBestSeller"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5">
+                              <FormLabel>الأكثر مبيعًا</FormLabel>
+                              <FormDescription>
+                                عرضه في قسم "الأكثر مبيعًا".
                               </FormDescription>
                             </div>
                             <FormControl>
@@ -347,6 +369,7 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
     );
   }
 )
+ProductFormDialog.displayName = "ProductFormDialog";
 
 export default function ManageProductsPage() {
   const { toast } = useToast();
@@ -401,15 +424,16 @@ export default function ManageProductsPage() {
                 <TableHead>اسم المنتج</TableHead>
                 <TableHead>الفئة</TableHead>
                 <TableHead>السعر</TableHead>
-                <TableHead>السعر الأصلي</TableHead>
+                <TableHead>الأصلي</TableHead>
                 <TableHead>مميز</TableHead>
                 <TableHead>عرض</TableHead>
+                <TableHead>الأكثر مبيعًا</TableHead>
                 <TableHead>الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoadingProducts ? (
-                <TableRow><TableCell colSpan={8} className="text-center">جاري تحميل المنتجات...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center">جاري تحميل المنتجات...</TableCell></TableRow>
               ) : products && products.length > 0 ? (
                 products.map((product) => (
                   <TableRow key={product.id}>
@@ -424,6 +448,7 @@ export default function ManageProductsPage() {
                     <TableCell>{product.originalPrice ? product.originalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' }) : '—'}</TableCell>
                     <TableCell>{product.isFeatured ? 'نعم' : 'لا'}</TableCell>
                     <TableCell>{product.isDeal ? 'نعم' : 'لا'}</TableCell>
+                    <TableCell>{product.isBestSeller ? 'نعم' : 'لا'}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         {/* Edit button can be added here later */}
@@ -451,7 +476,7 @@ export default function ManageProductsPage() {
                   </TableRow>
                 ))
               ) : (
-                <TableRow><TableCell colSpan={8} className="text-center">لم يتم العثور على منتجات.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center">لم يتم العثور على منتجات.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

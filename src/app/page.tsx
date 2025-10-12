@@ -6,11 +6,10 @@ import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useCollection } from '@/firebase';
-import { collection, query, limit, orderBy, where } from 'firebase/firestore';
+import { collection, query, limit, where } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product, Brand } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card } from '@/components/ui/card';
 import {
   Carousel,
   CarouselContent,
@@ -30,7 +29,7 @@ export default function Home() {
   const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
 
   const bestSellersQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'products'), orderBy('rating', 'desc'), limit(8)) : null),
+    () => (firestore ? query(collection(firestore, 'products'), where('isBestSeller', '==', true), limit(8)) : null),
     [firestore]
   );
   const { data: bestSellers, isLoading: isLoadingBestSellers } = useCollection<Product>(bestSellersQuery);

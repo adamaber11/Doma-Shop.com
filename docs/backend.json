@@ -104,6 +104,10 @@
             "type": "boolean",
             "description": "Whether the product is part of a daily deal."
         },
+        "isBestSeller": {
+            "type": "boolean",
+            "description": "Whether the product is a best seller."
+        },
         "dealEndDate": {
             "type": "string",
             "format": "date-time",
