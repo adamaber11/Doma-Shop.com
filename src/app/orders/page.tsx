@@ -97,7 +97,7 @@ export default function OrdersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-left">
-                      {(order.totalAmount ?? 0).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                      {(order.totalAmount ?? 0).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                     </TableCell>
                   </TableRow>
                 ))

@@ -137,10 +137,10 @@ function OrderDetailsDialog({ order, onClose, onStatusUpdate }: { order: OrderWi
             <div className="text-sm space-y-2 p-4 border rounded-md bg-card">
               <div className="flex justify-between"><span>الحالة:</span> <Badge variant={getStatusVariant(order.status)}>{statusTranslations[order.status]}</Badge></div>
               <Separator />
-              <div className="flex justify-between"><span>المجموع الفرعي:</span> <span>{( (order.totalAmount ?? 0) - (order.shippingCost ?? 0)).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span></div>
-              <div className="flex justify-between"><span>تكلفة الشحن:</span> <span>{(order.shippingCost ?? 0).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span></div>
+              <div className="flex justify-between"><span>المجموع الفرعي:</span> <span>{( (order.totalAmount ?? 0) - (order.shippingCost ?? 0)).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</span></div>
+              <div className="flex justify-between"><span>تكلفة الشحن:</span> <span>{(order.shippingCost ?? 0).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</span></div>
               <Separator />
-              <div className="flex justify-between font-bold text-base"><span>الإجمالي:</span> <span>{(order.totalAmount ?? 0).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span></div>
+              <div className="flex justify-between font-bold text-base"><span>الإجمالي:</span> <span>{(order.totalAmount ?? 0).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</span></div>
             </div>
              {/* Status Update */}
             <div className="mt-4">
@@ -197,8 +197,8 @@ function OrderDetailsDialog({ order, onClose, onStatusUpdate }: { order: OrderWi
                         </div>
                       </TableCell>
                       <TableCell>{item.quantity}</TableCell>
-                      <TableCell>{item.itemPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</TableCell>
-                      <TableCell className="text-left">{(item.itemPrice * item.quantity).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</TableCell>
+                      <TableCell>{item.itemPrice.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</TableCell>
+                      <TableCell className="text-left">{(item.itemPrice * item.quantity).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -344,7 +344,7 @@ export default function DashboardOrdersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {(order.totalAmount ?? 0).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                      {(order.totalAmount ?? 0).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                     </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(order)}>

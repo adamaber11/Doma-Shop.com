@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useQuickView } from '@/hooks/use-quick-view';
@@ -186,11 +187,11 @@ export default function ProductQuickView() {
                 </div>
                 <div className="flex items-baseline gap-2">
                     <p className="text-3xl font-semibold text-destructive">
-                        {price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                        {price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                     </p>
                     {hasDiscount && (
                         <p className="text-xl text-muted-foreground line-through">
-                            {originalPrice?.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                            {originalPrice?.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                         </p>
                     )}
                 </div>

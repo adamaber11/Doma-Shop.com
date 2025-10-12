@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -35,7 +36,7 @@ const chartConfig = {
     color: 'hsl(var(--primary))',
   },
   revenue: {
-    label: 'الإيرادات (درهم)',
+    label: 'الإيرادات (جنيه)',
     color: 'hsl(var(--accent))',
   },
 } satisfies ChartConfig;
@@ -148,7 +149,7 @@ export default function DashboardPage() {
             <CardContent>
               {isLoading ? <Skeleton className="h-8 w-3/4" /> : (
                 <div className="text-2xl font-bold">
-                    {totalRevenue.toLocaleString('ar-AE', { style: 'currency', currency: 'AED', minimumFractionDigits: 2 })}
+                    {totalRevenue.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2 })}
                 </div>
               )}
               <p className="text-xs text-muted-foreground">
@@ -192,7 +193,7 @@ export default function DashboardPage() {
             <CardContent>
                 {isLoading ? <Skeleton className="h-8 w-3/4" /> : (
                     <div className="text-2xl font-bold">
-                        {(totalSales > 0 ? totalRevenue / totalSales : 0).toLocaleString('ar-AE', { style: 'currency', currency: 'AED', minimumFractionDigits: 2 })}
+                        {(totalSales > 0 ? totalRevenue / totalSales : 0).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2 })}
                     </div>
                 )}
                 <p className="text-xs text-muted-foreground">

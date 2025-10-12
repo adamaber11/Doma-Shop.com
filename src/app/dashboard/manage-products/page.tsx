@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, forwardRef, useEffect } from 'react';
@@ -253,7 +254,7 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
                 <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (EGP)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <FormField control={form.control} name="originalPrice" render={({ field }) => (<FormItem><FormLabel>السعر الأصلي (اختياري)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -512,7 +513,7 @@ export default function ManageProductsPage() {
                       }
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</TableCell>
+                    <TableCell>{product.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>{product.isFeatured ? 'نعم' : 'لا'}</TableCell>
                     <TableCell>{product.isDeal ? 'نعم' : 'لا'}</TableCell>

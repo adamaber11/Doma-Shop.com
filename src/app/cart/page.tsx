@@ -44,7 +44,7 @@ export default function CartPage() {
                     <p className="text-sm text-muted-foreground">المقاس: {item.selectedSize}</p>
                   )}
                   <p className="text-muted-foreground text-sm">
-                    {item.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                    {item.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export default function CartPage() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>المجموع الفرعي</span>
-                  <span>{totalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
+                  <span>{totalPrice.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>الشحن</span>
@@ -85,7 +85,7 @@ export default function CartPage() {
               <Separator className="my-4" />
               <div className="flex justify-between font-bold text-lg">
                 <span>المجموع الإجمالي (تقريبي)</span>
-                <span>{totalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
+                <span>{totalPrice.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</span>
               </div>
               <Button asChild size="lg" className="w-full mt-6 bg-accent text-accent-foreground hover:bg-accent/90">
                 <Link href="/checkout">إتمام الشراء</Link>
@@ -97,5 +97,3 @@ export default function CartPage() {
     </div>
   );
 }
-
-    

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -83,11 +84,11 @@ export default function ProductCard({ product }: { product: Product }) {
           </CardTitle>
            <div className="flex items-baseline gap-2">
              <p className="text-sm font-semibold text-destructive group-hover:text-green-600 group-hover:underline">
-                {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                {product.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
              </p>
              {hasDiscount && (
                 <p className="text-xs text-muted-foreground line-through">
-                    {product.originalPrice?.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                    {product.originalPrice?.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                 </p>
              )}
            </div>

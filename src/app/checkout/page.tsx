@@ -209,7 +209,7 @@ export default function CheckoutPage() {
                           <SelectContent>
                             {governorates?.map((g) => (
                               <SelectItem key={g.id} value={g.id}>
-                                {g.name} ({g.shippingCost.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })})
+                                {g.name} ({g.shippingCost.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })})
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -272,7 +272,7 @@ export default function CheckoutPage() {
                     <span>{item.name} x {item.quantity}</span>
                     {item.selectedSize && <span className="text-xs text-muted-foreground block">المقاس: {item.selectedSize}</span>}
                   </div>
-                  <span className="font-medium">{(item.price * item.quantity).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
+                  <span className="font-medium">{(item.price * item.quantity).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</span>
                 </div>
               ))}
             </div>
@@ -280,13 +280,13 @@ export default function CheckoutPage() {
             <div className="space-y-2">
                 <div className="flex justify-between">
                     <span>المجموع الفرعي</span>
-                    <span>{totalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
+                    <span>{totalPrice.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</span>
                 </div>
                  <div className="flex justify-between">
                     <span>الشحن</span>
                     <span>
                         {selectedGovernorateCost !== null 
-                            ? selectedGovernorateCost.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' }) 
+                            ? selectedGovernorateCost.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' }) 
                             : '---'}
                     </span>
                 </div>
@@ -294,7 +294,7 @@ export default function CheckoutPage() {
             <Separator className="my-4" />
             <div className="flex justify-between font-bold text-lg">
               <span>المجموع</span>
-              <span>{finalTotal.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
+              <span>{finalTotal.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</span>
             </div>
           </div>
         </div>

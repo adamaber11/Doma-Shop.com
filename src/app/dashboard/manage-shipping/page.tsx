@@ -135,7 +135,7 @@ export default function ManageShippingPage() {
                   name="shippingCost"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>سعر الشحن (AED)</FormLabel>
+                      <FormLabel>سعر الشحن (EGP)</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -178,7 +178,7 @@ export default function ManageShippingPage() {
                 governorates.map((gov) => (
                   <TableRow key={gov.id}>
                     <TableCell className="font-medium">{gov.name}</TableCell>
-                    <TableCell>{gov.shippingCost.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</TableCell>
+                    <TableCell>{gov.shippingCost.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</TableCell>
                     <TableCell className="flex gap-2">
                       <Button variant="ghost" size="icon" onClick={() => handleOpenForm(gov)}>
                         <Edit className="h-4 w-4" />
@@ -217,5 +217,3 @@ export default function ManageShippingPage() {
     </div>
   );
 }
-
-    

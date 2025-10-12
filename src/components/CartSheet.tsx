@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -56,7 +57,7 @@ export default function CartSheet() {
                         <p className="text-xs text-muted-foreground">المقاس: {item.selectedSize}</p>
                       )}
                       <p className="text-sm text-muted-foreground">
-                        {item.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+                        {item.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
@@ -80,7 +81,7 @@ export default function CartSheet() {
                 <Separator />
                 <div className="flex justify-between font-bold text-lg">
                   <span>المجموع:</span>
-                  <span>{totalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
+                  <span>{totalPrice.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}</span>
                 </div>
                 <div className="flex gap-2">
                    <SheetClose asChild>
