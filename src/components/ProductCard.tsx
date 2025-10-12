@@ -18,10 +18,12 @@ export default function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    // We only prevent default if we are NOT navigating.
-    // Otherwise, the parent Link's navigation will be blocked.
-    if (!product.sizes || product.sizes.length === 0) {
-        e.preventDefault();
+    e.preventDefault(); // Always prevent the Link navigation when the button is clicked.
+    if (product.sizes && product.sizes.length > 0) {
+        // If the product has sizes, clicking the cart on the card should navigate to the product page.
+        router.push(`/products/${product.id}`);
+    } else {
+        // If no sizes, add directly to cart.
         addToCart(product, 1);
         toast({
           title: 'تمت الإضافة إلى السلة',
@@ -41,10 +43,10 @@ export default function ProductCard({ product }: { product: Product }) {
     : 0;
 
   return (
-    <Link href={`/products/${product.id}`} className="block group w-[250px] h-[430px]">
+    <Link href={`/products/${product.id}`} className="block group w-full h-full">
       <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
-            <div className="relative w-full h-52 overflow-hidden">
+            <div className="relative w-full aspect-[4/3] overflow-hidden">
                 <Image
                     src={imageUrl1}
                     alt={product.name}
@@ -73,7 +75,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <p className="text-xs text-muted-foreground">{product.category}</p>
             <StarRating rating={product.rating} />
           </div>
-          <CardTitle className="font-headline text-base group-hover:text-blue-600 group-hover:underline">
+          <CardTitle className="font-headline text-base group-hover:text-blue-600 group-hover:underline mt-1 mb-0">
             {product.name}
           </CardTitle>
            <div className="flex items-baseline gap-2">
@@ -86,7 +88,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 </p>
              )}
            </div>
-          <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+          <p className="text-xs text-muted-foreground mt-2 line-clamp-2 flex-grow">
             {product.description}
           </p>
         </CardContent>
