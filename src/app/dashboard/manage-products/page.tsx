@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { addDoc, collection, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 import type { Product, Category, Brand } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
@@ -40,6 +40,7 @@ import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
 
 const productSchema = z.object({
   name: z.string().min(2, 'اسم المنتج مطلوب'),
@@ -54,6 +55,7 @@ const productSchema = z.object({
   sizes: z.string().optional(),
   isFeatured: z.boolean().default(false),
   isDeal: z.boolean().default(false),
+  dealDurationHours: z.coerce.number().optional().nullable(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -78,7 +80,13 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
       sizes: '',
       isFeatured: false,
       isDeal: false,
+      dealDurationHours: undefined,
     },
+  });
+
+  const isDeal = useWatch({
+    control: form.control,
+    name: 'isDeal'
   });
 
   async function onSubmit(values: ProductFormData) {
@@ -98,6 +106,9 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
         isFeatured: values.isFeatured,
         isDeal: values.isDeal,
         originalPrice: values.originalPrice || undefined,
+        dealEndDate: values.isDeal && values.dealDurationHours 
+          ? Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000) 
+          : undefined,
       };
       
       await addDoc(collection(firestore, 'products'), newProductData);
@@ -227,6 +238,26 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
                         </FormItem>
                       )}
                     />
+                </div>
+                 <div className={cn("transition-all duration-300 overflow-hidden", isDeal ? "max-h-40 opacity-100" : "max-h-0 opacity-0")}>
+                    <div className="pt-4">
+                        <FormField
+                        control={form.control}
+                        name="dealDurationHours"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>مدة العرض (بالساعات)</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="24" {...field} value={field.value ?? ''} />
+                            </FormControl>
+                            <FormDescription>
+                                سيتم بدء العد التنازلي من الآن.
+                            </FormDescription>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
                 </div>
               </div>
             </ScrollArea>

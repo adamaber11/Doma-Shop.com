@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import CountdownTimer from './CountdownTimer';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
@@ -20,7 +21,6 @@ export default function ProductCard({ product }: { product: Product }) {
     e.preventDefault();
     e.stopPropagation();
 
-    // If product has sizes, user must go to product page to select one
     if (product.sizes && product.sizes.length > 0) {
         router.push(`/products/${product.id}`);
         return;
@@ -93,16 +93,19 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.description}
           </p>
         </CardContent>
-        <CardFooter className="p-4 pt-0">
+        <CardFooter className="p-4 pt-0 mt-auto flex-col items-stretch gap-2">
             <Button 
                 onClick={handleAddToCart} 
                 aria-label={`Add ${product.name} to cart`}
                 size="sm"
-                className="w-full bg-yellow-400 text-black hover:bg-yellow-500 rounded-full pb-[5px]"
+                className="w-full bg-yellow-400 text-black hover:bg-yellow-500 rounded-full h-8 text-xs"
             >
-                <ShoppingCart className="mr-2 h-4 w-4" />
+                <ShoppingCart className="mr-2 h-3 w-3" />
                 أضف إلى العربة
             </Button>
+            {product.isDeal && product.dealEndDate && (
+                <CountdownTimer endDate={product.dealEndDate} />
+            )}
         </CardFooter>
       </Card>
     </Link>

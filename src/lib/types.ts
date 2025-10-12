@@ -14,6 +14,7 @@ export interface Product {
   sizes?: string[];
   isFeatured?: boolean;
   isDeal?: boolean;
+  dealEndDate?: Timestamp;
 }
 
 export interface CartItem extends Product {

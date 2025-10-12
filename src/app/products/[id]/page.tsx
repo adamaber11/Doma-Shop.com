@@ -13,6 +13,7 @@ import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import CountdownTimer from '@/components/CountdownTimer';
 
 function ProductPageSkeleton() {
   return (
@@ -68,7 +69,7 @@ export default function ProductDetailPage() {
   }
   
   // This check is now safe because we've already handled the loading and !product cases
-  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice } = product!;
+  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice, isDeal, dealEndDate } = product!;
   const selectedImageUrl = imageUrls?.[selectedImageIndex] || '';
   const selectedImageHint = imageHints?.[selectedImageIndex] || '';
   const hasSizes = sizes && sizes.length > 0;
@@ -159,8 +160,9 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-          <div className="pt-4">
+          <div className="pt-4 space-y-4">
             <AddToCartButton product={product!} selectedSize={selectedSize} />
+            {isDeal && dealEndDate && <CountdownTimer endDate={dealEndDate} />}
           </div>
         </div>
       </div>

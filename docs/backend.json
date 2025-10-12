@@ -96,6 +96,11 @@
         "isDeal": {
             "type": "boolean",
             "description": "Whether the product is part of a daily deal."
+        },
+        "dealEndDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The end date for the daily deal."
         }
       },
       "required": [
