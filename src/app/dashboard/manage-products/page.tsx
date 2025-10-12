@@ -133,7 +133,7 @@ function AddProductDialog({ onProductAdded }: { onProductAdded: () => void }) {
                         <FormField name="description" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>وصف المنتج</FormLabel> <FormControl> <Textarea placeholder="صف المنتج بالتفصيل..." {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <FormField name="price" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>السعر (درهم)</FormLabel> <FormControl> <Input type="number" step="0.01" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                             <FormField
+                            <FormField
                                 control={form.control}
                                 name="category"
                                 render={({ field }) => (
@@ -146,7 +146,7 @@ function AddProductDialog({ onProductAdded }: { onProductAdded: () => void }) {
                                     </FormItem>
                                 )}
                             />
-                             <FormField
+                            <FormField
                                 control={form.control}
                                 name="brand"
                                 render={({ field }) => (
