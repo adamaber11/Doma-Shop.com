@@ -133,24 +133,15 @@ function AddProductDialog({ onProductAdded }: { onProductAdded: () => void }) {
                         <FormField name="description" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>وصف المنتج</FormLabel> <FormControl> <Textarea placeholder="صف المنتج بالتفصيل..." {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <FormField name="price" control={form.control} render={({ field }) => ( <FormItem> <FormLabel>السعر (درهم)</FormLabel> <FormControl> <Input type="number" step="0.01" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                            <FormField
+                             <FormField
                                 control={form.control}
                                 name="category"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>الفئة</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="اختر فئة..." />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {categories?.map((cat) => (
-                                                    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <FormControl>
+                                            <Input placeholder="مثال: ساعات" {...field} />
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -161,18 +152,9 @@ function AddProductDialog({ onProductAdded }: { onProductAdded: () => void }) {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>العلامة التجارية</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingBrands}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="اختر علامة..." />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {brands?.map((brand) => (
-                                                    <SelectItem key={brand.id} value={brand.name}>{brand.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <FormControl>
+                                            <Input placeholder="مثال: رولكس" {...field} />
+                                        </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
