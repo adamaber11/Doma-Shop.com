@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
 import { ShoppingCart, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
@@ -40,12 +41,11 @@ export default function ProductCard({ product }: { product: Product }) {
     <Link href={`/products/${product.id}`} className="block group w-[200px] h-[450px]">
       <Card className="flex flex-col overflow-hidden h-full duration-300">
         <CardHeader className="p-0 relative">
-            <div className="relative w-full h-64 overflow-hidden">
+            <div className="relative w-full h-52 overflow-hidden">
                 <Image
                 src={imageUrl}
                 alt={product.name}
-                width={600}
-                height={800}
+                fill
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 data-ai-hint={imageHint}
                 />
