@@ -8,3 +8,5 @@ export const useCart = (): CartContextType => {
   }
   return context;
 };
+
+    

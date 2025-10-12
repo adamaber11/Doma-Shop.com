@@ -61,6 +61,7 @@ const productSchema = z.object({
   imageHints: z.string().optional(),
   rating: z.coerce.number().min(0, 'التقييم يجب أن يكون بين 0 و 5').optional(),
   sizes: z.string().optional(),
+  stock: z.coerce.number().optional(),
   isFeatured: z.boolean().optional().default(false),
   isDeal: z.boolean().optional().default(false),
   isBestSeller: z.boolean().optional().default(false),
@@ -92,6 +93,7 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
         imageHints: '',
         rating: 0,
         sizes: '',
+        stock: 0,
         isFeatured: false,
         isDeal: false,
         isBestSeller: false,
@@ -134,6 +136,7 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                 imageHints: values.imageHints?.split(',').map(hint => hint.trim()) || [],
                 rating: values.rating || 0,
                 sizes: values.sizes?.split(',').map(s => s.trim()) || [],
+                stock: values.stock || 0,
                 isFeatured: values.isFeatured,
                 isDeal: values.isDeal,
                 isBestSeller: values.isBestSeller,
@@ -153,6 +156,14 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                 newProductData.dealEndDate = Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000);
             }
             
+            // Remove undefined fields
+            Object.keys(newProductData).forEach(key => {
+                const typedKey = key as keyof typeof newProductData;
+                if (newProductData[typedKey] === undefined) {
+                    delete newProductData[typedKey];
+                }
+            });
+
             await addDoc(collection(firestore, 'products'), newProductData);
             toast({ title: 'تمت إضافة المنتج بنجاح!' });
             form.reset();
@@ -189,8 +200,11 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                     <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="originalPrice" render={({ field }) => (<FormItem><FormLabel>السعر الأصلي (اختياري)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                     <FormField control={form.control} name="stock" render={({ field }) => (<FormItem><FormLabel>الكمية المتاحة</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+                     <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5) (اختياري)</FormLabel><FormControl><Input type="number" step="0.1" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+                  </div>
                    <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5) (اختياري)</FormLabel><FormControl><Input type="number" step="0.1" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField
                       control={form.control}
                       name="category"
@@ -211,8 +225,6 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                         </FormItem>
                       )}
                     />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="brand"
@@ -233,8 +245,9 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                         </FormItem>
                       )}
                     />
-                      <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
+                  
+                  <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   
                   <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -427,9 +440,8 @@ export default function ManageProductsPage() {
               <TableRow>
                 <TableHead className="w-[80px]">الصورة</TableHead>
                 <TableHead>اسم المنتج</TableHead>
-                <TableHead>الفئة</TableHead>
                 <TableHead>السعر</TableHead>
-                <TableHead>الأصلي</TableHead>
+                <TableHead>الكمية</TableHead>
                 <TableHead>مميز</TableHead>
                 <TableHead>عرض</TableHead>
                 <TableHead>الأكثر مبيعًا</TableHead>
@@ -438,7 +450,7 @@ export default function ManageProductsPage() {
             </TableHeader>
             <TableBody>
               {isLoadingProducts ? (
-                <TableRow><TableCell colSpan={9} className="text-center">جاري تحميل المنتجات...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center">جاري تحميل المنتجات...</TableCell></TableRow>
               ) : products && products.length > 0 ? (
                 products.map((product) => (
                   <TableRow key={product.id}>
@@ -448,9 +460,8 @@ export default function ManageProductsPage() {
                       }
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
                     <TableCell>{product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</TableCell>
-                    <TableCell>{product.originalPrice ? product.originalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' }) : '—'}</TableCell>
+                    <TableCell>{product.stock}</TableCell>
                     <TableCell>{product.isFeatured ? 'نعم' : 'لا'}</TableCell>
                     <TableCell>{product.isDeal ? 'نعم' : 'لا'}</TableCell>
                     <TableCell>{product.isBestSeller ? 'نعم' : 'لا'}</TableCell>
@@ -481,7 +492,7 @@ export default function ManageProductsPage() {
                   </TableRow>
                 ))
               ) : (
-                <TableRow><TableCell colSpan={9} className="text-center">لم يتم العثور على منتجات.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center">لم يتم العثور على منتجات.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -490,3 +501,5 @@ export default function ManageProductsPage() {
     </div>
   );
 }
+
+    

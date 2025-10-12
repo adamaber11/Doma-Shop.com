@@ -127,6 +127,10 @@
             "items": {
                 "type": "string"
             }
+        },
+        "stock": {
+            "type": "number",
+            "description": "The available quantity of the product."
         }
       },
       "required": [
@@ -138,7 +142,8 @@
         "imageHints",
         "rating",
         "category",
-        "brand"
+        "brand",
+        "stock"
       ]
     },
     "ProductVariant": {
@@ -389,3 +394,5 @@
     }
   }
 }
+
+    

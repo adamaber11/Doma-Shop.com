@@ -10,6 +10,7 @@ export interface CartContextType {
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
+  isItemInCart: (id: string) => boolean;
   cartCount: number;
   totalPrice: number;
 }
@@ -39,33 +40,48 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [cartItems, isClient]);
 
+  const isItemInCart = useCallback((id: string) => {
+    return cartItems.some(item => item.id === id);
+  }, [cartItems]);
+
   const addToCart = useCallback((product: Product, quantity: number, selectedSize?: string, selectedColor?: string) => {
     setCartItems(prevItems => {
-      // Cart item ID is now a combination of product ID, size, and color
       const cartItemId = `${product.id}${selectedSize ? `-${selectedSize}` : ''}${selectedColor ? `-${selectedColor}` : ''}`;
       const existingItem = prevItems.find(i => i.id === cartItemId);
-      
-      let newItems;
+
       if (existingItem) {
-        newItems = prevItems.map(i =>
-          i.id === cartItemId ? { ...i, quantity: i.quantity + quantity } : i
-        );
-      } else {
-        const newItem: CartItem = { 
-            ...product, 
-            quantity, 
-            selectedSize,
-            selectedColor,
-            id: cartItemId, // The unique ID for the cart item
-            productId: product.id, // The original product ID
-        };
-        newItems = [...prevItems, newItem];
+        toast({
+          variant: 'destructive',
+          title: 'المنتج موجود بالفعل',
+          description: 'هذا المنتج موجود بالفعل في سلة التسوق الخاصة بك.',
+        });
+        return prevItems;
       }
+      
+      if (quantity > product.stock) {
+        toast({
+            variant: 'destructive',
+            title: 'الكمية غير متوفرة',
+            description: `الكمية المتاحة لهذا المنتج هي ${product.stock} فقط.`,
+        });
+        return prevItems;
+      }
+
+      const newItem: CartItem = { 
+          ...product, 
+          quantity, 
+          selectedSize,
+          selectedColor,
+          id: cartItemId,
+          productId: product.id,
+      };
+      
       toast({
         title: 'تمت الإضافة إلى السلة',
         description: `${quantity} x ${product.name} ${selectedSize ? `(المقاس: ${selectedSize})` : ''} ${selectedColor ? `(اللون: ${selectedColor})` : ''}`,
       });
-      return newItems;
+
+      return [...prevItems, newItem];
     });
   }, [toast]);
 
@@ -77,11 +93,24 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (quantity <= 0) {
       removeFromCart(id);
     } else {
-      setCartItems(prevItems =>
-        prevItems.map(item => (item.id === id ? { ...item, quantity } : item))
-      );
+        setCartItems(prevItems =>
+            prevItems.map(item => {
+                if (item.id === id) {
+                    if (quantity > item.stock) {
+                        toast({
+                            variant: 'destructive',
+                            title: 'الكمية غير متوفرة',
+                            description: `الكمية القصوى المتاحة هي ${item.stock}.`,
+                        });
+                        return { ...item, quantity: item.stock };
+                    }
+                    return { ...item, quantity };
+                }
+                return item;
+            })
+        );
     }
-  }, [removeFromCart]);
+  }, [removeFromCart, toast]);
 
   const clearCart = useCallback(() => {
     setCartItems([]);
@@ -91,8 +120,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   if (!isClient) {
-    // Return null or a loading state until the client has mounted
-    // This prevents hydration mismatches with localStorage
     return null;
   }
 
@@ -104,6 +131,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         removeFromCart,
         updateQuantity,
         clearCart,
+        isItemInCart,
         cartCount,
         totalPrice,
       }}
@@ -112,3 +140,5 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     </CartContext.Provider>
   );
 }
+
+    

@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';
 import Link from 'next/link';
-import { Tag, CheckCircle } from 'lucide-react';
+import { Tag, CheckCircle, Package } from 'lucide-react';
 
 function ProductPageSkeleton() {
   return (
@@ -71,7 +71,7 @@ export default function ProductDetailPage() {
   }
   
   // This check is now safe because we've already handled the loading and !product cases
-  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features } = product!;
+  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, stock } = product!;
   const selectedImageUrl = imageUrls?.[selectedImageIndex] || '';
   const selectedImageHint = imageHints?.[selectedImageIndex] || '';
   const hasSizes = sizes && sizes.length > 0;
@@ -153,7 +153,19 @@ export default function ProductDetailPage() {
 
           <p className="text-muted-foreground leading-relaxed">{description}</p>
           
-          <div className="space-y-4 pt-2">
+           <div className="space-y-4 pt-2">
+              <div className="flex items-center gap-2 text-sm">
+                  <Package className="h-5 w-5 text-muted-foreground" />
+                  {stock > 0 ? (
+                      <span className="text-green-600 font-semibold">
+                          متوفر ({stock} قطعة)
+                      </span>
+                  ) : (
+                      <span className="text-red-600 font-semibold">
+                          غير متوفر حاليًا
+                      </span>
+                  )}
+              </div>
               {(material || countryOfOrigin) && (
                   <div className="grid grid-cols-2 gap-4 text-sm">
                       {material && (

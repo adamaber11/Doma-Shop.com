@@ -20,6 +20,7 @@ export interface Product {
   category: string;
   brand: string;
   sizes?: string[];
+  stock: number;
   isFeatured?: boolean;
   isDeal?: boolean;
   isBestSeller?: boolean;
@@ -81,3 +82,5 @@ export interface ShippingAddress {
   country: string;
   postalCode: string;
 }
+
+    
