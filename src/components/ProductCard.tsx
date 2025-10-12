@@ -37,7 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const imageHint = product.imageHints?.[0] || 'product';
 
   return (
-    <Link href={`/products/${product.id}`} className="block h-full group w-[200px]">
+    <Link href={`/products/${product.id}`} className="block group w-[200px] h-[450px]">
       <Card className="flex flex-col overflow-hidden h-full duration-300">
         <CardHeader className="p-0 relative">
             <div className="relative w-full h-64 overflow-hidden">
