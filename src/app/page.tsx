@@ -7,7 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import { useCollection, useDoc } from '@/firebase';
 import { collection, query, limit, where, doc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
-import type { Product, Brand, HeroSection } from '@/lib/types';
+import type { Product, Brand, HeroSection, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Carousel,
@@ -71,6 +71,19 @@ export default function Home() {
     [firestore]
   );
   const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
+  
+  const categoriesQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'categories'), where('parentId', '==', null), limit(4)) : null),
+    [firestore]
+  );
+  const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
+
+  const categoryImages = [
+    { url: 'https://picsum.photos/seed/cat1/600/400', hint: 'mens fashion' },
+    { url: 'https://picsum.photos/seed/cat2/600/400', hint: 'womens fashion' },
+    { url: 'https://picsum.photos/seed/cat3/600/400', hint: 'modern electronics' },
+    { url: 'https://picsum.photos/seed/cat4/600/400', hint: 'home decor' },
+  ];
 
   return (
     <div className="flex flex-col gap-5">
@@ -232,6 +245,41 @@ export default function Home() {
           <CarouselPrevious className='hidden sm:flex' />
           <CarouselNext className='hidden sm:flex' />
         </Carousel>
+      </section>
+
+      <section id="shop-by-category" className="bg-card py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="font-headline text-3xl font-bold text-center mb-8">
+                تسوق حسب الفئة
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {isLoadingCategories ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="space-y-2">
+                            <Skeleton className="h-40 w-full" />
+                            <Skeleton className="h-6 w-3/4 mx-auto" />
+                        </div>
+                    ))
+                ) : (
+                    categories?.map((category, index) => (
+                        <Link key={category.id} href={`/category/${encodeURIComponent(category.name)}`} className="group block">
+                            <div className="relative overflow-hidden rounded-lg shadow-md aspect-video">
+                                <Image
+                                    src={categoryImages[index % categoryImages.length].url}
+                                    alt={category.name}
+                                    fill
+                                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                                    data-ai-hint={categoryImages[index % categoryImages.length].hint}
+                                />
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                    <h3 className="font-headline text-2xl font-bold text-white drop-shadow-lg">{category.name}</h3>
+                                </div>
+                            </div>
+                        </Link>
+                    ))
+                )}
+            </div>
+        </div>
       </section>
 
       <section id="best-sellers" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
