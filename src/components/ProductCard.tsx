@@ -54,23 +54,28 @@ export default function ProductCard({ product }: { product: Product }) {
                 </div>
             </div>
         </CardHeader>
-        <CardContent className="p-4 flex-grow">
+        <CardContent className="p-4 flex-grow flex flex-col">
           <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
           <CardTitle className="font-headline text-lg mb-2 h-12 overflow-hidden group-hover:text-primary">
             {product.name}
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-auto">
               <StarRating rating={product.rating} />
               <span className="text-xs text-muted-foreground">({product.rating})</span>
           </div>
         </CardContent>
-        <CardFooter className="p-4 pt-0 flex justify-between items-center">
-          <p className="text-lg font-semibold text-primary">
-            {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
-          </p>        
-          <Button variant="outline" size="icon" onClick={handleAddToCart} aria-label={`Add ${product.name} to cart`}>
-            <ShoppingCart className="h-5 w-5" />
-          </Button>
+        <CardFooter className="p-4 pt-2 flex flex-col items-stretch gap-2">
+            <p className="text-lg font-semibold text-primary self-start">
+                {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+            </p>        
+            <Button 
+                onClick={handleAddToCart} 
+                aria-label={`Add ${product.name} to cart`}
+                className="w-full bg-yellow-400 text-black hover:bg-yellow-500 rounded-full"
+            >
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                أضف إلى العربة
+            </Button>
         </CardFooter>
       </Card>
     </Link>
