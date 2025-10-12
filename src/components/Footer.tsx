@@ -1,11 +1,60 @@
+
+'use client';
+
 import Link from 'next/link';
 import Logo from './Logo';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Github, Twitter, Instagram } from 'lucide-react';
+import { Instagram } from 'lucide-react';
 import { APP_NAME } from '@/lib/constants';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import type { SocialLinks } from '@/lib/types';
+import { Skeleton } from './ui/skeleton';
+
+const FacebookIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="h-5 w-5 hover:text-primary"
+  >
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+
+const TiktokIcon = () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5 hover:text-primary"
+    >
+      <path d="M12 12a4 4 0 1 0 4 4V8a8 8 0 1 1-8-8" />
+    </svg>
+  );
 
 export default function Footer() {
+  const firestore = useFirestore();
+  const socialLinksRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'settings', 'socialLinks') : null),
+    [firestore]
+  );
+  const { data: socialLinks, isLoading } = useDoc<SocialLinks>(socialLinksRef);
+
+
   return (
     <footer className="bg-card text-card-foreground border-t">
       <div className="container mx-auto px-4 py-8">
@@ -16,9 +65,19 @@ export default function Footer() {
               تجربة تسوق فاخرة للمتسوق المميز.
             </p>
             <div className="flex space-x-4 space-x-reverse">
-              <Link href="/twitter" aria-label="Twitter"><Twitter className="h-5 w-5 hover:text-primary" /></Link>
-              <Link href="/instagram" aria-label="Instagram"><Instagram className="h-5 w-5 hover:text-primary" /></Link>
-              <Link href="/github" aria-label="Github"><Github className="h-5 w-5 hover:text-primary" /></Link>
+              {isLoading ? (
+                 <div className="flex space-x-4 space-x-reverse">
+                    <Skeleton className='h-5 w-5 rounded-full' />
+                    <Skeleton className='h-5 w-5 rounded-full' />
+                    <Skeleton className='h-5 w-5 rounded-full' />
+                 </div>
+              ) : (
+                <>
+                 {socialLinks?.facebook && <Link href={socialLinks.facebook} aria-label="Facebook" target="_blank" rel="noopener noreferrer"><FacebookIcon /></Link>}
+                 {socialLinks?.instagram && <Link href={socialLinks.instagram} aria-label="Instagram" target="_blank" rel="noopener noreferrer"><Instagram className="h-5 w-5 hover:text-primary" /></Link>}
+                 {socialLinks?.tiktok && <Link href={socialLinks.tiktok} aria-label="TikTok" target="_blank" rel="noopener noreferrer"><TiktokIcon /></Link>}
+                </>
+              )}
             </div>
           </div>
           <div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -20,7 +21,7 @@ import {
 
 function HeroSectionSkeleton() {
   return (
-    <section className="relative h-[calc(60vh+20px)] w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden bg-secondary shadow-lg" style={{ marginTop: '5px' }}>
+    <section className="relative h-[60vh] w-full overflow-hidden bg-secondary shadow-lg">
       <Skeleton className="w-full h-full" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
       <div className="absolute inset-0 flex items-end p-8 md:p-12">
@@ -78,7 +79,7 @@ export default function Home() {
       {isLoadingHero ? (
         <HeroSectionSkeleton />
       ) : heroData ? (
-        <section className="relative h-[calc(60vh+20px)] w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden bg-secondary shadow-lg" style={{ marginTop: '5px' }}>
+        <section className="relative h-[60vh] w-full overflow-hidden bg-secondary shadow-lg">
           <Image
             src={heroData.imageUrl}
             alt={heroData.headline}
@@ -274,5 +275,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

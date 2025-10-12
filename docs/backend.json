@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -403,6 +404,29 @@
         "secondaryActionText",
         "secondaryActionLink"
       ]
+    },
+    "SocialLinks": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SocialLinks",
+      "type": "object",
+      "description": "Stores the social media links for the website.",
+      "properties": {
+        "facebook": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the Facebook page."
+        },
+        "instagram": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the Instagram profile."
+        },
+        "tiktok": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the TikTok profile."
+        }
+      }
     }
   },
   "auth": {
@@ -447,9 +471,13 @@
           "$ref": "#/entities/HeroSection"
         },
         "description": "Stores the configuration for the homepage hero section. This is a single-document collection."
+      },
+      "/settings/socialLinks": {
+        "schema": {
+          "$ref": "#/entities/SocialLinks"
+        },
+        "description": "Stores the social media links for the website footer. This is a single-document collection."
       }
     }
   }
 }
-
-    

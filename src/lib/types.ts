@@ -1,3 +1,4 @@
+
 import { Timestamp } from "firebase/firestore";
 
 export interface ProductVariant {
@@ -95,4 +96,9 @@ export interface HeroSection {
   secondaryActionLink: string;
 }
 
-    
+export interface SocialLinks {
+    id: string;
+    facebook?: string;
+    instagram?: string;
+    tiktok?: string;
+}

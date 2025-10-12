@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -18,10 +19,11 @@ function DashboardNav() {
     { href: '/dashboard/manage-categories', label: 'إدارة الفئات' },
     { href: '/dashboard/manage-brands', label: 'إدارة العلامات التجارية' },
     { href: '/dashboard/manage-hero', label: 'إدارة الواجهة' },
+    { href: '/dashboard/manage-socials', label: 'إدارة التواصل الاجتماعي' },
   ];
 
   return (
-    <nav className="bg-card border-b sticky top-[56px] z-30">
+    <nav className="bg-card border-b sticky top-[80px] z-30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8 overflow-x-auto pb-px">
           {navLinks.map((link) => (
@@ -87,5 +89,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
-    
