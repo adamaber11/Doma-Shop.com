@@ -18,19 +18,16 @@ export default function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (product.sizes && product.sizes.length > 0) {
-        router.push(`/products/${product.id}`);
-        return;
+    // We only prevent default if we are NOT navigating.
+    // Otherwise, the parent Link's navigation will be blocked.
+    if (!product.sizes || product.sizes.length === 0) {
+        e.preventDefault();
+        addToCart(product, 1);
+        toast({
+          title: 'تمت الإضافة إلى السلة',
+          description: `1 x ${product.name}`,
+        });
     }
-
-    addToCart(product, 1);
-    toast({
-      title: 'تمت الإضافة إلى السلة',
-      description: `1 x ${product.name}`,
-    });
   };
 
   const imageUrl1 = product.imageUrls?.[0] || 'https://picsum.photos/seed/placeholder/600/800';
@@ -72,7 +69,7 @@ export default function ProductCard({ product }: { product: Product }) {
             </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow flex flex-col">
-          <div className="flex justify-between items-center mb-1">
+          <div className="flex justify-between items-center">
             <p className="text-xs text-muted-foreground">{product.category}</p>
             <StarRating rating={product.rating} />
           </div>
