@@ -2,7 +2,7 @@
 
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import StarRating from '@/components/StarRating';
 import { Separator } from '@/components/ui/separator';
 import AddToCartButton from '@/components/AddToCartButton';
@@ -15,7 +15,8 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';
 import Link from 'next/link';
-import { Tag, CheckCircle, Package } from 'lucide-react';
+import { Tag, CheckCircle, Package, Check, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 function ProductPageSkeleton() {
   return (
@@ -59,8 +60,42 @@ export default function ProductDetailPage() {
   );
   const { data: product, isLoading } = useDoc<Product>(productRef);
 
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState<number | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
+
+  const currentImages = useMemo(() => {
+    if (product?.variants && selectedVariantIndex !== null && product.variants[selectedVariantIndex]) {
+      return product.variants[selectedVariantIndex].imageUrls;
+    }
+    return product?.imageUrls || [];
+  }, [product, selectedVariantIndex]);
+
+  const currentImageHints = useMemo(() => {
+    if (product?.variants && selectedVariantIndex !== null && product.variants[selectedVariantIndex]) {
+      return product.variants[selectedVariantIndex].imageHints;
+    }
+    return product?.imageHints || [];
+  }, [product, selectedVariantIndex]);
+  
+  // Reset states when product data loads
+  useState(() => {
+      if (product) {
+          const hasSizes = product.sizes && product.sizes.length > 0;
+          const hasVariants = product.variants && product.variants.length > 0;
+          setSelectedVariantIndex(null);
+          setSelectedImageIndex(0);
+          setSelectedSize(hasSizes ? undefined : '');
+      }
+  }, [product]);
+
+  // Ensure image index is valid for current images
+  useState(() => {
+    if (selectedImageIndex >= currentImages.length) {
+      setSelectedImageIndex(0);
+    }
+  }, [currentImages, selectedImageIndex]);
+
 
   if (isLoading) {
     return <ProductPageSkeleton />;
@@ -71,12 +106,24 @@ export default function ProductDetailPage() {
   }
   
   // This check is now safe because we've already handled the loading and !product cases
-  const { name, description, price, rating, imageUrls, imageHints, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, stock } = product!;
-  const selectedImageUrl = imageUrls?.[selectedImageIndex] || '';
-  const selectedImageHint = imageHints?.[selectedImageIndex] || '';
+  const { name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, stock, variants } = product!;
+  
   const hasSizes = sizes && sizes.length > 0;
+  const hasVariants = variants && variants.length > 0;
+
+  const selectedImageUrl = currentImages[selectedImageIndex] || '';
+  const selectedImageHint = currentImageHints[selectedImageIndex] || '';
+  
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercentage = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+  
+  const selectedColorName = hasVariants && selectedVariantIndex !== null ? variants![selectedVariantIndex].color : undefined;
+
+  const isSelectionComplete = (!hasSizes || selectedSize !== undefined) && (!hasVariants || selectedVariantIndex !== null);
+  const optionsNotSelectedMessage = [
+      hasVariants && selectedVariantIndex === null ? 'اللون' : '',
+      hasSizes && !selectedSize ? 'المقاس' : ''
+  ].filter(Boolean).join(' و');
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
@@ -98,9 +145,9 @@ export default function ProductDetailPage() {
                 </div>
             )}
           </div>
-          {imageUrls && imageUrls.length > 1 && (
+          {currentImages && currentImages.length > 1 && (
             <div className="grid grid-cols-5 gap-2">
-              {imageUrls.map((url, index) => (
+              {currentImages.map((url, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
@@ -115,7 +162,7 @@ export default function ProductDetailPage() {
                     width={100}
                     height={100}
                     className="w-full h-full object-cover"
-                    data-ai-hint={imageHints?.[index]}
+                    data-ai-hint={currentImageHints?.[index]}
                   />
                 </button>
               ))}
@@ -197,26 +244,70 @@ export default function ProductDetailPage() {
               )}
           </div>
 
-          {hasSizes && (
-            <div className="space-y-4 pt-2">
-                <h3 className="text-sm font-medium text-foreground">المقاسات</h3>
-                <div className="flex flex-wrap gap-2">
-                    {sizes?.map(size => (
-                        <Button 
-                            key={size}
-                            variant={selectedSize === size ? "default" : "outline"}
-                            onClick={() => setSelectedSize(size)}
-                            className="px-4 py-2"
-                        >
-                            {size}
-                        </Button>
-                    ))}
+            {hasVariants && (
+                <div className="space-y-3 pt-2">
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-medium text-foreground">اللون:</h3>
+                        <span className="text-sm text-muted-foreground">{selectedColorName}</span>
+                    </div>
+                    <TooltipProvider>
+                        <div className="flex flex-wrap gap-2">
+                            {variants.map((variant, index) => (
+                                <Tooltip key={variant.color}>
+                                    <TooltipTrigger asChild>
+                                        <button
+                                            onClick={() => setSelectedVariantIndex(index)}
+                                            className={cn(
+                                                'h-8 w-8 rounded-full border-2 transition-all flex items-center justify-center',
+                                                selectedVariantIndex === index ? 'border-primary ring-2 ring-primary/50' : 'border-border hover:border-primary/50'
+                                            )}
+                                            style={{ backgroundColor: variant.hex }}
+                                            aria-label={`Select color ${variant.color}`}
+                                        >
+                                            {selectedVariantIndex === index && <Check className="h-5 w-5 text-white mix-blend-difference" />}
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{variant.color}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            ))}
+                        </div>
+                    </TooltipProvider>
                 </div>
-            </div>
-          )}
+            )}
+
+            {hasSizes && (
+                <div className="space-y-4 pt-2">
+                    <h3 className="text-sm font-medium text-foreground">المقاسات</h3>
+                    <div className="flex flex-wrap gap-2">
+                        {sizes?.map(size => (
+                            <Button 
+                                key={size}
+                                variant={selectedSize === size ? "default" : "outline"}
+                                onClick={() => setSelectedSize(size)}
+                                className="px-4 py-2"
+                            >
+                                {size}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
           <div className="pt-4 space-y-4">
-            <AddToCartButton product={product!} selectedSize={selectedSize} />
+            <AddToCartButton 
+              product={product!} 
+              selectedSize={selectedSize} 
+              selectedColor={selectedColorName}
+              isSelectionComplete={isSelectionComplete}
+            />
+            {!isSelectionComplete && (
+                <div className="flex items-center gap-2 text-sm text-destructive">
+                    <Info className="h-4 w-4" />
+                    <span>الرجاء اختيار {optionsNotSelectedMessage} للمتابعة.</span>
+                </div>
+            )}
             {isDeal && dealEndDate && <CountdownTimer endDate={dealEndDate} />}
           </div>
         </div>
@@ -228,5 +319,3 @@ export default function ProductDetailPage() {
     </div>
   );
 }
-
-    

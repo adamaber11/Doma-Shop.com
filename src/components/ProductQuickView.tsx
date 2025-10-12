@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';
 import Link from 'next/link';
-import { Tag, CheckCircle, Check } from 'lucide-react';
+import { Tag, CheckCircle, Check, Info } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
@@ -63,22 +63,24 @@ export default function ProductQuickView() {
   // Reset state when product changes
   useEffect(() => {
     if (product) {
+      const hasSizes = product.sizes && product.sizes.length > 0;
+      const hasVariants = product.variants && product.variants.length > 0;
       // Always start with default images by setting variant index to null
-      setSelectedVariantIndex(null);
+      setSelectedVariantIndex(hasVariants ? null : -1); // use -1 to signify no variants, null for variant choice needed
       setSelectedImageIndex(0);
-      setSelectedSize(product.sizes && product.sizes.length > 0 ? undefined : '');
+      setSelectedSize(hasSizes ? undefined : '');
     }
   }, [product]);
 
   const currentImages = useMemo(() => {
-    if (product?.variants && selectedVariantIndex !== null && product.variants[selectedVariantIndex]) {
+    if (product?.variants && selectedVariantIndex !== null && selectedVariantIndex >= 0 && product.variants[selectedVariantIndex]) {
       return product.variants[selectedVariantIndex].imageUrls;
     }
     return product?.imageUrls || [];
   }, [product, selectedVariantIndex]);
 
   const currentImageHints = useMemo(() => {
-    if (product?.variants && selectedVariantIndex !== null && product.variants[selectedVariantIndex]) {
+    if (product?.variants && selectedVariantIndex !== null && selectedVariantIndex >= 0 && product.variants[selectedVariantIndex]) {
       return product.variants[selectedVariantIndex].imageHints;
     }
     return product?.imageHints || [];
@@ -99,12 +101,21 @@ export default function ProductQuickView() {
   const { name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, variants } = product;
   const selectedImageUrl = currentImages[selectedImageIndex] || '';
   const selectedImageHint = currentImageHints[selectedImageIndex] || '';
+  
   const hasSizes = sizes && sizes.length > 0;
   const hasVariants = variants && variants.length > 0;
+
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercentage = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
-  const selectedColorName = hasVariants && selectedVariantIndex !== null ? variants[selectedVariantIndex].color : undefined;
+  const selectedColorName = hasVariants && selectedVariantIndex !== null && selectedVariantIndex >= 0 ? variants[selectedVariantIndex].color : undefined;
   
+  const isSelectionComplete = (!hasSizes || selectedSize !== undefined) && (!hasVariants || selectedVariantIndex !== null);
+
+  const optionsNotSelectedMessage = [
+      hasVariants && selectedVariantIndex === null ? 'اللون' : '',
+      hasSizes && !selectedSize ? 'المقاس' : ''
+  ].filter(Boolean).join(' و');
+
   return (
     <Sheet open={isQuickViewOpen} onOpenChange={closeQuickView}>
       <SheetContent side="left" className="w-full sm:max-w-4xl p-0">
@@ -223,7 +234,7 @@ export default function ProductQuickView() {
                     <div className="space-y-3 pt-2">
                         <div className="flex items-center gap-2">
                             <h3 className="text-sm font-medium text-foreground">اللون:</h3>
-                            <span className="text-sm text-muted-foreground">{selectedColorName}</span>
+                            <span className="text-sm text-muted-foreground">{selectedColorName || 'يرجى التحديد'}</span>
                         </div>
                          <TooltipProvider>
                             <div className="flex flex-wrap gap-2">
@@ -271,7 +282,13 @@ export default function ProductQuickView() {
                 )}
 
                 <div className="pt-4 space-y-4">
-                    <AddToCartButton product={product} selectedSize={selectedSize} selectedColor={selectedColorName} />
+                    <AddToCartButton product={product} selectedSize={selectedSize} selectedColor={selectedColorName} isSelectionComplete={isSelectionComplete} />
+                     {!isSelectionComplete && (
+                        <div className="flex items-center gap-2 text-sm text-destructive">
+                            <Info className="h-4 w-4" />
+                            <span>الرجاء اختيار {optionsNotSelectedMessage} للمتابعة.</span>
+                        </div>
+                    )}
                     {isDeal && dealEndDate && <CountdownTimer endDate={dealEndDate} />}
                 </div>
 

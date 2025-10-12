@@ -22,8 +22,10 @@ export default function ProductCard({ product }: { product: Product }) {
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click event when clicking the button
-    if (product.sizes && product.sizes.length > 0) {
-        openQuickView(product); // Open quick view to select size
+    const hasOptions = (product.sizes && product.sizes.length > 0) || (product.variants && product.variants.length > 0);
+
+    if (hasOptions) {
+        openQuickView(product); // Open quick view to select size/color
     } else {
         addToCart(product, 1);
         toast({

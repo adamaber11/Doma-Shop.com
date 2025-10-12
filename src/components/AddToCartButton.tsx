@@ -12,12 +12,12 @@ interface AddToCartButtonProps {
     product: Product;
     selectedSize?: string;
     selectedColor?: string;
+    isSelectionComplete: boolean;
 }
 
-export default function AddToCartButton({ product, selectedSize, selectedColor }: AddToCartButtonProps) {
+export default function AddToCartButton({ product, selectedSize, selectedColor, isSelectionComplete }: AddToCartButtonProps) {
   const [quantity, setQuantity] = useState(1);
   const { addToCart, isItemInCart } = useCart();
-  const { toast } = useToast();
   
   const cartItemId = `${product.id}${selectedSize ? `-${selectedSize}` : ''}${selectedColor ? `-${selectedColor}` : ''}`;
   const itemInCart = isItemInCart(cartItemId);
@@ -26,7 +26,7 @@ export default function AddToCartButton({ product, selectedSize, selectedColor }
     addToCart(product, quantity, selectedSize, selectedColor);
   };
 
-  const isAddToCartDisabled = product.stock === 0 || itemInCart;
+  const isAddToCartDisabled = product.stock === 0 || itemInCart || !isSelectionComplete;
 
   return (
     <div className="flex items-center gap-4">
@@ -70,6 +70,8 @@ export default function AddToCartButton({ product, selectedSize, selectedColor }
           </>
         ) : product.stock === 0 ? (
           'غير متوفر'
+        ) : !isSelectionComplete ? (
+            'اختر الخيارات'
         ) : (
           <>
             <ShoppingCart className="mr-2 h-5 w-5" />
@@ -80,5 +82,3 @@ export default function AddToCartButton({ product, selectedSize, selectedColor }
     </div>
   );
 }
-
-    
