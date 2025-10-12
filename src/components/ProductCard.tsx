@@ -55,14 +55,16 @@ export default function ProductCard({ product }: { product: Product }) {
             </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow flex flex-col">
-          <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
+          <div className="flex justify-between items-center mb-1">
+            <p className="text-xs text-muted-foreground">{product.category}</p>
+            <div className="flex items-center gap-1">
+              <StarRating rating={product.rating} />
+              <span className="text-xs text-muted-foreground">({product.rating})</span>
+            </div>
+          </div>
           <CardTitle className="font-headline text-base mb-1 h-12 overflow-hidden group-hover:text-primary">
             {product.name}
           </CardTitle>
-          <div className="flex items-center gap-1 mb-2">
-            <StarRating rating={product.rating} />
-            <span className="text-xs text-muted-foreground">({product.rating})</span>
-          </div>
            <p className="text-sm font-semibold text-destructive">
             {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
           </p>
