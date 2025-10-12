@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, forwardRef } from 'react';
+import { useState, forwardRef, useEffect } from 'react';
 import { useForm, useWatch, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,28 +44,28 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 
 const variantSchema = z.object({
-  color: z.string().optional(),
-  hex: z.string().optional(),
-  imageUrls: z.string().optional(),
-  imageHints: z.string().optional(),
+  color: z.string().min(1, "Color name is required."),
+  hex: z.string().min(1, "Hex code is required."),
+  imageUrls: z.string().min(1, "Image URLs are required."),
+  imageHints: z.string().min(1, "Image hints are required."),
 });
 
 const productSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  price: z.coerce.number().optional(),
-  originalPrice: z.coerce.number().optional().nullable(),
-  category: z.string().optional(),
-  brand: z.string().optional(),
-  imageUrls: z.string().optional(),
-  imageHints: z.string().optional(),
-  rating: z.coerce.number().min(0, 'التقييم يجب أن يكون بين 0 و 5').optional(),
+  name: z.string().min(2, 'اسم المنتج مطلوب'),
+  description: z.string().min(10, 'الوصف مطلوب (10 أحرف على الأقل)'),
+  price: z.coerce.number().positive('السعر يجب أن يكون رقمًا موجبًا'),
+  originalPrice: z.coerce.number().positive('السعر الأصلي يجب أن يكون رقمًا موجبًا').optional().nullable(),
+  category: z.string().min(1, 'الفئة مطلوبة'),
+  brand: z.string().min(1, 'العلامة التجارية مطلوبة'),
+  imageUrls: z.string().min(1, 'رابط صورة واحد على الأقل مطلوب'),
+  imageHints: z.string().min(1, 'تلميح صورة واحد على الأقل مطلوب'),
+  rating: z.coerce.number().min(0, 'التقييم يجب أن يكون بين 0 و 5').max(5, 'التقييم يجب أن يكون بين 0 و 5'),
   sizes: z.string().optional(),
-  stock: z.coerce.number().optional(),
-  isFeatured: z.boolean().optional().default(false),
-  isDeal: z.boolean().optional().default(false),
-  isBestSeller: z.boolean().optional().default(false),
-  dealDurationHours: z.coerce.number().optional().nullable(),
+  stock: z.coerce.number().min(0, 'الكمية يجب أن تكون رقمًا موجبًا'),
+  isFeatured: z.boolean().default(false),
+  isDeal: z.boolean().default(false),
+  isBestSeller: z.boolean().default(false),
+  dealDurationHours: z.coerce.number().positive().optional().nullable(),
   material: z.string().optional(),
   countryOfOrigin: z.string().optional(),
   features: z.string().optional(),
@@ -74,15 +74,22 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], brands: Brand[], onProductAdded: () => void }>(
-  function ProductFormDialog({ categories, brands, onProductAdded }, ref) {
-    const { toast } = useToast();
-    const firestore = useFirestore();
-    const [isOpen, setIsOpen] = useState(false);
+interface ProductFormProps {
+  product?: Product | null;
+  categories: Category[];
+  brands: Brand[];
+  onFormSubmit: () => void;
+  children: React.ReactNode;
+}
 
-    const form = useForm<ProductFormData>({
-      resolver: zodResolver(productSchema),
-      defaultValues: {
+function ProductForm({ product, categories, brands, onFormSubmit, children }: ProductFormProps) {
+  const { toast } = useToast();
+  const firestore = useFirestore();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const form = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
         name: '',
         description: '',
         price: 0,
@@ -102,292 +109,325 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
         countryOfOrigin: '',
         features: '',
         variants: [],
-      },
-    });
+    },
+  });
 
-    const { fields, append, remove } = useFieldArray({
-      control: form.control,
-      name: "variants",
-    });
-
-    const isDeal = useWatch({
-      control: form.control,
-      name: 'isDeal'
-    });
-
-    async function onSubmit(values: ProductFormData) {
-        if (!firestore) return;
-    
-        try {
-            const variants: ProductVariant[] | undefined = values.variants?.filter(v => v.color && v.hex && v.imageUrls && v.imageHints).map(v => ({
-                color: v.color!,
-                hex: v.hex!,
-                imageUrls: v.imageUrls!.split(',').map(url => url.trim()),
-                imageHints: v.imageHints!.split(',').map(hint => hint.trim()),
-            }));
-    
-            const newProductData: Partial<Omit<Product, 'id'>> = {
-                name: values.name || 'منتج بدون اسم',
-                description: values.description || 'لا يوجد وصف',
-                price: values.price || 0,
-                category: values.category || 'غير مصنف',
-                brand: values.brand || 'غير محدد',
-                imageUrls: values.imageUrls?.split(',').map(url => url.trim()) || [],
-                imageHints: values.imageHints?.split(',').map(hint => hint.trim()) || [],
-                rating: values.rating || 0,
-                sizes: values.sizes?.split(',').map(s => s.trim()) || [],
-                stock: values.stock || 0,
-                isFeatured: values.isFeatured,
-                isDeal: values.isDeal,
-                isBestSeller: values.isBestSeller,
-                material: values.material,
-                countryOfOrigin: values.countryOfOrigin,
-                features: values.features?.split(',').map(f => f.trim()) || [],
-            };
-            
-            // Only add fields if they have a value to avoid sending `undefined` to Firestore
-            if (variants && variants.length > 0) {
-              newProductData.variants = variants;
-            }
-            if (values.originalPrice) {
-                newProductData.originalPrice = values.originalPrice;
-            }
-            if (values.isDeal && values.dealDurationHours) {
-                newProductData.dealEndDate = Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000);
-            }
-            
-            // Remove undefined fields
-            Object.keys(newProductData).forEach(key => {
-                const typedKey = key as keyof typeof newProductData;
-                if (newProductData[typedKey] === undefined) {
-                    delete newProductData[typedKey];
-                }
-            });
-
-            await addDoc(collection(firestore, 'products'), newProductData);
-            toast({ title: 'تمت إضافة المنتج بنجاح!' });
-            form.reset();
-            setIsOpen(false);
-            onProductAdded();
-        } catch (error) {
-            console.error("Error adding product:", error);
-            toast({ variant: 'destructive', title: 'حدث خطأ ما', description: (error as Error).message });
-        }
+  useEffect(() => {
+    if (isOpen && product) {
+        const productData = {
+            ...product,
+            price: product.price ?? 0,
+            rating: product.rating ?? 0,
+            stock: product.stock ?? 0,
+            originalPrice: product.originalPrice ?? undefined,
+            imageUrls: product.imageUrls?.join(', ') ?? '',
+            imageHints: product.imageHints?.join(', ') ?? '',
+            sizes: product.sizes?.join(', ') ?? '',
+            features: product.features?.join(', ') ?? '',
+            variants: product.variants?.map(v => ({
+                ...v,
+                imageUrls: v.imageUrls.join(', '),
+                imageHints: v.imageHints.join(', '),
+            })) ?? [],
+            dealDurationHours: undefined, // Not stored, calculated on save
+        };
+        form.reset(productData);
+    } else if (isOpen) {
+        form.reset({
+            name: '',
+            description: '',
+            price: 0,
+            originalPrice: undefined,
+            category: '',
+            brand: '',
+            imageUrls: '',
+            imageHints: '',
+            rating: 0,
+            sizes: '',
+            stock: 0,
+            isFeatured: false,
+            isDeal: false,
+            isBestSeller: false,
+            dealDurationHours: undefined,
+            material: '',
+            countryOfOrigin: '',
+            features: '',
+            variants: [],
+        });
     }
-
-    return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            إضافة منتج جديد
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[800px]">
-          <DialogHeader>
-            <DialogTitle>إضافة منتج جديد</DialogTitle>
-            <DialogFormDescription>
-              املأ النموذج أدناه لإضافة منتج جديد إلى متجرك.
-            </DialogFormDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <ScrollArea className="h-[65vh] w-full pr-6">
-                <div className="space-y-4 my-4">
-                  <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="originalPrice" render={({ field }) => (<FormItem><FormLabel>السعر الأصلي (اختياري)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                     <FormField control={form.control} name="stock" render={({ field }) => (<FormItem><FormLabel>الكمية المتاحة</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
-                     <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5) (اختياري)</FormLabel><FormControl><Input type="number" step="0.1" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
-                  </div>
-                   <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>الفئة (اختياري)</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="اختر فئة..." />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {categories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="brand"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>العلامة التجارية (اختياري)</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="اختر علامة تجارية..." />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {brands.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  
-                  <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  
-                  <Separator className="my-6" />
-
-                  <div>
-                      <h3 className="text-lg font-medium mb-2">الألوان المتوفرة</h3>
-                      <div className="space-y-4">
-                          {fields.map((field, index) => (
-                              <div key={field.id} className="p-4 border rounded-md relative space-y-3">
-                                  <Button type="button" variant="ghost" size="icon" className="absolute top-2 left-2 h-6 w-6" onClick={() => remove(index)}>
-                                      <X className="h-4 w-4" />
-                                  </Button>
-                                  <div className="grid grid-cols-2 gap-4">
-                                      <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (<FormItem><FormLabel>اسم اللون</FormLabel><FormControl><Input placeholder="أحمر" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                      <FormField control={form.control} name={`variants.${index}.hex`} render={({ field }) => (<FormItem><FormLabel>كود اللون (Hex)</FormLabel><FormControl><Input type="color" className='p-0 h-10' {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                  </div>
-                                  <FormField control={form.control} name={`variants.${index}.imageUrls`} render={({ field }) => (<FormItem><FormLabel>روابط صور اللون</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                  <FormField control={form.control} name={`variants.${index}.imageHints`} render={({ field }) => (<FormItem><FormLabel>تلميحات صور اللون</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                              </div>
-                          ))}
-                      </div>
-                       <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="mt-4"
-                          onClick={() => append({ color: '', hex: '#000000', imageUrls: '', imageHints: '' })}
-                      >
-                          <PlusCircle className="mr-2 h-4 w-4" />
-                          إضافة لون
-                      </Button>
-                  </div>
-
-                  <Separator className="my-6" />
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="material" render={({ field }) => (<FormItem><FormLabel>الخامة</FormLabel><FormControl><Input placeholder="قطن، جلد، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="countryOfOrigin" render={({ field }) => (<FormItem><FormLabel>بلد الصنع</FormLabel><FormControl><Input placeholder="تركيا، فيتنام، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                  </div>
-                  <FormField control={form.control} name="features" render={({ field }) => (<FormItem><FormLabel>ميزات إضافية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="مقاوم للماء، جودة عالية، ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+  }, [isOpen, product, form]);
 
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-                      <FormField
-                        control={form.control}
-                        name="isFeatured"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                            <div className="space-y-0.5">
-                              <FormLabel>منتج مميز</FormLabel>
-                              <FormDescription>
-                                عرضه في قسم "منتجاتنا المميزة".
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                       <FormField
-                        control={form.control}
-                        name="isDeal"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                            <div className="space-y-0.5">
-                              <FormLabel>عرض اليوم</FormLabel>
-                              <FormDescription>
-                                 عرضه في قسم "العروض اليومية".
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                       <FormField
-                        control={form.control}
-                        name="isBestSeller"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                            <div className="space-y-0.5">
-                              <FormLabel>الأكثر مبيعًا</FormLabel>
-                              <FormDescription>
-                                عرضه في قسم "الأكثر مبيعًا".
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                  </div>
-                   <div className={cn("transition-all duration-300 overflow-hidden", isDeal ? "max-h-40 opacity-100" : "max-h-0 opacity-0")}>
-                      <div className="pt-4">
-                          <FormField
-                          control={form.control}
-                          name="dealDurationHours"
-                          render={({ field }) => (
-                              <FormItem>
-                              <FormLabel>مدة العرض (بالساعات)</FormLabel>
-                              <FormControl>
-                                  <Input type="number" placeholder="24" {...field} value={field.value ?? ''} />
-                              </FormControl>
-                              <FormDescription>
-                                  سيتم بدء العد التنازلي من الآن.
-                              </FormDescription>
-                              <FormMessage />
-                              </FormItem>
-                          )}
-                          />
-                      </div>
-                  </div>
-                </div>
-              </ScrollArea>
-              <DialogFooter className="pt-4">
-                <DialogClose asChild><Button type="button" variant="outline">إلغاء</Button></DialogClose>
-                <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ المنتج'}</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-    );
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "variants",
+  });
+
+  const isDeal = useWatch({
+    control: form.control,
+    name: 'isDeal'
+  });
+
+  const isEditing = !!product;
+
+  async function onSubmit(values: ProductFormData) {
+      if (!firestore) return;
+  
+      try {
+          const variantsData: ProductVariant[] | undefined = values.variants?.filter(v => v.color && v.hex && v.imageUrls && v.imageHints).map(v => ({
+              color: v.color!,
+              hex: v.hex!,
+              imageUrls: v.imageUrls!.split(',').map(url => url.trim()),
+              imageHints: v.imageHints!.split(',').map(hint => hint.trim()),
+          }));
+  
+          const productData: Omit<Product, 'id'> = {
+              name: values.name,
+              description: values.description,
+              price: values.price,
+              category: values.category,
+              brand: values.brand,
+              imageUrls: values.imageUrls.split(',').map(url => url.trim()),
+              imageHints: values.imageHints.split(',').map(hint => hint.trim()),
+              rating: values.rating,
+              sizes: values.sizes ? values.sizes.split(',').map(s => s.trim()) : [],
+              stock: values.stock,
+              isFeatured: values.isFeatured,
+              isDeal: values.isDeal,
+              isBestSeller: values.isBestSeller,
+              material: values.material,
+              countryOfOrigin: values.countryOfOrigin,
+              features: values.features ? values.features.split(',').map(f => f.trim()) : [],
+              variants: variantsData && variantsData.length > 0 ? variantsData : [],
+              originalPrice: values.originalPrice || undefined,
+          };
+          
+          if (values.isDeal && values.dealDurationHours) {
+              productData.dealEndDate = Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000);
+          } else if (values.isDeal && isEditing && product?.dealEndDate && product.dealEndDate.toMillis() > Date.now()) {
+            // Keep existing end date if not changed
+            productData.dealEndDate = product.dealEndDate;
+          } else {
+             productData.dealEndDate = undefined;
+          }
+
+          if (isEditing) {
+            const productRef = doc(firestore, 'products', product.id);
+            await updateDoc(productRef, productData);
+            toast({ title: 'تم تحديث المنتج بنجاح!' });
+          } else {
+            await addDoc(collection(firestore, 'products'), productData);
+            toast({ title: 'تمت إضافة المنتج بنجاح!' });
+          }
+
+          setIsOpen(false);
+          onFormSubmit();
+
+      } catch (error) {
+          console.error("Error saving product:", error);
+          toast({ variant: 'destructive', title: 'حدث خطأ ما', description: (error as Error).message });
+      }
   }
-)
-ProductFormDialog.displayName = "ProductFormDialog";
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-[800px]">
+        <DialogHeader>
+          <DialogTitle>{isEditing ? 'تعديل المنتج' : 'إضافة منتج جديد'}</DialogTitle>
+          <DialogFormDescription>
+            {isEditing ? 'قم بتعديل تفاصيل المنتج أدناه.' : 'املأ النموذج أدناه لإضافة منتج جديد إلى متجرك.'}
+          </DialogFormDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <ScrollArea className="h-[65vh] w-full pr-6">
+              <div className="space-y-4 my-4">
+                <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="originalPrice" render={({ field }) => (<FormItem><FormLabel>السعر الأصلي (اختياري)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <FormField control={form.control} name="stock" render={({ field }) => (<FormItem><FormLabel>الكمية المتاحة</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                   <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                 <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>الفئة</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر فئة..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="brand"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>العلامة التجارية</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر علامة تجارية..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {brands.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                
+                <FormField control={form.control} name="imageUrls" render={({ field }) => (<FormItem><FormLabel>روابط الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="imageHints" render={({ field }) => (<FormItem><FormLabel>تلميحات الصور الافتراضية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                
+                <Separator className="my-6" />
+
+                <div>
+                    <h3 className="text-lg font-medium mb-2">الألوان المتوفرة</h3>
+                    <div className="space-y-4">
+                        {fields.map((field, index) => (
+                            <div key={field.id} className="p-4 border rounded-md relative space-y-3">
+                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 left-2 h-6 w-6" onClick={() => remove(index)}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField control={form.control} name={`variants.${index}.color`} render={({ field }) => (<FormItem><FormLabel>اسم اللون</FormLabel><FormControl><Input placeholder="أحمر" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                    <FormField control={form.control} name={`variants.${index}.hex`} render={({ field }) => (<FormItem><FormLabel>كود اللون (Hex)</FormLabel><FormControl><Input type="color" className='p-0 h-10' {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                </div>
+                                <FormField control={form.control} name={`variants.${index}.imageUrls`} render={({ field }) => (<FormItem><FormLabel>روابط صور اللون</FormLabel><FormControl><Input placeholder="url1, url2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                                <FormField control={form.control} name={`variants.${index}.imageHints`} render={({ field }) => (<FormItem><FormLabel>تلميحات صور اللون</FormLabel><FormControl><Input placeholder="hint1, hint2, ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                            </div>
+                        ))}
+                    </div>
+                     <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => append({ color: '', hex: '#000000', imageUrls: '', imageHints: '' })}
+                    >
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        إضافة لون
+                    </Button>
+                </div>
+
+                <Separator className="my-6" />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="material" render={({ field }) => (<FormItem><FormLabel>الخامة</FormLabel><FormControl><Input placeholder="قطن، جلد، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                  <FormField control={form.control} name="countryOfOrigin" render={({ field }) => (<FormItem><FormLabel>بلد الصنع</FormLabel><FormControl><Input placeholder="تركيا، فيتنام، إلخ." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                <FormField control={form.control} name="features" render={({ field }) => (<FormItem><FormLabel>ميزات إضافية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="مقاوم للماء، جودة عالية، ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                    <FormField
+                      control={form.control}
+                      name="isFeatured"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>منتج مميز</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="isDeal"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>عرض اليوم</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="isBestSeller"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>الأكثر مبيعًا</FormLabel>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                </div>
+                 <div className={cn("transition-all duration-300 overflow-hidden", isDeal ? "max-h-40 opacity-100" : "max-h-0 opacity-0")}>
+                    <div className="pt-4">
+                        <FormField
+                        control={form.control}
+                        name="dealDurationHours"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>مدة العرض (بالساعات)</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="24" {...field} value={field.value ?? ''} />
+                            </FormControl>
+                            <FormDescription>
+                                سيتم بدء العد التنازلي من الآن. إذا تركته فارغًا، سيتم استخدام أي تاريخ انتهاء حالي.
+                            </FormDescription>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+                </div>
+              </div>
+            </ScrollArea>
+            <DialogFooter className="pt-4">
+              <DialogClose asChild><Button type="button" variant="outline">إلغاء</Button></DialogClose>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? 'جاري الحفظ...' : (isEditing ? 'حفظ التعديلات' : 'حفظ المنتج')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function ManageProductsPage() {
   const { toast } = useToast();
@@ -403,7 +443,7 @@ export default function ManageProductsPage() {
   const brandsQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'brands') : null), [firestore]);
   const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
 
-  const handleProductAdded = () => {
+  const handleFormSubmit = () => {
     setUpdateTrigger(count => count + 1);
   };
   
@@ -425,7 +465,12 @@ export default function ManageProductsPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-headline font-bold">إدارة المنتجات</h1>
         { !isLoading && categories && brands && (
-           <ProductFormDialog categories={categories} brands={brands} onProductAdded={handleProductAdded} />
+           <ProductForm categories={categories} brands={brands} onFormSubmit={handleFormSubmit}>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                إضافة منتج جديد
+              </Button>
+           </ProductForm>
         )}
       </div>
 
@@ -467,7 +512,13 @@ export default function ManageProductsPage() {
                     <TableCell>{product.isBestSeller ? 'نعم' : 'لا'}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        {/* Edit button can be added here later */}
+                        {!isLoading && categories && brands && (
+                          <ProductForm product={product} categories={categories} brands={brands} onFormSubmit={handleFormSubmit}>
+                             <Button variant="ghost" size="icon">
+                               <Edit className="h-4 w-4" />
+                             </Button>
+                          </ProductForm>
+                        )}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
@@ -501,5 +552,3 @@ export default function ManageProductsPage() {
     </div>
   );
 }
-
-    
