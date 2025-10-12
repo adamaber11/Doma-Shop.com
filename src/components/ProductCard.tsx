@@ -8,7 +8,7 @@ import { Button } from './ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -40,14 +40,19 @@ export default function ProductCard({ product }: { product: Product }) {
     <Link href={`/products/${product.id}`} className="block h-full group">
       <Card className="flex flex-col overflow-hidden h-full transition-shadow duration-300 hover:shadow-xl">
         <CardHeader className="p-0 relative">
-            <Image
-              src={imageUrl}
-              alt={product.name}
-              width={600}
-              height={800}
-              className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
-              data-ai-hint={imageHint}
-            />
+            <div className="relative w-full h-80 overflow-hidden">
+                <Image
+                src={imageUrl}
+                alt={product.name}
+                width={600}
+                height={800}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                data-ai-hint={imageHint}
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <Eye className="h-10 w-10 text-white" />
+                </div>
+            </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow">
           <CardTitle className="font-headline text-xl mb-2 h-14 overflow-hidden group-hover:text-primary">

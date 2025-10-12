@@ -2,7 +2,7 @@
 
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { use, useState } from 'react';
+import { useState } from 'react';
 import StarRating from '@/components/StarRating';
 import { Separator } from '@/components/ui/separator';
 import AddToCartButton from '@/components/AddToCartButton';
@@ -14,9 +14,11 @@ import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useParams } from 'next/navigation';
 
-export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ProductDetailPage() {
+  const params = useParams();
+  const id = params.id as string;
   const firestore = useFirestore();
   const productRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'products', id) : null),
@@ -138,7 +140,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       
       <Separator />
 
-      <ProductRecommendations currentProduct={product} />
+      {firestore && <ProductRecommendations currentProduct={product} />}
     </div>
   );
 }
