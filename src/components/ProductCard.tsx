@@ -49,7 +49,7 @@ export default function ProductCard({ product }: { product: Product }) {
     <div onClick={handleCardClick} className="block group w-full h-full cursor-pointer">
       <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
-            <div className="relative w-full aspect-[4/5] overflow-hidden">
+            <div className="relative w-full aspect-square overflow-hidden">
                 <Image
                     src={imageUrl1}
                     alt={product.name}
@@ -82,7 +82,7 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.name}
           </CardTitle>
            <div className="flex items-baseline gap-2">
-             <p className="text-sm font-semibold text-destructive group-hover:text-green-600 group-hover:underline">
+             <p className="text-sm font-semibold text-destructive">
                 {product.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
              </p>
              {hasDiscount && (
