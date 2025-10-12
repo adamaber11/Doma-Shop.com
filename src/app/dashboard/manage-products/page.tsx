@@ -52,8 +52,8 @@ const productSchema = z.object({
   imageHints: z.string().min(1, 'تلميح صورة واحد على الأقل مطلوب'),
   rating: z.coerce.number().min(0).max(5, 'التقييم يجب أن يكون بين 0 و 5'),
   sizes: z.string().optional(),
-  isFeatured: z.boolean().optional(),
-  isDeal: z.boolean().optional(),
+  isFeatured: z.boolean().default(false),
+  isDeal: z.boolean().default(false),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -85,7 +85,7 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
     if (!firestore) return;
 
     try {
-      const newProduct: Omit<Product, 'id'> = {
+      const newProductData: Omit<Product, 'id'> = {
         name: values.name,
         description: values.description,
         price: values.price,
@@ -99,10 +99,12 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
         isDeal: values.isDeal,
       };
       if (values.originalPrice && values.originalPrice > values.price) {
-        newProduct.originalPrice = values.originalPrice;
+        newProductData.originalPrice = values.originalPrice;
+      } else {
+        newProductData.originalPrice = undefined;
       }
 
-      await addDoc(collection(firestore, 'products'), newProduct);
+      await addDoc(collection(firestore, 'products'), newProductData);
       toast({ title: 'تمت إضافة المنتج بنجاح!' });
       form.reset();
       setIsOpen(false);
@@ -129,9 +131,9 @@ function AddProductDialog({ categories, brands, onProductAdded }: { categories: 
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <ScrollArea className="max-h-[60vh] p-6 pr-6 -mr-6">
-              <div className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <ScrollArea className="h-[60vh] w-full pr-6">
+              <div className="space-y-4 my-4">
                 <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <div className="grid grid-cols-2 gap-4">
@@ -310,7 +312,9 @@ export default function ManageProductsPage() {
                 products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
-                      <Image src={product.imageUrls[0]} alt={product.name} width={64} height={64} className="rounded-md object-cover" />
+                      {product.imageUrls && product.imageUrls.length > 0 &&
+                        <Image src={product.imageUrls[0]} alt={product.name} width={64} height={64} className="rounded-md object-cover" />
+                      }
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.category}</TableCell>
