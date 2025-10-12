@@ -38,7 +38,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link href={`/products/${product.id}`} className="block h-full group">
-      <Card className="flex flex-col overflow-hidden h-full transition-shadow duration-300 hover:shadow-xl">
+      <Card className="flex flex-col overflow-hidden h-full transition-shadow duration-300">
         <CardHeader className="p-0 relative">
             <div className="relative w-full h-80 overflow-hidden">
                 <Image
