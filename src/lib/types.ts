@@ -54,7 +54,7 @@ export interface Brand {
 
 export interface Order {
   id: string;
-  userId?: string;
+  userId: string;
   orderDate?: Timestamp;
   date?: string; // For mock data compatibility
   totalAmount?: number;
@@ -110,5 +110,7 @@ export interface ShippingGovernorate {
     name: string;
     shippingCost: number;
 }
+
+    
 
     
