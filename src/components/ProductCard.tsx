@@ -39,7 +39,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const imageHint2 = product.imageHints?.[1];
 
   return (
-    <Link href={`/products/${product.id}`} className="block group w-[250px] h-[400px]">
+    <Link href={`/products/${product.id}`} className="block group w-[250px] h-[430px]">
       <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
             <div className="relative w-full h-52 overflow-hidden">
@@ -76,7 +76,7 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.description}
           </p>
         </CardContent>
-        <CardFooter className="p-4 pt-0 mt-auto">
+        <CardFooter className="p-4 pt-0">
             <Button 
                 onClick={handleAddToCart} 
                 aria-label={`Add ${product.name} to cart`}
