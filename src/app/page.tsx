@@ -147,7 +147,7 @@ export default function Home() {
           <CarouselContent>
             {isLoadingDailyDeals ? (
               Array.from({ length: 8 }).map((_, index) => (
-                <CarouselItem key={index} className="basis-1/4 p-2">
+                <CarouselItem key={index} className="p-2" style={{ flex: '0 0 280px' }}>
                   <div className="space-y-2">
                     <Skeleton className="h-80 w-full" />
                     <Skeleton className="h-6 w-3/4" />
@@ -158,7 +158,7 @@ export default function Home() {
               ))
             ) : (
               dailyDeals?.map((product) => (
-                <CarouselItem key={product.id} className="basis-1/4 p-2">
+                <CarouselItem key={product.id} className="p-2" style={{ flex: '0 0 280px' }}>
                   <ProductCard product={product} />
                 </CarouselItem>
               ))
@@ -183,7 +183,7 @@ export default function Home() {
           <CarouselContent>
             {isLoadingProducts ? (
               Array.from({ length: 8 }).map((_, index) => (
-                <CarouselItem key={index} className="basis-1/4 p-2">
+                <CarouselItem key={index} className="p-2" style={{ flex: '0 0 280px' }}>
                   <div className="space-y-2">
                     <Skeleton className="h-80 w-full" />
                     <Skeleton className="h-6 w-3/4" />
@@ -194,7 +194,7 @@ export default function Home() {
               ))
             ) : (
               products?.map((product) => (
-                <CarouselItem key={product.id} className="basis-1/4 p-2">
+                <CarouselItem key={product.id} className="p-2" style={{ flex: '0 0 280px' }}>
                   <ProductCard product={product} />
                 </CarouselItem>
               ))
@@ -219,7 +219,7 @@ export default function Home() {
           <CarouselContent>
             {isLoadingBestSellers ? (
               Array.from({ length: 8 }).map((_, index) => (
-                <CarouselItem key={index} className="basis-1/4 p-2">
+                <CarouselItem key={index} className="p-2" style={{ flex: '0 0 280px' }}>
                   <div className="space-y-2">
                     <Skeleton className="h-80 w-full" />
                     <Skeleton className="h-6 w-3/4" />
@@ -230,7 +230,7 @@ export default function Home() {
               ))
             ) : (
               bestSellers?.map((product) => (
-                <CarouselItem key={product.id} className="basis-1/4 p-2">
+                <CarouselItem key={product.id} className="p-2" style={{ flex: '0 0 280px' }}>
                   <ProductCard product={product} />
                 </CarouselItem>
               ))
