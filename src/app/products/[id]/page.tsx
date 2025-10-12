@@ -16,14 +16,15 @@ import { Button } from '@/components/ui/button';
 
 function ProductPageSkeleton() {
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
           <div className="space-y-4">
-              <Skeleton className="w-full h-[600px] rounded-lg" />
-              <div className="flex gap-4">
-                  <Skeleton className="w-20 h-20 rounded-md" />
-                  <Skeleton className="w-20 h-20 rounded-md" />
-                  <Skeleton className="w-20 h-20 rounded-md" />
+              <Skeleton className="w-full aspect-[3/4] rounded-lg" />
+              <div className="grid grid-cols-5 gap-2">
+                  <Skeleton className="w-full aspect-square rounded-md" />
+                  <Skeleton className="w-full aspect-square rounded-md" />
+                  <Skeleton className="w-full aspect-square rounded-md" />
+                  <Skeleton className="w-full aspect-square rounded-md" />
               </div>
           </div>
         <div className="space-y-6">
@@ -34,7 +35,9 @@ function ProductPageSkeleton() {
           <Skeleton className="h-5 w-full" />
           <Skeleton className="h-5 w-full" />
           <Skeleton className="h-5 w-2/3" />
-          <Skeleton className="h-12 w-full" />
+          <div className="pt-4">
+            <Skeleton className="h-12 w-full" />
+          </div>
         </div>
       </div>
     </div>
@@ -60,48 +63,49 @@ export default function ProductDetailPage() {
     return <ProductPageSkeleton />;
   }
 
-  if (!product) {
+  if (!isLoading && !product) {
     notFound();
   }
   
-  const selectedImageUrl = product.imageUrls?.[selectedImageIndex] || '';
-  const selectedImageHint = product.imageHints?.[selectedImageIndex] || '';
-
-  const hasSizes = product.sizes && product.sizes.length > 0;
+  // This check is now safe because we've already handled the loading and !product cases
+  const { name, description, price, rating, imageUrls, imageHints, sizes } = product!;
+  const selectedImageUrl = imageUrls?.[selectedImageIndex] || '';
+  const selectedImageHint = imageHints?.[selectedImageIndex] || '';
+  const hasSizes = sizes && sizes.length > 0;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
         <div className="space-y-4">
-          <div className="bg-card p-4 rounded-lg shadow-sm">
+          <div className="bg-card p-4 rounded-lg shadow-sm border">
             <Image
               src={selectedImageUrl}
-              alt={product.name}
+              alt={name}
               width={600}
               height={800}
-              className="w-full h-auto object-cover rounded-md"
+              className="w-full h-auto object-cover rounded-md aspect-[3/4]"
               data-ai-hint={selectedImageHint}
               priority
             />
           </div>
-          {product.imageUrls && product.imageUrls.length > 1 && (
-            <div className="flex gap-4">
-              {product.imageUrls.map((url, index) => (
+          {imageUrls && imageUrls.length > 1 && (
+            <div className="grid grid-cols-5 gap-2">
+              {imageUrls.map((url, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
                   className={cn(
-                    'w-20 h-20 rounded-md overflow-hidden border-2 transition-all',
-                    selectedImageIndex === index ? 'border-primary' : 'border-transparent'
+                    'aspect-square rounded-md overflow-hidden border-2 transition-all',
+                    selectedImageIndex === index ? 'border-primary ring-2 ring-primary/50' : 'border-border hover:border-primary/50'
                   )}
                 >
                   <Image
                     src={url}
-                    alt={`${product.name} thumbnail ${index + 1}`}
-                    width={80}
-                    height={80}
+                    alt={`${name} thumbnail ${index + 1}`}
+                    width={100}
+                    height={100}
                     className="w-full h-full object-cover"
-                    data-ai-hint={product.imageHints?.[index]}
+                    data-ai-hint={imageHints?.[index]}
                   />
                 </button>
               ))}
@@ -110,26 +114,29 @@ export default function ProductDetailPage() {
         </div>
         <div className="space-y-6">
           <div className="space-y-2">
-            <h1 className="text-4xl font-headline font-bold">{product.name}</h1>
+            <h1 className="text-4xl font-headline font-bold">{name}</h1>
             <div className="flex items-center gap-2">
-              <StarRating rating={product.rating} />
-              <span className="text-sm text-muted-foreground">({product.rating.toFixed(1)})</span>
+              <StarRating rating={rating} />
+              <span className="text-sm text-muted-foreground">({rating.toFixed(1)})</span>
             </div>
           </div>
           <p className="text-3xl font-semibold">
-            {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
+            {price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
           </p>
           <Separator />
 
+          <p className="text-muted-foreground leading-relaxed">{description}</p>
+
           {hasSizes && (
-            <div className="space-y-4">
-                <h3 className="text-lg font-medium">المقاسات المتاحة</h3>
+            <div className="space-y-4 pt-2">
+                <h3 className="text-sm font-medium text-foreground">المقاسات</h3>
                 <div className="flex flex-wrap gap-2">
-                    {product.sizes?.map(size => (
+                    {sizes?.map(size => (
                         <Button 
                             key={size}
                             variant={selectedSize === size ? "default" : "outline"}
                             onClick={() => setSelectedSize(size)}
+                            className="px-4 py-2"
                         >
                             {size}
                         </Button>
@@ -138,15 +145,15 @@ export default function ProductDetailPage() {
             </div>
           )}
 
-
-          <p className="text-lg leading-relaxed">{product.description}</p>
-          <AddToCartButton product={product} selectedSize={selectedSize} />
+          <div className="pt-4">
+            <AddToCartButton product={product!} selectedSize={selectedSize} />
+          </div>
         </div>
       </div>
       
       <Separator />
 
-      {firestore && <ProductRecommendations currentProduct={product} />}
+      {firestore && <ProductRecommendations currentProduct={product!} />}
     </div>
   );
 }
