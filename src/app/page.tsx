@@ -175,7 +175,7 @@ export default function Home() {
   }, [firestore]);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 overflow-hidden">
       {isLoadingHero ? (
         <HeroSectionSkeleton />
       ) : heroData ? (
@@ -214,54 +214,6 @@ export default function Home() {
         <div className="container mx-auto text-center py-20">لم يتم تكوين الواجهة الرئيسية بعد. يرجى إعدادها من لوحة التحكم.</div>
       )}
 
-      <section className="bg-card py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-              direction: "rtl",
-              dragFree: true,
-            }}
-            className="w-full max-w-6xl mx-auto"
-          >
-            <CarouselContent className="-ml-1">
-              {isLoadingBrands ? (
-                Array.from({ length: 6 }).map((_, index) => (
-                  <CarouselItem key={index} className="basis-1/3 sm:basis-1/4 md:basis-1/6 pl-1" style={{paddingLeft: '2.5px', paddingRight: '2.5px'}}>
-                     <div className="flex flex-col items-center justify-center gap-2">
-                        <Skeleton className="h-20 w-20 rounded-full" />
-                        <Skeleton className="h-6 w-24" />
-                    </div>
-                  </CarouselItem>
-                ))
-              ) : (
-                brands?.map((brand) => (
-                  <CarouselItem key={brand.id} className="basis-1/3 sm:basis-1/4 md:basis-1/6" style={{paddingLeft: '2.5px', paddingRight: '2.5px'}}>
-                     <Link href={`/brand/${encodeURIComponent(brand.name)}`} className="flex flex-col items-center justify-center gap-2 text-center p-4 rounded-lg transition-all">
-                        <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center p-2 group relative overflow-hidden ring-2 ring-transparent hover:ring-primary transition-all duration-300">
-                            <Image
-                            src={brand.logoUrl}
-                            alt={`${brand.name} logo`}
-                            width={80}
-                            height={80}
-                            className="object-contain transition-transform duration-300 group-hover:scale-110"
-                            data-ai-hint={brand.logoHint}
-                            />
-                        </div>
-                        <p className="font-semibold mt-2 text-sm text-center">{brand.name}</p>
-                    </Link>
-                  </CarouselItem>
-                ))
-              )}
-            </CarouselContent>
-            <CarouselPrevious className="flex" />
-            <CarouselNext className="flex" />
-          </Carousel>
-        </div>
-      </section>
-
       {categories1 && categories1.length > 0 && <CategoryShowcase categories={categories1} isLoading={isLoadingCategories} />}
 
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -271,7 +223,7 @@ export default function Home() {
             align: "start",
             direction: "rtl",
           }}
-          className="w-full max-w-6xl mx-auto"
+          className="w-full"
         >
           <CarouselContent>
             {isLoadingDailyDeals ? (
@@ -293,8 +245,8 @@ export default function Home() {
               ))
             )}
           </CarouselContent>
-          <CarouselPrevious className="flex" />
-          <CarouselNext className="flex" />
+          <CarouselPrevious className="hidden md:flex" />
+          <CarouselNext className="hidden md:flex" />
         </Carousel>
       </section>
 
@@ -305,7 +257,7 @@ export default function Home() {
             align: "start",
             direction: "rtl",
           }}
-          className="w-full max-w-6xl mx-auto"
+          className="w-full"
         >
           <CarouselContent>
             {isLoadingProducts ? (
@@ -327,8 +279,8 @@ export default function Home() {
               ))
             )}
           </CarouselContent>
-          <CarouselPrevious className="flex" />
-          <CarouselNext className="flex" />
+          <CarouselPrevious className="hidden md:flex" />
+          <CarouselNext className="hidden md:flex" />
         </Carousel>
       </section>
       
@@ -341,7 +293,7 @@ export default function Home() {
             align: "start",
             direction: "rtl",
           }}
-          className="w-full max-w-6xl mx-auto"
+          className="w-full"
         >
           <CarouselContent>
             {isLoadingBestSellers ? (
@@ -363,8 +315,8 @@ export default function Home() {
               ))
             )}
           </CarouselContent>
-          <CarouselPrevious className="flex" />
-          <CarouselNext className="flex" />
+          <CarouselPrevious className="hidden md:flex" />
+          <CarouselNext className="hidden md:flex" />
         </Carousel>
       </section>
 
