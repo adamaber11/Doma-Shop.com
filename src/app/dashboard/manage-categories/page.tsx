@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -37,6 +38,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const categorySchema = z.object({
   name: z.string().min(2, 'اسم الفئة مطلوب'),
@@ -153,33 +155,36 @@ export default function ManageCategoriesPage() {
               <DialogTitle>{editingCategory ? 'تعديل الفئة' : 'إضافة فئة جديدة'}</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم الفئة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField
-                  control={form.control}
-                  name="parentId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الفئة الرئيسية (اختياري)</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(value === 'none' ? null : value)} value={field.value || 'none'} disabled={isLoadingCategories}>
-                        <FormControl>
-                          <SelectTrigger><SelectValue placeholder="اختر فئة رئيسية..." /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">-- لا يوجد --</SelectItem>
-                          {categories?.filter(c => c.id !== editingCategory?.id).map((category) => (<SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField control={form.control} name="imageUrl" render={({ field }) => (<FormItem><FormLabel>رابط الصورة</FormLabel><FormControl><Input placeholder="https://picsum.photos/seed/cat1/600/400" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="imageHint" render={({ field }) => (<FormItem><FormLabel>تلميح الصورة (AI)</FormLabel><FormControl><Input placeholder="مثال: mens fashion" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="callToActionText" render={({ field }) => (<FormItem><FormLabel>نص زر الإجراء</FormLabel><FormControl><Input placeholder="تسوق الآن" {...field} /></FormControl><FormMessage /></FormItem>)} />
-
-                <DialogFooter>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                 <ScrollArea className="h-[70vh] w-full pr-6">
+                    <div className="space-y-4 my-4">
+                        <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم الفئة</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField
+                        control={form.control}
+                        name="parentId"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>الفئة الرئيسية (اختياري)</FormLabel>
+                            <Select onValueChange={(value) => field.onChange(value === 'none' ? null : value)} value={field.value || 'none'} disabled={isLoadingCategories}>
+                                <FormControl>
+                                <SelectTrigger><SelectValue placeholder="اختر فئة رئيسية..." /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                <SelectItem value="none">-- لا يوجد --</SelectItem>
+                                {categories?.filter(c => c.id !== editingCategory?.id).map((category) => (<SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField control={form.control} name="imageUrl" render={({ field }) => (<FormItem><FormLabel>رابط الصورة</FormLabel><FormControl><Input placeholder="https://picsum.photos/seed/cat1/600/400" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="imageHint" render={({ field }) => (<FormItem><FormLabel>تلميح الصورة (AI)</FormLabel><FormControl><Input placeholder="مثال: mens fashion" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name="callToActionText" render={({ field }) => (<FormItem><FormLabel>نص زر الإجراء</FormLabel><FormControl><Input placeholder="تسوق الآن" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    </div>
+                 </ScrollArea>
+                <DialogFooter className="pt-4">
                   <DialogClose asChild><Button type="button" variant="outline">إلغاء</Button></DialogClose>
                   <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ'}</Button>
                 </DialogFooter>
