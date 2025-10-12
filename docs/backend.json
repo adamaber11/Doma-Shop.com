@@ -82,6 +82,9 @@
             "type": "number",
             "description": "Product rating out of 5."
         },
+        "reviewSummary": {
+            "$ref": "#/entities/ReviewSummary"
+        },
         "category": {
             "type": "string",
             "description": "Product category."
@@ -514,6 +517,32 @@
         }
       },
       "required": ["id", "name", "email", "subject", "message", "createdAt"]
+    },
+     "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "type": "object",
+      "description": "Represents a customer review for a product.",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "userName", "rating", "comment", "createdAt"]
+    },
+    "ReviewSummary": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ReviewSummary",
+      "type": "object",
+      "description": "Holds the aggregated review data for a product.",
+      "properties": {
+        "totalReviews": { "type": "number" },
+        "averageRating": { "type": "number" }
+      },
+      "required": ["totalReviews", "averageRating"]
     }
   },
   "auth": {
@@ -528,6 +557,12 @@
           "$ref": "#/entities/Product"
         },
         "description": "Stores all products available in the e-commerce store."
+      },
+      "/products/{productId}/reviews": {
+        "schema": {
+          "$ref": "#/entities/Review"
+        },
+        "description": "Stores all reviews for a specific product."
       },
       "/categories": {
         "schema": {

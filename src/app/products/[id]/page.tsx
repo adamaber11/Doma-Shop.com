@@ -18,6 +18,7 @@ import CountdownTimer from '@/components/CountdownTimer';
 import Link from 'next/link';
 import { Tag, CheckCircle, Package, Check, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import Reviews from '@/components/Reviews';
 
 function ProductPageSkeleton() {
   return (
@@ -107,7 +108,7 @@ export default function ProductDetailPage() {
   }
   
   // This check is now safe because we've already handled the loading and !product cases
-  const { name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, stock, variants } = product!;
+  const { name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, stock, variants, reviewSummary } = product!;
   
   const hasSizes = sizes && sizes.length > 0;
   const hasVariants = variants && variants.length > 0;
@@ -185,6 +186,7 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-2">
               <StarRating rating={rating} />
               <span className="text-sm text-muted-foreground">({rating.toFixed(1)})</span>
+              <a href="#reviews" className="text-sm text-muted-foreground hover:underline">({reviewSummary?.totalReviews || 0} تقييمات)</a>
             </div>
           </div>
           <div className="flex items-baseline gap-2">
@@ -315,6 +317,10 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+      
+      <Separator id="reviews" />
+
+      <Reviews productId={product.id} />
       
       <Separator />
 

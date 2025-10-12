@@ -8,6 +8,11 @@ export interface ProductVariant {
   imageHints: string[];
 }
 
+export interface ReviewSummary {
+    totalReviews: number;
+    averageRating: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -18,6 +23,7 @@ export interface Product {
   imageHints: string[]; // Default hints
   variants?: ProductVariant[];
   rating: number;
+  reviewSummary?: ReviewSummary;
   category: string;
   brand: string;
   sizes?: string[];
@@ -124,4 +130,13 @@ export interface ContactMessage {
   message: string;
   createdAt: Timestamp;
   isRead: boolean;
+}
+
+export interface Review {
+    id: string;
+    userId: string;
+    userName: string;
+    rating: number;
+    comment: string;
+    createdAt: Timestamp;
 }
