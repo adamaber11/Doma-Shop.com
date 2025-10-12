@@ -68,7 +68,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <p className="text-lg font-semibold text-primary">
             {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
           </p>
-          <p className="text-sm text-muted-foreground mt-2 line-clamp-2 h-[2.5em]">
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-2 h-[2.5rem]">
             {product.description}
           </p>
         </CardContent>
