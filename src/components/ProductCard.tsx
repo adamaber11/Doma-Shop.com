@@ -18,12 +18,10 @@ export default function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Always prevent the Link navigation when the button is clicked.
+    e.preventDefault(); // Prevent link navigation
     if (product.sizes && product.sizes.length > 0) {
-        // If the product has sizes, clicking the cart on the card should navigate to the product page.
         router.push(`/products/${product.id}`);
     } else {
-        // If no sizes, add directly to cart.
         addToCart(product, 1);
         toast({
           title: 'تمت الإضافة إلى السلة',
@@ -46,7 +44,7 @@ export default function ProductCard({ product }: { product: Product }) {
     <Link href={`/products/${product.id}`} className="block group w-full h-full">
       <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
-            <div className="relative w-full aspect-[4/3] overflow-hidden">
+            <div className="relative w-full h-[300px] overflow-hidden">
                 <Image
                     src={imageUrl1}
                     alt={product.name}
@@ -75,7 +73,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <p className="text-xs text-muted-foreground">{product.category}</p>
             <StarRating rating={product.rating} />
           </div>
-          <CardTitle className="font-headline text-base group-hover:text-blue-600 group-hover:underline mt-1 mb-0">
+          <CardTitle className="font-headline text-base group-hover:text-primary group-hover:underline mt-1 mb-0">
             {product.name}
           </CardTitle>
            <div className="flex items-baseline gap-2">
@@ -97,7 +95,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 onClick={handleAddToCart} 
                 aria-label={`Add ${product.name} to cart`}
                 size="sm"
-                className="w-full bg-yellow-400 text-black hover:bg-yellow-500 rounded-full h-8 text-xs"
+                className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-full h-8 text-xs"
             >
                 <ShoppingCart className="mr-2 h-3 w-3" />
                 أضف إلى العربة
