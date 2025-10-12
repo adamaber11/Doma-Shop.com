@@ -56,14 +56,12 @@ export default function ProductCard({ product }: { product: Product }) {
         </CardHeader>
         <CardContent className="p-4 flex-grow flex flex-col">
           <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
-          <div className="flex justify-between items-start gap-2">
-            <CardTitle className="font-headline text-lg mb-1 h-12 overflow-hidden group-hover:text-primary">
-              {product.name}
-            </CardTitle>
-            <div className="flex items-center gap-1 shrink-0 pt-1">
-                <StarRating rating={product.rating} />
-                <span className="text-xs text-muted-foreground">({product.rating})</span>
-            </div>
+          <CardTitle className="font-headline text-lg mb-1 h-12 overflow-hidden group-hover:text-primary">
+            {product.name}
+          </CardTitle>
+          <div className="flex items-center gap-1 mb-2">
+            <StarRating rating={product.rating} />
+            <span className="text-xs text-muted-foreground">({product.rating})</span>
           </div>
            <p className="text-lg font-semibold text-destructive">
             {product.price.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}
