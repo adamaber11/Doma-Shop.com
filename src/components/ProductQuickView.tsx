@@ -63,8 +63,8 @@ export default function ProductQuickView() {
   // Reset state when product changes
   useEffect(() => {
     if (product) {
-      const hasVariants = product.variants && product.variants.length > 0;
-      setSelectedVariantIndex(hasVariants ? 0 : null);
+      // Always start with default images by setting variant index to null
+      setSelectedVariantIndex(null);
       setSelectedImageIndex(0);
       setSelectedSize(product.sizes && product.sizes.length > 0 ? undefined : '');
     }
