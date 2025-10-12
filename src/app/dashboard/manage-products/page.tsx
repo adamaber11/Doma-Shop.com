@@ -138,20 +138,20 @@ function AddProductDialog({ onProductAdded }: { onProductAdded: () => void }) {
                                 name="category"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>الفئة</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="اختر فئة..." />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {categories?.map((cat) => (
-                                                    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
+                                    <FormLabel>الفئة</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
+                                        <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="اختر فئة..." />
+                                        </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                        {categories?.map((cat) => (
+                                            <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                        ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
                                     </FormItem>
                                 )}
                             />
