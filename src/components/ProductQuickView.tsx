@@ -246,7 +246,7 @@ export default function ProductQuickView() {
                                     onClick={() => setSelectedVariantIndex(index)}
                                     className={cn(
                                         'flex flex-col items-center gap-2 p-1 rounded-md border-2 transition-all',
-                                        selectedVariantIndex === index ? 'border-primary ring-2 ring-primary/50' : 'border-transparent hover:border-primary/50'
+                                        selectedVariantIndex === index ? 'border-primary ring-2 ring-primary/50' : 'border-border hover:border-primary/50'
                                     )}
                                     aria-label={`Select color ${variant.color}`}
                                 >
@@ -322,3 +322,5 @@ export default function ProductQuickView() {
     </Sheet>
   );
 }
+
+    
