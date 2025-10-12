@@ -44,16 +44,16 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 
 const variantSchema = z.object({
-  color: z.string().min(1, "اسم اللون مطلوب"),
-  hex: z.string().regex(/^#[0-9a-fA-F]{6}$/, "كود الهيكس غير صالح"),
-  imageUrls: z.string().min(1, 'رابط صورة واحد على الأقل مطلوب'),
-  imageHints: z.string().min(1, 'تلميح صورة واحد على الأقل مطلوب'),
+  color: z.string().optional(),
+  hex: z.string().optional(),
+  imageUrls: z.string().optional(),
+  imageHints: z.string().optional(),
 });
 
 const productSchema = z.object({
-  name: z.string().min(2, 'اسم المنتج مطلوب'),
-  description: z.string().min(10, 'الوصف مطلوب (10 أحرف على الأقل)'),
-  price: z.coerce.number().min(0, 'السعر يجب أن يكون رقمًا موجبًا'),
+  name: z.string().optional(),
+  description: z.string().optional(),
+  price: z.coerce.number().optional(),
   originalPrice: z.coerce.number().optional().nullable(),
   category: z.string().optional(),
   brand: z.string().optional(),
@@ -117,16 +117,17 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
       if (!firestore) return;
 
       try {
-          const variants: ProductVariant[] | undefined = values.variants?.map(v => ({
-              ...v,
-              imageUrls: v.imageUrls.split(',').map(url => url.trim()),
-              imageHints: v.imageHints.split(',').map(hint => hint.trim()),
+          const variants: ProductVariant[] | undefined = values.variants?.filter(v => v.color && v.hex && v.imageUrls && v.imageHints).map(v => ({
+              color: v.color!,
+              hex: v.hex!,
+              imageUrls: v.imageUrls!.split(',').map(url => url.trim()),
+              imageHints: v.imageHints!.split(',').map(hint => hint.trim()),
           }));
 
         const newProductData: Omit<Product, 'id'> = {
-          name: values.name,
-          description: values.description,
-          price: values.price,
+          name: values.name || 'منتج بدون اسم',
+          description: values.description || 'لا يوجد وصف',
+          price: values.price || 0,
           category: values.category || 'غير مصنف',
           brand: values.brand || 'غير محدد',
           imageUrls: values.imageUrls?.split(',').map(url => url.trim()) || [],
@@ -179,7 +180,7 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
                   <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>اسم المنتج</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>الوصف</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="price" render={({ field }) => (<FormItem><FormLabel>السعر (AED)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField control={form.control} name="originalPrice" render={({ field }) => (<FormItem><FormLabel>السعر الأصلي (اختياري)</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                   </div>
                    <div className="grid grid-cols-2 gap-4">
