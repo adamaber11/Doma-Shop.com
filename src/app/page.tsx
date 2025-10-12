@@ -127,9 +127,7 @@ export default function Home() {
 
       <section className="bg-card py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="font-headline text-3xl font-bold text-center mb-8">
-            أشهر العلامات التجارية
-          </h2>
+          
           <Carousel
             opts={{
               align: "start",
@@ -176,9 +174,7 @@ export default function Home() {
       </section>
 
       <section id="daily-deals" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="font-headline text-3xl font-bold text-center mb-8">
-          العروض اليومية
-        </h2>
+        
         <Carousel
           opts={{
             align: "start",
@@ -212,9 +208,7 @@ export default function Home() {
       </section>
 
       <section id="featured-products" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="font-headline text-3xl font-bold text-center mb-8">
-          منتجاتنا المميزة
-        </h2>
+        
         <Carousel
           opts={{
             align: "start",
@@ -249,9 +243,7 @@ export default function Home() {
 
       <section id="shop-by-category" className="bg-card py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-headline text-3xl font-bold text-center mb-8">
-                تسوق حسب الفئة
-            </h2>
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {isLoadingCategories ? (
                     Array.from({ length: 4 }).map((_, i) => (
@@ -283,9 +275,7 @@ export default function Home() {
       </section>
 
       <section id="best-sellers" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="font-headline text-3xl font-bold text-center mb-8">
-          الأكثر مبيعًا
-        </h2>
+        
         <Carousel
           opts={{
             align: "start",
