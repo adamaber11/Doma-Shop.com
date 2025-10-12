@@ -318,11 +318,12 @@ export default function ProductDetailPage() {
         </div>
       </div>
       
-      <Separator id="reviews" />
-
-      <Reviews productId={product.id} />
+      <div id="reviews">
+        <Separator className="my-12"/>
+        <Reviews productId={product.id} />
+      </div>
       
-      <Separator />
+      <Separator className="my-12"/>
 
       {firestore && <ProductRecommendations currentProduct={product!} />}
     </div>

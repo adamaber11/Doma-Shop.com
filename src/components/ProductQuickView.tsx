@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { Tag, CheckCircle, Check, Info } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import Reviews from './Reviews';
 
 function QuickViewSkeleton() {
     return (
@@ -99,7 +100,7 @@ export default function ProductQuickView() {
     return null;
   }
 
-  const { name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, variants } = product;
+  const { id: productId, name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, variants, reviewSummary } = product;
   const selectedImageUrl = currentImages[selectedImageIndex] || '';
   const selectedImageHint = currentImageHints[selectedImageIndex] || '';
   
@@ -181,8 +182,9 @@ export default function ProductQuickView() {
                         <SheetTitle className="text-4xl font-headline font-bold text-right">{name}</SheetTitle>
                     </SheetHeader>
                     <div className="flex items-center gap-2">
-                    <StarRating rating={rating} />
-                    <span className="text-sm text-muted-foreground">({rating.toFixed(1)})</span>
+                        <StarRating rating={rating} />
+                        <span className="text-sm text-muted-foreground">({rating.toFixed(1)})</span>
+                        <a href="#reviews" className="text-sm text-muted-foreground hover:underline">({reviewSummary?.totalReviews || 0} تقييمات)</a>
                     </div>
                 </div>
                 <div className="flex items-baseline gap-2">
@@ -301,7 +303,15 @@ export default function ProductQuickView() {
                 </div>
             </div>
             
-            <div className='p-6'>
+            <div className='p-6' id="reviews">
+                <Separator />
+            </div>
+
+            <div className='p-6 pt-0'>
+                <Reviews productId={productId} />
+            </div>
+            
+            <div className='p-6 pt-0'>
                 <Separator />
             </div>
 
