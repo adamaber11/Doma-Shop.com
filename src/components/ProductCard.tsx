@@ -66,7 +66,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <p className="text-xs text-muted-foreground">{product.category}</p>
             <StarRating rating={product.rating} />
           </div>
-          <CardTitle className="font-headline text-base h-12 overflow-hidden group-hover:text-blue-600 group-hover:underline">
+          <CardTitle className="font-headline text-base group-hover:text-blue-600 group-hover:underline">
             {product.name}
           </CardTitle>
            <p className="text-sm font-semibold text-destructive group-hover:text-blue-600">
