@@ -11,9 +11,9 @@ import { useCart } from '@/hooks/use-cart';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { useAuth, useFirestore, useUser, useDoc, useMemoFirebase } from '@/firebase';
+import { useAuth, useFirestore, useUser } from '@/firebase';
 import { addDoc, collection, serverTimestamp, doc, writeBatch } from 'firebase/firestore';
-import type { ShippingAddress, OrderItem, CouponGame } from '@/lib/types';
+import type { ShippingAddress, OrderItem } from '@/lib/types';
 import { useState } from 'react';
 
 const shippingSchema = z.object({
@@ -22,7 +22,6 @@ const shippingSchema = z.object({
   city: z.string().min(2, 'المدينة مطلوبة'),
   country: z.string().min(2, 'الدولة مطلوبة'),
   postalCode: z.string().min(3, 'الرمز البريدي مطلوب'),
-  couponCode: z.string().optional(),
 });
 
 const paymentSchema = z.object({
@@ -39,13 +38,6 @@ export default function CheckoutPage() {
   const router = useRouter();
   const firestore = useFirestore();
   const { user } = useUser();
-  const [couponDiscount, setCouponDiscount] = useState(0);
-
-  const couponGameRef = useMemoFirebase(
-    () => (firestore ? doc(firestore, 'couponGames', 'active') : null),
-    [firestore]
-  );
-  const { data: couponGame } = useDoc<CouponGame>(couponGameRef);
 
   const form = useForm<z.infer<typeof checkoutSchema>>({
     resolver: zodResolver(checkoutSchema),
@@ -55,32 +47,13 @@ export default function CheckoutPage() {
       city: '',
       country: '',
       postalCode: '',
-      couponCode: '',
       cardNumber: '',
       expiryDate: '',
       cvc: '',
     },
   });
 
-  function handleApplyCoupon() {
-    const code = form.getValues('couponCode');
-    if (!code || !couponGame) {
-      toast({ variant: 'destructive', title: 'كود خصم غير صالح' });
-      return;
-    }
-    
-    const correctCoupon = couponGame.coupons[couponGame.correctCouponIndex];
-    if (code === correctCoupon.value) {
-      const discount = couponGame.discountPercentage;
-      setCouponDiscount(discount);
-      toast({ title: 'تم تطبيق الخصم بنجاح!', description: `لقد حصلت على خصم ${discount}%` });
-    } else {
-      toast({ variant: 'destructive', title: 'كود خصم غير صالح' });
-      setCouponDiscount(0);
-    }
-  }
-
-  const finalTotal = totalPrice - (totalPrice * couponDiscount / 100);
+  const finalTotal = totalPrice;
 
   async function onSubmit(values: z.infer<typeof checkoutSchema>) {
     if (!user || !firestore) {
@@ -197,26 +170,6 @@ export default function CheckoutPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>كود الخصم</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center gap-2">
-                   <FormField
-                    control={form.control}
-                    name="couponCode"
-                    render={({ field }) => (
-                      <FormItem className="flex-grow">
-                        <FormControl>
-                          <Input placeholder="أدخل كود الخصم" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="button" variant="outline" onClick={handleApplyCoupon}>تطبيق</Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
                   <CardTitle>معلومات الدفع</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -253,12 +206,6 @@ export default function CheckoutPage() {
                     <span>المجموع الفرعي</span>
                     <span>{totalPrice.toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
                 </div>
-                {couponDiscount > 0 && (
-                    <div className="flex justify-between text-green-600">
-                        <span>خصم الكوبون ({couponDiscount}%)</span>
-                        <span>-{(totalPrice - finalTotal).toLocaleString('ar-AE', { style: 'currency', currency: 'AED' })}</span>
-                    </div>
-                )}
             </div>
             <Separator className="my-4" />
             <div className="flex justify-between font-bold text-lg">

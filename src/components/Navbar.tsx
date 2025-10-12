@@ -11,7 +11,6 @@ export default function Navbar() {
         { href: '/shopping', label: 'التسوق' },
         { href: '/best-sellers', label: 'الاكثر مبيعا' },
         { href: '/daily-deals', label: 'العروض اليوميه' },
-        { href: '/coupons', label: 'كوبونات الخصم' },
       ];
 
   return (

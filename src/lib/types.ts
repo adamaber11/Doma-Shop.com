@@ -82,10 +82,3 @@ export interface ShippingAddress {
   country: string;
   postalCode: string;
 }
-
-export interface CouponGame {
-    id?: string;
-    coupons: { value: string }[];
-    correctCouponIndex: number;
-    discountPercentage: number;
-}
