@@ -1,11 +1,9 @@
 'use client';
 
-import { getProductRecommendations } from '@/ai/flows/product-recommendations';
 import type { Product } from '@/lib/types';
 import ProductCard from './ProductCard';
-import { useCollection } from '@/firebase';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
-import { useFirestore, useMemoFirebase } from '@/firebase/provider';
+import { useFirestore } from '@/firebase/provider';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
 
@@ -15,69 +13,51 @@ export default function ProductRecommendations({ currentProduct }: { currentProd
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function getRecommendations(currentProduct: Product) {
+    async function getRecommendations(product: Product) {
       if (!firestore) return;
+      setIsLoading(true);
+
       try {
-        const productsSnapshot = await getDocs(collection(firestore, 'products'));
-        const productCatalog = productsSnapshot.docs.map(doc => doc.data().name).join(', ');
+        // Query for products in the same category
+        const categoryQuery = query(
+          collection(firestore, 'products'),
+          where('category', '==', product.category),
+          where('id', '!=', product.id),
+          limit(4)
+        );
 
-        const browsingHistory = `User viewed: ${currentProduct.name}`;
-        const purchaseHistory = 'User has not purchased anything yet.';
+        // Query for products of the same brand
+        const brandQuery = query(
+          collection(firestore, 'products'),
+          where('brand', '==', product.brand),
+          where('id', '!=', product.id),
+          limit(4)
+        );
 
-        const result = await getProductRecommendations({
-          productCatalog,
-          browsingHistory,
-          purchaseHistory,
+        const [categorySnapshot, brandSnapshot] = await Promise.all([
+          getDocs(categoryQuery),
+          getDocs(brandQuery),
+        ]);
+
+        const categoryProducts = categorySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        const brandProducts = brandSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+
+        // Combine and deduplicate results
+        const combinedRecommendations = new Map<string, Product>();
+        [...categoryProducts, ...brandProducts].forEach(p => {
+          if (p.id !== product.id) {
+            combinedRecommendations.set(p.id, p);
+          }
         });
         
-        const recommendedNames = result.recommendations
-          .split(',')
-          .map(name => name.trim())
-          .filter(name => name); // Filter out empty strings
-          
-        let recommendedProducts: Product[] = [];
-        if (recommendedNames.length > 0) {
-          const q = query(
-            collection(firestore, 'products'), 
-            where('name', 'in', recommendedNames),
-            where('id', '!=', currentProduct.id),
-            limit(4)
-          );
-          const recommendedProductsSnapshot = await getDocs(q);
-          recommendedProducts = recommendedProductsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        }
-        
-        // Fallback if AI gives no recommendations or less than 4
-        if (recommendedProducts.length < 4) {
-          const fallbackLimit = 4 - recommendedProducts.length;
-          const currentIds = [currentProduct.id, ...recommendedProducts.map(p => p.id)];
-          
-          const q = query(
-              collection(firestore, 'products'),
-              where('category', '==', currentProduct.category),
-              where('id', 'not-in', currentIds),
-              limit(fallbackLimit)
-          );
-          const fallbackSnapshot = await getDocs(q);
-          const fallbackProducts = fallbackSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as Product));
-          setRecommendations([...recommendedProducts, ...fallbackProducts]);
-        } else {
-          setRecommendations(recommendedProducts);
-        }
+        // Take up to 4 unique recommendations
+        const finalRecommendations = Array.from(combinedRecommendations.values()).slice(0, 4);
+
+        setRecommendations(finalRecommendations);
 
       } catch (error) {
         console.error("Failed to get product recommendations:", error);
-        // Fallback to simple category-based recommendations on error
-        if (firestore) {
-            const q = query(
-                collection(firestore, 'products'),
-                where('category', '==', currentProduct.category),
-                where('id', '!=', currentProduct.id),
-                limit(4)
-            );
-            const fallbackSnapshot = await getDocs(q);
-            setRecommendations(fallbackSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as Product)));
-        }
+        setRecommendations([]); // Clear recommendations on error
       } finally {
         setIsLoading(false);
       }
