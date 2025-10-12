@@ -352,6 +352,57 @@
         "country",
         "postalCode"
       ]
+    },
+    "HeroSection": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "HeroSection",
+      "type": "object",
+      "description": "Represents the content of the hero section on the homepage.",
+      "properties": {
+        "headline": {
+          "type": "string",
+          "description": "The main headline text."
+        },
+        "subheading": {
+          "type": "string",
+          "description": "The subheading text below the main headline."
+        },
+        "imageUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the background image."
+        },
+        "imageHint": {
+          "type": "string",
+          "description": "AI hint for the background image."
+        },
+        "primaryActionText": {
+          "type": "string",
+          "description": "Text for the primary call-to-action button."
+        },
+        "primaryActionLink": {
+          "type": "string",
+          "description": "URL for the primary call-to-action button."
+        },
+        "secondaryActionText": {
+          "type": "string",
+          "description": "Text for the secondary call-to-action button."
+        },
+        "secondaryActionLink": {
+          "type": "string",
+          "description": "URL for the secondary call-to-action button."
+        }
+      },
+      "required": [
+        "headline",
+        "subheading",
+        "imageUrl",
+        "imageHint",
+        "primaryActionText",
+        "primaryActionLink",
+        "secondaryActionText",
+        "secondaryActionLink"
+      ]
     }
   },
   "auth": {
@@ -390,6 +441,12 @@
             "$ref": "#/entities/OrderItem"
         },
         "description": "Stores items for a specific order."
+      },
+      "/settings/heroSection": {
+        "schema": {
+          "$ref": "#/entities/HeroSection"
+        },
+        "description": "Stores the configuration for the homepage hero section. This is a single-document collection."
       }
     }
   }

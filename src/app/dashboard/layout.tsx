@@ -17,6 +17,7 @@ function DashboardNav() {
     { href: '/dashboard/manage-products', label: 'إدارة المنتجات' },
     { href: '/dashboard/manage-categories', label: 'إدارة الفئات' },
     { href: '/dashboard/manage-brands', label: 'إدارة العلامات التجارية' },
+    { href: '/dashboard/manage-hero', label: 'إدارة الواجهة' },
   ];
 
   return (
@@ -29,7 +30,7 @@ function DashboardNav() {
               href={link.href}
               className={cn(
                 'py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
-                pathname.startsWith(link.href) && (pathname === link.href || link.href !== '/dashboard')
+                pathname.startsWith(link.href) && (pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href)))
                   ? 'border-primary text-primary'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
               )}
@@ -86,3 +87,5 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+    

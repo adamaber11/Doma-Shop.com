@@ -82,3 +82,17 @@ export interface ShippingAddress {
   country: string;
   postalCode: string;
 }
+
+export interface HeroSection {
+  id: string;
+  headline: string;
+  subheading: string;
+  imageUrl: string;
+  imageHint: string;
+  primaryActionText: string;
+  primaryActionLink: string;
+  secondaryActionText: string;
+  secondaryActionLink: string;
+}
+
+    
