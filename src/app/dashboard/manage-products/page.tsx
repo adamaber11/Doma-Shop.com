@@ -181,7 +181,7 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
               imageHints: v.imageHints!.split(',').map(hint => hint.trim()),
           }));
   
-          const productData: Omit<Product, 'id'> = {
+          const productData: Partial<Omit<Product, 'id'>> = {
               name: values.name,
               description: values.description,
               price: values.price,
@@ -199,8 +199,13 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
               countryOfOrigin: values.countryOfOrigin,
               features: values.features ? values.features.split(',').map(f => f.trim()) : [],
               variants: variantsData && variantsData.length > 0 ? variantsData : [],
-              originalPrice: values.originalPrice || undefined,
           };
+          
+          if (values.originalPrice) {
+            productData.originalPrice = values.originalPrice;
+          } else {
+            productData.originalPrice = undefined;
+          }
           
           if (values.isDeal && values.dealDurationHours) {
               productData.dealEndDate = Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000);
@@ -213,10 +218,12 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
 
           if (isEditing) {
             const productRef = doc(firestore, 'products', product.id);
-            await updateDoc(productRef, productData as any); // Use `any` to bypass strict partial type-check which updateDoc has
+            // Firestore does not support `undefined` values. We need to create a clean object.
+            const cleanProductData = Object.fromEntries(Object.entries(productData).filter(([_, v]) => v !== undefined));
+            await updateDoc(productRef, cleanProductData);
             toast({ title: 'تم تحديث المنتج بنجاح!' });
           } else {
-            await addDoc(collection(firestore, 'products'), productData);
+            await addDoc(collection(firestore, 'products'), productData as Omit<Product, 'id'>);
             toast({ title: 'تمت إضافة المنتج بنجاح!' });
           }
 
