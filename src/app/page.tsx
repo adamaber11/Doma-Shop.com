@@ -242,36 +242,43 @@ export default function Home() {
       </section>
 
       <section id="shop-by-category" className="bg-card py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {isLoadingCategories ? (
-                    Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="space-y-2">
-                            <Skeleton className="h-40 w-full" />
-                            <Skeleton className="h-6 w-3/4 mx-auto" />
-                        </div>
-                    ))
-                ) : (
-                    categories?.map((category, index) => (
-                        <Link key={category.id} href={`/category/${encodeURIComponent(category.name)}`} className="group block">
-                            <div className="relative overflow-hidden rounded-lg shadow-md aspect-video">
-                                <Image
-                                    src={categoryImages[index % categoryImages.length].url}
-                                    alt={category.name}
-                                    fill
-                                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                                    data-ai-hint={categoryImages[index % categoryImages.length].hint}
-                                />
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                    <h3 className="font-headline text-2xl font-bold text-white drop-shadow-lg">{category.name}</h3>
-                                </div>
-                            </div>
-                        </Link>
-                    ))
-                )}
-            </div>
-        </div>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {isLoadingCategories ? (
+                      Array.from({ length: 4 }).map((_, i) => (
+                          <div key={i} className="space-y-2">
+                              <Skeleton className="h-64 w-full" />
+                          </div>
+                      ))
+                  ) : (
+                      categories?.map((category, index) => (
+                          <Link key={category.id} href={`/category/${encodeURIComponent(category.name)}`} className="group block">
+                              <div className="relative overflow-hidden rounded-lg shadow-md aspect-[4/5] border-4 border-white">
+                                  <Image
+                                      src={categoryImages[index % categoryImages.length].url}
+                                      alt={category.name}
+                                      fill
+                                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                      data-ai-hint={categoryImages[index % categoryImages.length].hint}
+                                  />
+                                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/50 transition-colors duration-300" />
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
+                                      <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                          <h3 className="font-headline text-3xl font-bold drop-shadow-lg">{category.name}</h3>
+                                          <p className="mt-2 text-sm max-w-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                              اكتشف مجموعتنا الواسعة من {category.name.toLowerCase()}.
+                                          </p>
+                                          <Button variant="outline" className="mt-4 bg-transparent text-white border-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white hover:text-black">
+                                              تسوق الآن
+                                          </Button>
+                                      </div>
+                                  </div>
+                              </div>
+                          </Link>
+                      ))
+                  )}
+              </div>
+          </div>
       </section>
 
       <section id="best-sellers" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
