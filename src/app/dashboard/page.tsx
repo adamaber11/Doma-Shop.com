@@ -24,7 +24,7 @@ import {
   Legend,
 } from 'recharts';
 import { useFirestore } from '@/firebase';
-import { collectionGroup, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collectionGroup, getDocs, query, orderBy } from 'firebase/firestore';
 import { useEffect, useState, useMemo } from 'react';
 import type { Order } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -61,10 +61,13 @@ export default function DashboardPage() {
       setIsLoading(true);
       
       const processOrders = (allOrders: Order[]) => {
+          // Filter out cancelled orders on the client side
+          const activeOrders = allOrders.filter(order => order.status !== 'Cancelled');
+          
           // Calculate stats
-          const revenue = allOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-          const sales = allOrders.length;
-          const customers = new Set(allOrders.map(order => order.userId)).size;
+          const revenue = activeOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+          const sales = activeOrders.length;
+          const customers = new Set(activeOrders.map(order => order.userId)).size;
 
           setTotalRevenue(revenue);
           setTotalSales(sales);
@@ -74,7 +77,7 @@ export default function DashboardPage() {
           const monthlySummary: { [key: string]: { sales: number; revenue: number } } = {};
           const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
 
-          allOrders.forEach(order => {
+          activeOrders.forEach(order => {
             if (order.orderDate) {
               const date = order.orderDate.toDate();
               const month = date.getMonth(); // 0-11
@@ -102,10 +105,9 @@ export default function DashboardPage() {
       };
 
       try {
-        // Try the query with ordering first
+        // Fetch all orders and order them. Filtering happens on the client.
         const ordersQuery = query(
           collectionGroup(firestore, 'orders'),
-          where('status', '!=', 'Cancelled'),
           orderBy('orderDate', 'desc')
         );
         const querySnapshot = await getDocs(ordersQuery);
@@ -115,11 +117,8 @@ export default function DashboardPage() {
       } catch (error) {
         console.error("Error fetching ordered dashboard data, trying fallback:", error);
         try {
-            // Fallback query without ordering if the index doesn't exist
-            const fallbackQuery = query(
-              collectionGroup(firestore, 'orders'),
-              where('status', '!=', 'Cancelled')
-            );
+            // Fallback query without ordering if the index doesn't exist yet.
+            const fallbackQuery = query(collectionGroup(firestore, 'orders'));
             const fallbackSnapshot = await getDocs(fallbackQuery);
             const fallbackOrders: Order[] = fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
             processOrders(fallbackOrders);
