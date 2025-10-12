@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { useCollection } from '@/firebase';
-import { collection, query, limit } from 'firebase/firestore';
+import { collection, query, limit, orderBy } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product, Brand } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,6 +29,18 @@ export default function Home() {
   );
   const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
 
+  const bestSellersQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'products'), orderBy('rating', 'desc'), limit(4)) : null),
+    [firestore]
+  );
+  const { data: bestSellers, isLoading: isLoadingBestSellers } = useCollection<Product>(bestSellersQuery);
+
+  const dailyDealsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'products'), limit(4)) : null), // Simple query for deals for now
+    [firestore]
+  );
+  const { data: dailyDeals, isLoading: isLoadingDailyDeals } = useCollection<Product>(dailyDealsQuery);
+
   const brandsQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, 'brands'), limit(10)) : null),
     [firestore]
@@ -36,7 +48,7 @@ export default function Home() {
   const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
 
   return (
-    <div className="flex flex-col" style={{gap: '5px'}}>
+    <div className="flex flex-col gap-5">
       <section className="relative h-[calc(60vh+20px)] w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden bg-secondary shadow-lg" style={{ marginTop: '5px' }}>
         {heroImage && (
           <Image
@@ -156,6 +168,51 @@ export default function Home() {
           <CarouselNext />
         </Carousel>
       </section>
+
+      <section id="best-sellers" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h2 className="font-headline text-3xl font-bold text-center mb-8">
+          الأكثر مبيعًا
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {isLoadingBestSellers ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="space-y-2">
+                    <Skeleton className="h-80 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-5 w-1/2" />
+                    <Skeleton className="h-8 w-1/4" />
+                  </div>
+              ))
+            ) : (
+              bestSellers?.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+              ))
+            )}
+        </div>
+      </section>
+      
+      <section id="daily-deals" className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h2 className="font-headline text-3xl font-bold text-center mb-8">
+          العروض اليومية
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {isLoadingDailyDeals ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="space-y-2">
+                    <Skeleton className="h-80 w-full" />
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-5 w-1/2" />
+                    <Skeleton className="h-8 w-1/4" />
+                  </div>
+              ))
+            ) : (
+              dailyDeals?.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+              ))
+            )}
+        </div>
+      </section>
+
     </div>
   );
 }
