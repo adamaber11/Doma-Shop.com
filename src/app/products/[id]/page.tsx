@@ -14,43 +14,51 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
+function ProductPageSkeleton() {
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+          <div className="space-y-4">
+              <Skeleton className="w-full h-[600px] rounded-lg" />
+              <div className="flex gap-4">
+                  <Skeleton className="w-20 h-20 rounded-md" />
+                  <Skeleton className="w-20 h-20 rounded-md" />
+                  <Skeleton className="w-20 h-20 rounded-md" />
+              </div>
+          </div>
+        <div className="space-y-6">
+          <Skeleton className="h-12 w-3/4" />
+          <Skeleton className="h-6 w-1/4" />
+          <Skeleton className="h-10 w-1/3" />
+          <Separator />
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-2/3" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const firestore = useFirestore();
+
   const productRef = useMemoFirebase(
     () => (firestore && id ? doc(firestore, 'products', id) : null),
     [firestore, id]
   );
   const { data: product, isLoading } = useDoc<Product>(productRef);
+
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
 
+  // Show skeleton while loading
   if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
-            <div className="space-y-4">
-                <Skeleton className="w-full h-[600px] rounded-lg" />
-                <div className="flex gap-4">
-                    <Skeleton className="w-20 h-20 rounded-md" />
-                    <Skeleton className="w-20 h-20 rounded-md" />
-                    <Skeleton className="w-20 h-20 rounded-md" />
-                </div>
-            </div>
-          <div className="space-y-6">
-            <Skeleton className="h-12 w-3/4" />
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-10 w-1/3" />
-            <Separator />
-            <Skeleton className="h-5 w-full" />
-            <Skeleton className="h-5 w-full" />
-            <Skeleton className="h-5 w-2/3" />
-            <Skeleton className="h-12 w-full" />
-          </div>
-        </div>
-      </div>
-    );
+    return <ProductPageSkeleton />;
   }
 
   // After loading, if product is still null, then it's a 404
