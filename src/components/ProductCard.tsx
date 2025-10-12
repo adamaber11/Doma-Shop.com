@@ -55,7 +55,7 @@ export default function ProductCard({ product }: { product: Product }) {
             </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow">
-          <CardTitle className="font-headline text-xl mb-2 h-14 overflow-hidden group-hover:text-primary">
+          <CardTitle className="font-headline text-lg mb-2 h-12 overflow-hidden group-hover:text-primary">
             {product.name}
           </CardTitle>
           <div className="flex items-center gap-2">
