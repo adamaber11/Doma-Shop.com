@@ -239,30 +239,29 @@ export default function ProductQuickView() {
                             <h3 className="text-sm font-medium text-foreground">اللون:</h3>
                             <span className="text-sm text-muted-foreground">{selectedColorName || 'يرجى التحديد'}</span>
                         </div>
-                         <TooltipProvider>
-                            <div className="flex flex-wrap gap-2">
-                                {variants.map((variant, index) => (
-                                    <Tooltip key={variant.color}>
-                                        <TooltipTrigger asChild>
-                                            <button
-                                                onClick={() => setSelectedVariantIndex(index)}
-                                                className={cn(
-                                                    'h-8 w-8 rounded-full border-2 transition-all flex items-center justify-center',
-                                                    selectedVariantIndex === index ? 'border-primary ring-2 ring-primary/50' : 'border-border hover:border-primary/50'
-                                                )}
-                                                style={{ backgroundColor: variant.hex }}
-                                                aria-label={`Select color ${variant.color}`}
-                                            >
-                                                {selectedVariantIndex === index && <Check className="h-5 w-5 text-white mix-blend-difference" />}
-                                            </button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>{variant.color}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                ))}
-                            </div>
-                        </TooltipProvider>
+                        <div className="flex flex-wrap gap-3">
+                            {variants.map((variant, index) => (
+                                <button
+                                    key={variant.color}
+                                    onClick={() => setSelectedVariantIndex(index)}
+                                    className={cn(
+                                        'flex flex-col items-center gap-2 p-1 rounded-md border-2 transition-all',
+                                        selectedVariantIndex === index ? 'border-primary ring-2 ring-primary/50' : 'border-transparent hover:border-primary/50'
+                                    )}
+                                    aria-label={`Select color ${variant.color}`}
+                                >
+                                    <Image
+                                        src={variant.imageUrls[0]}
+                                        alt={variant.color}
+                                        width={60}
+                                        height={80}
+                                        className="w-16 h-20 object-cover rounded-md"
+                                        data-ai-hint={variant.imageHints[0]}
+                                    />
+                                    <span className="text-xs text-muted-foreground">{variant.color}</span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 )}
 
@@ -323,5 +322,3 @@ export default function ProductQuickView() {
     </Sheet>
   );
 }
-
-    
