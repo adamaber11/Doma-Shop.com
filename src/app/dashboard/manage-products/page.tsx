@@ -114,48 +114,54 @@ const ProductFormDialog = forwardRef<HTMLDivElement, { categories: Category[], b
     });
 
     async function onSubmit(values: ProductFormData) {
-      if (!firestore) return;
-
-      try {
-          const variants: ProductVariant[] | undefined = values.variants?.filter(v => v.color && v.hex && v.imageUrls && v.imageHints).map(v => ({
-              color: v.color!,
-              hex: v.hex!,
-              imageUrls: v.imageUrls!.split(',').map(url => url.trim()),
-              imageHints: v.imageHints!.split(',').map(hint => hint.trim()),
-          }));
-
-        const newProductData: Omit<Product, 'id'> = {
-          name: values.name || 'منتج بدون اسم',
-          description: values.description || 'لا يوجد وصف',
-          price: values.price || 0,
-          category: values.category || 'غير مصنف',
-          brand: values.brand || 'غير محدد',
-          imageUrls: values.imageUrls?.split(',').map(url => url.trim()) || [],
-          imageHints: values.imageHints?.split(',').map(hint => hint.trim()) || [],
-          variants: variants,
-          rating: values.rating || 0,
-          sizes: values.sizes?.split(',').map(s => s.trim()) || [],
-          isFeatured: values.isFeatured,
-          isDeal: values.isDeal,
-          isBestSeller: values.isBestSeller,
-          originalPrice: values.originalPrice || undefined,
-          dealEndDate: values.isDeal && values.dealDurationHours 
-            ? Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000) 
-            : undefined,
-          material: values.material,
-          countryOfOrigin: values.countryOfOrigin,
-          features: values.features?.split(',').map(f => f.trim()) || [],
-        };
-        
-        await addDoc(collection(firestore, 'products'), newProductData);
-        toast({ title: 'تمت إضافة المنتج بنجاح!' });
-        form.reset();
-        setIsOpen(false);
-        onProductAdded();
-      } catch (error) {
-        console.error("Error adding product:", error);
-        toast({ variant: 'destructive', title: 'حدث خطأ ما' });
-      }
+        if (!firestore) return;
+    
+        try {
+            const variants: ProductVariant[] | undefined = values.variants?.filter(v => v.color && v.hex && v.imageUrls && v.imageHints).map(v => ({
+                color: v.color!,
+                hex: v.hex!,
+                imageUrls: v.imageUrls!.split(',').map(url => url.trim()),
+                imageHints: v.imageHints!.split(',').map(hint => hint.trim()),
+            }));
+    
+            const newProductData: Partial<Omit<Product, 'id'>> = {
+                name: values.name || 'منتج بدون اسم',
+                description: values.description || 'لا يوجد وصف',
+                price: values.price || 0,
+                category: values.category || 'غير مصنف',
+                brand: values.brand || 'غير محدد',
+                imageUrls: values.imageUrls?.split(',').map(url => url.trim()) || [],
+                imageHints: values.imageHints?.split(',').map(hint => hint.trim()) || [],
+                rating: values.rating || 0,
+                sizes: values.sizes?.split(',').map(s => s.trim()) || [],
+                isFeatured: values.isFeatured,
+                isDeal: values.isDeal,
+                isBestSeller: values.isBestSeller,
+                material: values.material,
+                countryOfOrigin: values.countryOfOrigin,
+                features: values.features?.split(',').map(f => f.trim()) || [],
+            };
+            
+            // Only add fields if they have a value to avoid sending `undefined` to Firestore
+            if (variants && variants.length > 0) {
+              newProductData.variants = variants;
+            }
+            if (values.originalPrice) {
+                newProductData.originalPrice = values.originalPrice;
+            }
+            if (values.isDeal && values.dealDurationHours) {
+                newProductData.dealEndDate = Timestamp.fromMillis(Date.now() + values.dealDurationHours * 60 * 60 * 1000);
+            }
+            
+            await addDoc(collection(firestore, 'products'), newProductData);
+            toast({ title: 'تمت إضافة المنتج بنجاح!' });
+            form.reset();
+            setIsOpen(false);
+            onProductAdded();
+        } catch (error) {
+            console.error("Error adding product:", error);
+            toast({ variant: 'destructive', title: 'حدث خطأ ما', description: (error as Error).message });
+        }
     }
 
     return (
@@ -484,5 +490,3 @@ export default function ManageProductsPage() {
     </div>
   );
 }
-
-    
