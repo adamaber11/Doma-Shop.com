@@ -1,27 +1,25 @@
 'use client';
 
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { useState } from 'react';
 import StarRating from '@/components/StarRating';
 import { Separator } from '@/components/ui/separator';
 import AddToCartButton from '@/components/AddToCartButton';
 import ProductRecommendations from '@/components/ProductRecommendations';
-import { useDoc } from '@/firebase';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useParams } from 'next/navigation';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const firestore = useFirestore();
   const productRef = useMemoFirebase(
-    () => (firestore ? doc(firestore, 'products', id) : null),
+    () => (firestore && id ? doc(firestore, 'products', id) : null),
     [firestore, id]
   );
   const { data: product, isLoading } = useDoc<Product>(productRef);
@@ -55,6 +53,7 @@ export default function ProductDetailPage() {
     );
   }
 
+  // After loading, if product is still null, then it's a 404
   if (!product) {
     notFound();
   }
@@ -76,6 +75,7 @@ export default function ProductDetailPage() {
               height={800}
               className="w-full h-auto object-cover rounded-md"
               data-ai-hint={selectedImageHint}
+              priority
             />
           </div>
           {product.imageUrls && product.imageUrls.length > 1 && (
