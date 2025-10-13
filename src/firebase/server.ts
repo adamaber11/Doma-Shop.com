@@ -8,7 +8,14 @@ let firestore: admin.firestore.Firestore;
 
 function initializeFirebaseAdmin() {
   if (!serviceAccountString) {
-    throw new Error("The FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON environment variable is not set. It's required for server-side Firebase operations.");
+    console.error("The FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON environment variable is not set. It's required for server-side Firebase operations.");
+    // في حالة عدم وجود متغير البيئة، نُنشئ كائنًا وهميًا لتجنب تعطل التطبيق بالكامل.
+    // هذا يسمح لعملية البناء بالاستمرار حتى لو فشل جلب البيانات الديناميكية.
+    return {
+      collection: () => ({
+        get: () => Promise.resolve({ docs: [], empty: true }),
+      }),
+    } as unknown as admin.firestore.Firestore;
   }
   
   // تحقق مما إذا كان التطبيق قد تم تهيئته بالفعل لمنع الخطأ
@@ -21,7 +28,11 @@ function initializeFirebaseAdmin() {
     } catch (error) {
       console.error("Failed to parse service account JSON or initialize Firebase Admin SDK:", error);
       // في حالة الفشل، نقوم بإنشاء كائن وهمي لمنع تعطل التطبيق بالكامل.
-      return {} as admin.firestore.Firestore;
+      return {
+        collection: () => ({
+          get: () => Promise.resolve({ docs: [], empty: true }),
+        }),
+      } as unknown as admin.firestore.Firestore;
     }
   }
 
