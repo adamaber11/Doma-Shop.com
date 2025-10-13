@@ -1,48 +1,39 @@
-'use client';
-
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/types';
-import { collection, query, where } from 'firebase/firestore';
 import ProductCard from '@/components/ProductCard';
-import { Skeleton } from '@/components/ui/skeleton';
 import { notFound } from 'next/navigation';
+import { firestore } from '@/firebase/server';
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const firestore = useFirestore();
+interface PageProps {
+  params: { slug: string };
+}
+
+async function getProductsByCategory(categoryName: string): Promise<Product[] | null> {
+    try {
+        const productsRef = firestore.collection('products');
+        const snapshot = await productsRef.where('category', '==', categoryName).get();
+        
+        if (snapshot.empty) {
+            return [];
+        }
+
+        const products: Product[] = [];
+        snapshot.forEach(doc => {
+            products.push({ id: doc.id, ...doc.data() } as Product);
+        });
+
+        return products;
+    } catch (error) {
+        console.error("Error fetching products by category:", error);
+        return null;
+    }
+}
+
+export default async function CategoryPage({ params }: PageProps) {
   const categoryName = decodeURIComponent(params.slug);
-
-  const productsQuery = useMemoFirebase(
-    () =>
-      firestore
-        ? query(
-            collection(firestore, 'products'),
-            where('category', '==', categoryName)
-          )
-        : null,
-    [firestore, categoryName]
-  );
-  const { data: products, isLoading } = useCollection<Product>(productsQuery);
+  const products = await getProductsByCategory(categoryName);
   
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Skeleton className="h-10 w-1/3 mx-auto mb-8" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-80 w-full" />
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-5 w-1/2" />
-              <Skeleton className="h-8 w-1/4" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!products) {
-    notFound();
+  if (products === null) {
+    return <div className="text-center py-20">حدث خطأ أثناء جلب المنتجات.</div>;
   }
 
   return (

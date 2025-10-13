@@ -1,18 +1,7 @@
 
 import { MetadataRoute } from 'next';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { initializeFirebase } from '@/firebase/client-provider'; // Adjust path if needed
+import { firestore } from '@/firebase/server'; // Corrected import
 import type { Product, Category, Brand } from '@/lib/types';
-
-// Initialize Firebase Admin to fetch data on the server
-let firestore: any;
-try {
-    const { firestore: fs } = initializeFirebase();
-    firestore = fs;
-} catch (e) {
-    console.error("Firebase initialization failed for sitemap:", e);
-}
-
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://doma-shop.com';
 
@@ -44,16 +33,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : 0.8,
   }));
 
-  if (!firestore) {
-      console.warn("Firestore not initialized, returning only static routes for sitemap.");
-      return staticRoutes;
-  }
-
   try {
     // Dynamic product routes
-    const productsSnapshot = await getDocs(collection(firestore, 'products'));
+    const productsSnapshot = await firestore.collection('products').get();
     const productRoutes = productsSnapshot.docs.map((doc) => {
-        const product = doc.data() as Product;
         return {
         url: `${APP_URL}/products/${doc.id}`,
         lastModified,
@@ -63,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     // Dynamic category routes
-    const categoriesSnapshot = await getDocs(collection(firestore, 'categories'));
+    const categoriesSnapshot = await firestore.collection('categories').get();
     const categoryRoutes = categoriesSnapshot.docs.map((doc) => {
         const category = doc.data() as Category;
         return {
@@ -75,7 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     // Dynamic brand routes
-    const brandsSnapshot = await getDocs(collection(firestore, 'brands'));
+    const brandsSnapshot = await firestore.collection('brands').get();
     const brandRoutes = brandsSnapshot.docs.map((doc) => {
         const brand = doc.data() as Brand;
         return {
