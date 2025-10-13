@@ -139,7 +139,7 @@ export default function Home() {
         const snapshot1 = await getDocs(q1);
         const cats1 = snapshot1.docs.map(d => ({id: d.id, ...d.data()} as Category));
         setCategories1(cats1);
-        lastVisible = snapshot1.docs[snapshot1.docs.length-1];
+        lastVisible = snapshot1.docs.length > 0 ? snapshot1.docs[snapshot1.docs.length-1] : null;
 
         // Fetch second set
         if (lastVisible) {
@@ -147,7 +147,7 @@ export default function Home() {
           const snapshot2 = await getDocs(q2);
           const cats2 = snapshot2.docs.map(d => ({id: d.id, ...d.data()} as Category));
           setCategories2(cats2);
-          lastVisible = snapshot2.docs[snapshot2.docs.length-1];
+          lastVisible = snapshot2.docs.length > 0 ? snapshot2.docs[snapshot2.docs.length-1] : null;
         }
 
          // Fetch third set
