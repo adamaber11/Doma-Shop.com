@@ -1,6 +1,6 @@
 
 import { MetadataRoute } from 'next';
-import { firestore } from '@/firebase/server'; // Corrected import
+import { firestore } from '@/firebase/server'; // تصحيح الاستيراد ليعتمد على ملف الخادم
 import type { Product, Category, Brand } from '@/lib/types';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://doma-shop.com';
@@ -8,7 +8,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://doma-shop.com';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
 
-  // Static routes
+  // الروابط الثابتة في الموقع
   const staticRoutes = [
     '',
     '/about',
@@ -34,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    // Dynamic product routes
+    // جلب الروابط الديناميكية من Firestore
     const productsSnapshot = await firestore.collection('products').get();
     const productRoutes = productsSnapshot.docs.map((doc) => {
         return {
@@ -45,7 +45,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         };
     });
 
-    // Dynamic category routes
     const categoriesSnapshot = await firestore.collection('categories').get();
     const categoryRoutes = categoriesSnapshot.docs.map((doc) => {
         const category = doc.data() as Category;
@@ -57,7 +56,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         };
     });
 
-    // Dynamic brand routes
     const brandsSnapshot = await firestore.collection('brands').get();
     const brandRoutes = brandsSnapshot.docs.map((doc) => {
         const brand = doc.data() as Brand;
@@ -69,10 +67,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         };
     });
 
+    // دمج جميع الروابط
     return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...brandRoutes];
 
   } catch (error) {
     console.error("Error generating dynamic sitemap routes:", error);
-    return staticRoutes; // Fallback to static routes on error
+    // في حالة حدوث خطأ، يتم إرجاع الروابط الثابتة فقط لمنع فشل عملية البناء
+    return staticRoutes;
   }
 }

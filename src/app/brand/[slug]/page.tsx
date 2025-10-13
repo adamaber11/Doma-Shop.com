@@ -1,19 +1,23 @@
+
 import type { Product } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
-import { firestore } from '@/firebase/server';
+import { firestore } from '@/firebase/server'; // استيراد من ملف الخادم الجديد
 
+// تعريف واجهة الخصائص (props) لمكونات الخادم
 interface PageProps {
   params: { slug: string };
 }
 
+// دالة لجلب المنتجات حسب العلامة التجارية من جهة الخادم
 async function getProductsByBrand(brandName: string): Promise<Product[] | null> {
   try {
     const productsRef = firestore.collection('products');
+    // استخدام where للبحث عن المنتجات التي تطابق اسم العلامة التجارية
     const snapshot = await productsRef.where('brand', '==', brandName).get();
     
     if (snapshot.empty) {
-      return [];
+      return []; // إرجاع مصفوفة فارغة إذا لم يتم العثور على منتجات
     }
 
     const products: Product[] = [];
@@ -24,24 +28,24 @@ async function getProductsByBrand(brandName: string): Promise<Product[] | null> 
     return products;
   } catch (error) {
     console.error("Error fetching products by brand:", error);
-    return null;
+    return null; // إرجاع null في حالة حدوث خطأ
   }
 }
 
+// تعريف المكون كـ async ليتمكن من جلب البيانات
 export default async function BrandPage({ params }: PageProps) {
+  // فك ترميز الـ slug للحصول على اسم العلامة التجارية الصحيح
   const brandName = decodeURIComponent(params.slug);
   const products = await getProductsByBrand(brandName);
 
+  // في حالة حدوث خطأ أثناء جلب البيانات
   if (products === null) {
-    // This could be a 500 error page in a real app
     return <div className="text-center py-20">حدث خطأ أثناء جلب المنتجات.</div>;
   }
   
-  // Unlike client components, we can't determine "loading" state here.
-  // If we want a notFound for a brand that exists but has no products, this is correct.
-  // If we want a "not found" for a brand that doesn't exist at all, a separate query would be needed.
-  // For simplicity, we assume an empty array means the brand is valid but has no items to show.
-
+  // إذا لم يتم العثور على منتجات، يمكن عرض صفحة "غير موجود"
+  // أو عرض رسالة للمستخدم. هنا نعرض رسالة.
+  
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="font-headline text-4xl font-bold text-center mb-8">

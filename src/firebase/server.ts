@@ -1,32 +1,35 @@
+
 import * as admin from 'firebase-admin';
 
-// This is the service account JSON, stored as a string.
-// It's safe to be here as it's only used on the server.
+// ملاحظة: تأكد من أن متغير البيئة هذا متاح في بيئة النشر (Vercel, etc.).
 const serviceAccountString = process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON;
-
-if (!serviceAccountString) {
-  throw new Error("The FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON environment variable is not set. It's required for server-side Firebase operations.");
-}
 
 let firestore: admin.firestore.Firestore;
 
-try {
-  const serviceAccount = JSON.parse(serviceAccountString);
-
-  // Check if the app is already initialized
+function initializeFirebaseAdmin() {
+  if (!serviceAccountString) {
+    throw new Error("The FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON environment variable is not set. It's required for server-side Firebase operations.");
+  }
+  
+  // تحقق مما إذا كان التطبيق قد تم تهيئته بالفعل لمنع الخطأ
   if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
+    try {
+      const serviceAccount = JSON.parse(serviceAccountString);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+    } catch (error) {
+      console.error("Failed to parse service account JSON or initialize Firebase Admin SDK:", error);
+      // في حالة الفشل، نقوم بإنشاء كائن وهمي لمنع تعطل التطبيق بالكامل.
+      return {} as admin.firestore.Firestore;
+    }
   }
 
-  firestore = admin.firestore();
-
-} catch (error) {
-  console.error("Failed to initialize Firebase Admin SDK:", error);
-  // Create a mock firestore object on error to prevent the app from crashing,
-  // though server-side operations will fail.
-  firestore = {} as admin.firestore.Firestore;
+  return admin.firestore();
 }
 
+// قم بتهيئة firestore مرة واحدة فقط
+firestore = initializeFirebaseAdmin();
+
+// تصدير firestore instance لاستخدامه في جميع أنحاء الخادم.
 export { firestore };

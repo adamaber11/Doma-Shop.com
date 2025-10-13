@@ -1,19 +1,23 @@
+
 import type { Product } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
-import { firestore } from '@/firebase/server';
+import { firestore } from '@/firebase/server'; // استيراد من ملف الخادم الجديد
 
+// تعريف واجهة الخصائص (props) لمكونات الخادم
 interface PageProps {
   params: { slug: string };
 }
 
+// دالة لجلب المنتجات حسب الفئة من جهة الخادم
 async function getProductsByCategory(categoryName: string): Promise<Product[] | null> {
     try {
         const productsRef = firestore.collection('products');
+        // استخدام where للبحث عن المنتجات التي تطابق اسم الفئة
         const snapshot = await productsRef.where('category', '==', categoryName).get();
         
         if (snapshot.empty) {
-            return [];
+            return []; // إرجاع مصفوفة فارغة إذا لم يتم العثور على منتجات
         }
 
         const products: Product[] = [];
@@ -24,14 +28,17 @@ async function getProductsByCategory(categoryName: string): Promise<Product[] | 
         return products;
     } catch (error) {
         console.error("Error fetching products by category:", error);
-        return null;
+        return null; // إرجاع null في حالة حدوث خطأ
     }
 }
 
+// تعريف المكون كـ async ليتمكن من جلب البيانات
 export default async function CategoryPage({ params }: PageProps) {
+  // فك ترميز الـ slug للحصول على اسم الفئة الصحيح
   const categoryName = decodeURIComponent(params.slug);
   const products = await getProductsByCategory(categoryName);
   
+  // في حالة حدوث خطأ أثناء جلب البيانات
   if (products === null) {
     return <div className="text-center py-20">حدث خطأ أثناء جلب المنتجات.</div>;
   }
