@@ -1,3 +1,4 @@
+
 import { Timestamp } from "firebase/firestore";
 
 export interface ProductVariant {
@@ -24,7 +25,6 @@ export interface Product {
   rating: number;
   reviewSummary?: ReviewSummary;
   category: string;
-  brand: string;
   sizes?: string[];
   stock: number;
   isFeatured?: boolean;
@@ -52,13 +52,6 @@ export interface Category {
   imageHint?: string;
   description?: string;
   callToActionText?: string;
-}
-
-export interface Brand {
-    id: string;
-    name: string;
-    logoUrl: string;
-    logoHint: string;
 }
 
 export interface Order {
@@ -154,3 +147,5 @@ export interface PopupModal {
     callToActionText: string;
     callToActionLink: string;
 }
+
+    

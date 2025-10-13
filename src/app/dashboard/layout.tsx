@@ -18,7 +18,6 @@ function DashboardNav() {
     { href: '/dashboard/messages', label: 'رسائل العملاء' },
     { href: '/dashboard/manage-products', label: 'إدارة المنتجات' },
     { href: '/dashboard/manage-categories', label: 'إدارة الفئات' },
-    { href: '/dashboard/manage-brands', label: 'إدارة العلامات التجارية' },
     { href: '/dashboard/manage-shipping', label: 'إدارة الشحن' },
     { href: '/dashboard/manage-hero', label: 'إدارة الواجهة' },
     { href: '/dashboard/manage-socials', label: 'إدارة التواصل الاجتماعي' },
@@ -92,3 +91,5 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+    

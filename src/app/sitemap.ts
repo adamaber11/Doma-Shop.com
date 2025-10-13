@@ -1,14 +1,14 @@
 
 import { MetadataRoute } from 'next';
-import { firestore } from '@/firebase/server'; // تصحيح الاستيراد ليعتمد على ملف الخادم
-import type { Product, Category, Brand } from '@/lib/types';
+import { firestore } from '@/firebase/server';
+import type { Product, Category } from '@/lib/types';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://doma-shop.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
 
-  // الروابط الثابتة في الموقع
+  // Static routes
   const staticRoutes = [
     '',
     '/about',
@@ -34,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
-    // جلب الروابط الديناميكية من Firestore
+    // Dynamic routes from Firestore
     const productsSnapshot = await firestore.collection('products').get();
     const productRoutes = productsSnapshot.docs.map((doc) => {
         return {
@@ -56,23 +56,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         };
     });
 
-    const brandsSnapshot = await firestore.collection('brands').get();
-    const brandRoutes = brandsSnapshot.docs.map((doc) => {
-        const brand = doc.data() as Brand;
-        return {
-        url: `${APP_URL}/brand/${encodeURIComponent(brand.name)}`,
-        lastModified,
-        changeFrequency: 'weekly' as 'weekly',
-        priority: 0.6,
-        };
-    });
-
-    // دمج جميع الروابط
-    return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...brandRoutes];
+    // Combine all routes
+    return [...staticRoutes, ...productRoutes, ...categoryRoutes];
 
   } catch (error) {
     console.error("Error generating dynamic sitemap routes:", error);
-    // في حالة حدوث خطأ، يتم إرجاع الروابط الثابتة فقط لمنع فشل عملية البناء
+    // On error, return only static routes to prevent build failure
     return staticRoutes;
   }
 }
+
+    

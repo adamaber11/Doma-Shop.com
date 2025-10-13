@@ -100,7 +100,7 @@ export default function ProductQuickView() {
     return null;
   }
 
-  const { id: productId, name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, variants, reviewSummary } = product;
+  const { id: productId, name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, material, countryOfOrigin, features, variants, reviewSummary } = product;
   const selectedImageUrl = currentImages[selectedImageIndex] || '';
   const selectedImageHint = currentImageHints[selectedImageIndex] || '';
   
@@ -172,10 +172,6 @@ export default function ProductQuickView() {
                     <div className="flex gap-4 items-center text-xs sm:text-sm text-muted-foreground">
                         <Link onClick={closeQuickView} href={`/category/${encodeURIComponent(category)}`} className="hover:text-primary hover:underline flex items-center gap-1">
                             <Tag className="w-4 h-4" /> {category}
-                        </Link>
-                        <span>/</span>
-                        <Link onClick={closeQuickView} href={`/brand/${encodeURIComponent(brand)}`} className="hover:text-primary hover:underline">
-                            {brand}
                         </Link>
                     </div>
                     <SheetHeader>
@@ -317,3 +313,5 @@ export default function ProductQuickView() {
     </Sheet>
   );
 }
+
+    

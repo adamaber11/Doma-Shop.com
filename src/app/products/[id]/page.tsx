@@ -1,3 +1,4 @@
+
 'use client';
 
 import { notFound, useParams } from 'next/navigation';
@@ -107,7 +108,7 @@ export default function ProductDetailPage() {
   }
   
   // This check is now safe because we've already handled the loading and !product cases
-  const { name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, brand, material, countryOfOrigin, features, stock, variants, reviewSummary } = product!;
+  const { name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, material, countryOfOrigin, features, stock, variants, reviewSummary } = product!;
   
   const hasSizes = sizes && sizes.length > 0;
   const hasVariants = variants && variants.length > 0;
@@ -175,10 +176,6 @@ export default function ProductDetailPage() {
             <div className="flex gap-4 items-center text-sm text-muted-foreground">
                 <Link href={`/category/${encodeURIComponent(category)}`} className="hover:text-primary hover:underline flex items-center gap-1">
                     <Tag className="w-4 h-4" /> {category}
-                </Link>
-                <span>/</span>
-                <Link href={`/brand/${encodeURIComponent(brand)}`} className="hover:text-primary hover:underline">
-                    {brand}
                 </Link>
             </div>
             <h1 className="text-4xl font-headline font-bold">{name}</h1>
@@ -328,3 +325,5 @@ export default function ProductDetailPage() {
     </div>
   );
 }
+
+    

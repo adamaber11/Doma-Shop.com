@@ -8,7 +8,7 @@ import ProductCard from '@/components/ProductCard';
 import { useCollection, useDoc } from '@/firebase';
 import { collection, query, limit, where, doc, startAfter, getDocs } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
-import type { Product, Brand, HeroSection, Category } from '@/lib/types';
+import type { Product, HeroSection, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Carousel,
@@ -126,12 +126,6 @@ export default function Home() {
     [firestore]
   );
   const { data: dailyDeals, isLoading: isLoadingDailyDeals } = useCollection<Product>(dailyDealsQuery);
-
-  const brandsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'brands'), limit(12)) : null),
-    [firestore]
-  );
-  const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
   
   useEffect(() => {
     async function fetchCategories() {
@@ -325,3 +319,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

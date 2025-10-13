@@ -89,10 +89,6 @@
             "type": "string",
             "description": "Product category."
         },
-        "brand": {
-            "type": "string",
-            "description": "Product brand."
-        },
         "sizes": {
             "type": "array",
             "description": "Available sizes for the product.",
@@ -146,7 +142,6 @@
         "imageHints",
         "rating",
         "category",
-        "brand",
         "stock"
       ]
     },
@@ -221,37 +216,6 @@
       "required": [
         "id",
         "name"
-      ]
-    },
-    "Brand": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Brand",
-      "type": "object",
-      "description": "Represents a brand for products.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the brand."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the brand."
-        },
-        "logoUrl": {
-          "type": "string",
-          "description": "URL of the brand logo.",
-          "format": "uri"
-        },
-        "logoHint": {
-          "type": "string",
-          "description": "AI hint for the brand logo."
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "logoUrl",
-        "logoHint"
       ]
     },
     "Order": {
@@ -634,12 +598,6 @@
         },
         "description": "Stores all product categories."
       },
-      "/brands": {
-        "schema": {
-            "$ref": "#/entities/Brand"
-        },
-        "description": "Stores all product brands."
-      },
       "/users/{userId}/orders": {
         "schema": {
           "$ref": "#/entities/Order"
@@ -691,3 +649,5 @@
     }
   }
 }
+
+    

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, forwardRef, useEffect } from 'react';
@@ -12,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { addDoc, collection, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
-import type { Product, Category, Brand, ProductVariant } from '@/lib/types';
+import type { Product, Category, ProductVariant } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PlusCircle, Edit, Trash2, X } from 'lucide-react';
 import {
@@ -56,7 +57,6 @@ const productSchema = z.object({
   price: z.coerce.number().positive('السعر يجب أن يكون رقمًا موجبًا'),
   originalPrice: z.coerce.number().positive('السعر الأصلي يجب أن يكون رقمًا موجبًا').optional().nullable(),
   category: z.string().min(1, 'الفئة مطلوبة'),
-  brand: z.string().min(1, 'العلامة التجارية مطلوبة'),
   imageUrls: z.string().min(1, 'رابط صورة واحد على الأقل مطلوب'),
   imageHints: z.string().min(1, 'تلميح صورة واحد على الأقل مطلوب'),
   rating: z.coerce.number().min(0, 'التقييم يجب أن يكون بين 0 و 5').max(5, 'التقييم يجب أن يكون بين 0 و 5'),
@@ -77,12 +77,11 @@ type ProductFormData = z.infer<typeof productSchema>;
 interface ProductFormProps {
   product?: Product | null;
   categories: Category[];
-  brands: Brand[];
   onFormSubmit: () => void;
   children: React.ReactNode;
 }
 
-function ProductForm({ product, categories, brands, onFormSubmit, children }: ProductFormProps) {
+function ProductForm({ product, categories, onFormSubmit, children }: ProductFormProps) {
   const { toast } = useToast();
   const firestore = useFirestore();
   const [isOpen, setIsOpen] = useState(false);
@@ -95,7 +94,6 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
         price: 0,
         originalPrice: undefined,
         category: '',
-        brand: '',
         imageUrls: '',
         imageHints: '',
         rating: 0,
@@ -139,7 +137,6 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
             price: 0,
             originalPrice: undefined,
             category: '',
-            brand: '',
             imageUrls: '',
             imageHints: '',
             rating: 0,
@@ -186,7 +183,6 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
               description: values.description,
               price: values.price,
               category: values.category,
-              brand: values.brand,
               imageUrls: values.imageUrls.split(',').map(url => url.trim()),
               imageHints: values.imageHints.split(',').map(hint => hint.trim()),
               rating: values.rating,
@@ -260,48 +256,26 @@ function ProductForm({ product, categories, brands, onFormSubmit, children }: Pr
                    <FormField control={form.control} name="stock" render={({ field }) => (<FormItem><FormLabel>الكمية المتاحة</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />
                    <FormField control={form.control} name="rating" render={({ field }) => (<FormItem><FormLabel>التقييم (0-5)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>الفئة</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="اختر فئة..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {categories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="brand"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>العلامة التجارية</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="اختر علامة تجارية..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {brands.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الفئة</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر فئة..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <FormField control={form.control} name="sizes" render={({ field }) => (<FormItem><FormLabel>المقاسات (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="S, M, L, XL" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 
@@ -447,9 +421,6 @@ export default function ManageProductsPage() {
   const categoriesQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'categories') : null), [firestore]);
   const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
-  const brandsQuery = useMemoFirebase(() => (firestore ? collection(firestore, 'brands') : null), [firestore]);
-  const { data: brands, isLoading: isLoadingBrands } = useCollection<Brand>(brandsQuery);
-
   const handleFormSubmit = () => {
     setUpdateTrigger(count => count + 1);
   };
@@ -465,14 +436,14 @@ export default function ManageProductsPage() {
     }
   }
 
-  const isLoading = isLoadingProducts || isLoadingCategories || isLoadingBrands;
+  const isLoading = isLoadingProducts || isLoadingCategories;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl sm:text-4xl font-headline font-bold">إدارة المنتجات</h1>
-        { !isLoading && categories && brands && (
-           <ProductForm categories={categories} brands={brands} onFormSubmit={handleFormSubmit}>
+        { !isLoading && categories && (
+           <ProductForm categories={categories} onFormSubmit={handleFormSubmit}>
               <Button>
                 <PlusCircle className="mr-0 sm:mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">إضافة منتج جديد</span>
@@ -520,8 +491,8 @@ export default function ManageProductsPage() {
                       <TableCell>{product.isBestSeller ? 'نعم' : 'لا'}</TableCell>
                       <TableCell>
                         <div className="flex gap-1 sm:gap-2">
-                          {!isLoading && categories && brands && (
-                            <ProductForm product={product} categories={categories} brands={brands} onFormSubmit={handleFormSubmit}>
+                          {!isLoading && categories && (
+                            <ProductForm product={product} categories={categories} onFormSubmit={handleFormSubmit}>
                                <Button variant="ghost" size="icon">
                                  <Edit className="h-4 w-4" />
                                </Button>
@@ -561,3 +532,5 @@ export default function ManageProductsPage() {
     </div>
   );
 }
+
+    
