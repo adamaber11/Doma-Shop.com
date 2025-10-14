@@ -12,7 +12,7 @@ import { ShoppingCart } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { useQuickView } from '@/hooks/use-quick-view';
 import { cn } from '@/lib/utils';
-import { Skeleton } from './ui/skeleton';
+import Link from 'next/link';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { openQuickView } = useQuickView();
@@ -34,11 +34,7 @@ export default function ProductCard({ product }: { product: Product }) {
         });
     }
   };
-
-  const handleCardClick = () => {
-    openQuickView(product);
-  };
-
+  
   const imageUrl1 = product.imageUrls?.[0] || 'https://picsum.photos/seed/placeholder/600/800';
   const imageHint1 = product.imageHints?.[0] || 'product';
   const imageUrl2 = product.imageUrls?.[1];
@@ -50,7 +46,7 @@ export default function ProductCard({ product }: { product: Product }) {
     : 0;
 
   return (
-    <div onClick={handleCardClick} className="block group w-full h-full cursor-pointer">
+    <Link href={`/products/${product.id}`} className="block group w-full h-full cursor-pointer">
       <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
             <div className="relative w-full aspect-square overflow-hidden">
@@ -120,6 +116,6 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
         </CardFooter>
       </Card>
-    </div>
+    </Link>
   );
 }

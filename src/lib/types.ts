@@ -73,9 +73,7 @@ export interface Order {
   userId: string;
   orderNumber?: number;
   orderDate?: Timestamp;
-  date?: string; // For mock data compatibility
   totalAmount?: number;
-  total?: number; // For mock data compatibility
   status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   shippingAddress?: ShippingAddress;
   shippingCost?: number;

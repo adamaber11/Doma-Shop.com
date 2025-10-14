@@ -1,124 +1,73 @@
 'use client';
 
-import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { notFound } from 'next/navigation';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useCart } from '@/hooks/use-cart';
-import { useToast } from '@/hooks/use-toast';
-import StarRating from '@/components/StarRating';
-import { ShoppingCart } from 'lucide-react';
-import CountdownTimer from '@/components/CountdownTimer';
-import { useQuickView } from '@/hooks/use-quick-view';
-import { cn } from '@/lib/utils';
+import ProductQuickViewContent from '@/components/ProductQuickViewContent';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function ProductCard({ product }: { product: Product }) {
-  const { openQuickView } = useQuickView();
-  const { addToCart } = useCart();
-  const { toast } = useToast();
+
+interface PageProps {
+  params: { id: string };
+}
+
+function ProductPageSkeleton() {
+    return (
+      <div className="container mx-auto max-w-6xl py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start">
+            <div className="space-y-4">
+                <Skeleton className="w-full aspect-[3/4] rounded-lg" />
+                <div className="grid grid-cols-5 gap-2">
+                    <Skeleton className="w-full aspect-square rounded-md" />
+                    <Skeleton className="w-full aspect-square rounded-md" />
+                    <Skeleton className="w-full aspect-square rounded-md" />
+                </div>
+            </div>
+          <div className="space-y-6">
+            <Skeleton className="h-10 w-3/4" />
+            <Skeleton className="h-6 w-1/4" />
+            <Skeleton className="h-8 w-1/3" />
+            <div className="border-t pt-6 space-y-4">
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-2/3" />
+            </div>
+            <div className="pt-4">
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+}
+
+
+export default function ProductPage({ params }: PageProps) {
+  const firestore = useFirestore();
+  const productRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'products', params.id) : null),
+    [firestore, params.id]
+  );
+  const { data: product, isLoading, error } = useDoc<Product>(productRef);
+
+  if (isLoading) {
+    return <ProductPageSkeleton />;
+  }
+
+  if (error) {
+    console.error("Error fetching product:", error);
+    return <div className="text-center py-20">حدث خطأ أثناء جلب بيانات المنتج.</div>;
+  }
   
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent link navigation
-    e.stopPropagation(); // Prevent card click event when clicking the button
-    const hasOptions = (product.sizes && product.sizes.length > 0) || (product.variants && product.variants.length > 0);
-
-    if (hasOptions) {
-        openQuickView(product); // Open quick view to select size/color
-    } else {
-        addToCart(product, 1);
-        toast({
-          title: 'تمت الإضافة إلى السلة',
-          description: `1 x ${product.name}`,
-        });
-    }
-  };
-
-  const handleCardClick = () => {
-    openQuickView(product);
-  };
-
-  const imageUrl1 = product.imageUrls?.[0] || 'https://picsum.photos/seed/placeholder/600/800';
-  const imageHint1 = product.imageHints?.[0] || 'product';
-  const imageUrl2 = product.imageUrls?.[1];
-  const imageHint2 = product.imageHints?.[1];
-  
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-  const discountPercentage = hasDiscount 
-    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
-    : 0;
+  if (!product) {
+    notFound();
+  }
 
   return (
-    <div onClick={handleCardClick} className="block group w-full h-full cursor-pointer">
-      <Card className="flex flex-col overflow-hidden h-full">
-        <CardHeader className="p-0 relative">
-            <div className="relative w-full aspect-square overflow-hidden">
-                <Image
-                    src={imageUrl1}
-                    alt={product.name}
-                    fill
-                    className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
-                    data-ai-hint={imageHint1}
-                />
-                {imageUrl2 && (
-                    <Image
-                    src={imageUrl2}
-                    alt={product.name}
-                    fill
-                    className="w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                    data-ai-hint={imageHint2 || 'product alternate'}
-                    />
-                )}
-                 {hasDiscount && (
-                    <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md">
-                        خصم {discountPercentage}%
-                    </div>
-                )}
-            </div>
-        </CardHeader>
-        <CardContent className="p-4 flex-grow flex flex-col">
-          <div className="flex justify-between items-center">
-            <p className="text-xs text-muted-foreground">{product.category}</p>
-            <StarRating rating={product.rating} />
-          </div>
-          <CardTitle className="font-headline text-sm font-semibold group-hover:text-primary mt-1 mb-2 h-5 truncate">
-            {product.name}
-          </CardTitle>
-           <div className="flex items-baseline gap-2 mt-auto">
-             <p className="text-sm font-semibold text-destructive">
-                {product.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
-             </p>
-             {hasDiscount && (
-                <p className="text-xs text-muted-foreground line-through">
-                    {product.originalPrice?.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
-                </p>
-             )}
-           </div>
-        </CardContent>
-        <CardFooter className="p-4 pt-0 mt-auto flex-col items-stretch gap-2">
-            <Button 
-                onClick={handleAddToCart} 
-                aria-label={`Add ${product.name} to cart`}
-                size="sm"
-                className="w-full bg-accent text-accent-foreground hover:bg-accent/90 rounded-full h-8 text-xs"
-            >
-                <ShoppingCart className="mr-2 h-3 w-3" />
-                أضف إلى العربة
-            </Button>
-            
-            {product.cardMessageIsEnabled && product.cardMessageText ? (
-              <p className={cn("text-xs text-center", product.cardMessageTextColor, product.cardMessageFontWeight)}>
-                {product.cardMessageText}
-              </p>
-            ) : (
-                <div className="h-4"></div> // Placeholder to prevent layout shift
-            )}
-
-            {product.isDeal && product.dealEndDate && (
-                <CountdownTimer endDate={product.dealEndDate} />
-            )}
-        </CardFooter>
-      </Card>
+    <div className="container mx-auto max-w-6xl py-8">
+      <ProductQuickViewContent product={product} />
     </div>
   );
 }
