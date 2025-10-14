@@ -46,7 +46,7 @@ export default function ProductCard({ product }: { product: Product }) {
     : 0;
 
   return (
-    <Link href={`/products/${product.id}`} className="block group w-full h-full cursor-pointer">
+    <div onClick={() => openQuickView(product)} className="block group w-full h-full cursor-pointer">
       <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
             <div className="relative w-full aspect-square overflow-hidden">
@@ -116,6 +116,6 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
         </CardFooter>
       </Card>
-    </Link>
+    </div>
   );
 }

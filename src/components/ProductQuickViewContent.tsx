@@ -91,7 +91,6 @@ export default function ProductQuickViewContent({ product, isSheet = false }: { 
       <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-12 items-start", isSheet && "p-4 sm:p-6")}>
         <div className="space-y-4">
             <div className="bg-card p-4 rounded-lg shadow-sm border relative">
-                <Link href={`/products/${productId}`} className="block">
                     <Image
                     src={selectedImageUrl}
                     alt={name}
@@ -101,7 +100,6 @@ export default function ProductQuickViewContent({ product, isSheet = false }: { 
                     data-ai-hint={selectedImageHint}
                     priority
                     />
-                </Link>
                 {hasDiscount && (
                     <div className="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-md">
                         خصم {discountPercentage}%
