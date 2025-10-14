@@ -80,6 +80,9 @@ const productSchema = z.object({
   features: z.string().optional(),
   variants: z.array(variantSchema).optional(),
   shippingAndService: shippingAndServiceSchema.optional(),
+  cardMessageIsEnabled: z.boolean().default(false),
+  cardMessageText: z.string().optional(),
+  cardMessageTextColor: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -90,6 +93,14 @@ interface ProductFormProps {
   onFormSubmit: () => void;
   children: React.ReactNode;
 }
+
+const colorOptions = [
+  { value: 'text-foreground', label: 'أسود' },
+  { value: 'text-destructive', label: 'أحمر' },
+  { value: 'text-green-600', label: 'أخضر' },
+  { value: 'text-blue-600', label: 'أزرق' },
+  { value: 'text-primary', label: 'اللون الأساسي' },
+];
 
 function ProductForm({ product, categories, onFormSubmit, children }: ProductFormProps) {
   const { toast } = useToast();
@@ -127,6 +138,9 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
         features: '',
         variants: [],
         shippingAndService: defaultShippingAndService,
+        cardMessageIsEnabled: false,
+        cardMessageText: '',
+        cardMessageTextColor: 'text-destructive',
     },
   });
 
@@ -149,6 +163,9 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
             })) ?? [],
             dealDurationHours: undefined,
             shippingAndService: product.shippingAndService || defaultShippingAndService,
+            cardMessageIsEnabled: product.cardMessageIsEnabled ?? false,
+            cardMessageText: product.cardMessageText ?? '',
+            cardMessageTextColor: product.cardMessageTextColor ?? 'text-destructive',
         };
         form.reset(productData);
     } else if (isOpen) {
@@ -172,6 +189,9 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
             features: '',
             variants: [],
             shippingAndService: defaultShippingAndService,
+            cardMessageIsEnabled: false,
+            cardMessageText: '',
+            cardMessageTextColor: 'text-destructive',
         });
     }
   }, [isOpen, product, form]);
@@ -187,10 +207,20 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
     name: 'isDeal'
   });
 
+  const isCardMessageEnabled = useWatch({
+    control: form.control,
+    name: 'cardMessageIsEnabled'
+  });
+
   const isEditing = !!product;
 
   async function onSubmit(values: ProductFormData) {
       if (!firestore) return;
+
+      if (values.cardMessageIsEnabled && !values.cardMessageText) {
+          form.setError("cardMessageText", { type: "manual", message: "نص الرسالة مطلوب عند تفعيلها."});
+          return;
+      }
   
       try {
           const variantsData: ProductVariant[] | undefined = values.variants?.filter(v => v.color && v.hex && v.imageUrls && v.imageHints).map(v => ({
@@ -218,6 +248,9 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
               features: values.features ? values.features.split(',').map(f => f.trim()) : [],
               variants: variantsData && variantsData.length > 0 ? variantsData : [],
               shippingAndService: values.shippingAndService,
+              cardMessageIsEnabled: values.cardMessageIsEnabled,
+              cardMessageText: values.cardMessageText,
+              cardMessageTextColor: values.cardMessageTextColor,
           };
           
           if (values.originalPrice) {
@@ -422,6 +455,66 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
                     />
                   </div>
                 </div>
+
+                <Separator className="my-6" />
+
+                <div>
+                  <h3 className="text-lg font-medium mb-4">رسالة بطاقة المنتج</h3>
+                  <div className='space-y-4'>
+                    <FormField
+                      control={form.control}
+                      name="cardMessageIsEnabled"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <FormLabel>تفعيل الرسالة على البطاقة</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <div className={cn("transition-all duration-300 overflow-hidden grid grid-cols-1 sm:grid-cols-2 gap-4", isCardMessageEnabled ? "max-h-40 opacity-100" : "max-h-0 opacity-0")}>
+                        <FormField
+                          control={form.control}
+                          name="cardMessageText"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>نص الرسالة</FormLabel>
+                              <FormControl>
+                                <Input placeholder="مثال: خصم خاص" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="cardMessageTextColor"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>لون الخط</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="اختر لونًا..." />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {colorOptions.map((option) => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                      <span className={option.value}>{option.label}</span>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                    </div>
+                  </div>
+                </div>
+
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                     <FormField
@@ -633,5 +726,3 @@ export default function ManageProductsPage() {
     </div>
   );
 }
-
-    

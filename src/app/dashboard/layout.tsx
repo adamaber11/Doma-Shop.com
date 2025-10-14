@@ -22,7 +22,6 @@ function DashboardNav() {
     { href: '/dashboard/manage-hero', label: 'إدارة الواجهة' },
     { href: '/dashboard/manage-socials', label: 'إدارة التواصل الاجتماعي' },
     { href: '/dashboard/manage-popup', label: 'إدارة الإعلان المنبثق' },
-    { href: '/dashboard/manage-card-message', label: 'رسالة المنتج' },
   ];
 
   return (
@@ -92,5 +91,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
-    

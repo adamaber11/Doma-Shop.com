@@ -44,6 +44,9 @@ export interface Product {
   countryOfOrigin?: string;
   features?: string[];
   shippingAndService?: ProductShippingAndService;
+  cardMessageIsEnabled?: boolean;
+  cardMessageText?: string;
+  cardMessageTextColor?: string;
 }
 
 export interface CartItem extends Product {
@@ -157,12 +160,4 @@ export interface PopupModal {
     callToActionText: string;
     callToActionLink: string;
 }
-
-export interface ProductCardMessage {
-    id: string;
-    isEnabled: boolean;
-    text: string;
-    textColor: string;
-}
-
     

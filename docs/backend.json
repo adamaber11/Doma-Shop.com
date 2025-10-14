@@ -134,6 +134,18 @@
         },
         "shippingAndService": {
             "$ref": "#/entities/ProductShippingAndService"
+        },
+        "cardMessageIsEnabled": {
+            "type": "boolean",
+            "description": "Indicates if a special message is enabled for this product's card."
+        },
+        "cardMessageText": {
+            "type": "string",
+            "description": "The special message text to display on the product card."
+        },
+        "cardMessageTextColor": {
+            "type": "string",
+            "description": "The Tailwind CSS class for the message text color (e.g., 'text-destructive')."
         }
       },
       "required": [
@@ -613,27 +625,6 @@
             "callToActionText",
             "callToActionLink"
         ]
-    },
-    "ProductCardMessage": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "ProductCardMessage",
-      "type": "object",
-      "description": "A global message to be displayed on product cards.",
-      "properties": {
-        "isEnabled": {
-          "type": "boolean",
-          "description": "Whether the message is active and should be shown."
-        },
-        "text": {
-          "type": "string",
-          "description": "The content of the message."
-        },
-        "textColor": {
-          "type": "string",
-          "description": "The Tailwind CSS class for the text color (e.g., 'text-destructive')."
-        }
-      },
-      "required": ["isEnabled", "text", "textColor"]
     }
   },
   "auth": {
@@ -708,15 +699,7 @@
               "$ref": "#/entities/PopupModal"
           },
           "description": "Stores the configuration for the promotional popup modal. This is a single-document collection."
-      },
-      "/settings/productCardMessage": {
-          "schema": {
-              "$ref": "#/entities/ProductCardMessage"
-          },
-          "description": "Stores the global message for product cards. This is a single-document collection."
       }
     }
   }
 }
-
-    
