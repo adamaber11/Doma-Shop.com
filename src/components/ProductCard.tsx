@@ -105,16 +105,6 @@ export default function ProductCard({ product }: { product: Product }) {
            </div>
         </CardContent>
         <CardFooter className="p-4 pt-0 mt-auto flex-col items-stretch gap-2">
-            {isLoadingMessage ? (
-              <Skeleton className="h-4 w-full" />
-            ) : messageData?.isEnabled && messageData.text ? (
-              <p className={cn("text-xs font-semibold text-center mb-1", messageData.textColor)}>
-                {messageData.text}
-              </p>
-            ) : (
-                <div className="h-4 mb-1"></div> // Placeholder to prevent layout shift
-            )}
-
             <Button 
                 onClick={handleAddToCart} 
                 aria-label={`Add ${product.name} to cart`}
@@ -124,6 +114,17 @@ export default function ProductCard({ product }: { product: Product }) {
                 <ShoppingCart className="mr-2 h-3 w-3" />
                 أضف إلى العربة
             </Button>
+            
+            {isLoadingMessage ? (
+              <Skeleton className="h-4 w-full" />
+            ) : messageData?.isEnabled && messageData.text ? (
+              <p className={cn("text-xs font-semibold text-center", messageData.textColor)}>
+                {messageData.text}
+              </p>
+            ) : (
+                <div className="h-4"></div> // Placeholder to prevent layout shift
+            )}
+
             {product.isDeal && product.dealEndDate && (
                 <CountdownTimer endDate={product.dealEndDate} />
             )}
@@ -132,5 +133,3 @@ export default function ProductCard({ product }: { product: Product }) {
     </div>
   );
 }
-
-    
