@@ -107,7 +107,7 @@ export default function ProductCard({ product }: { product: Product }) {
             </Button>
             
             {product.cardMessageIsEnabled && product.cardMessageText ? (
-              <p className={cn("text-xs font-semibold text-center", product.cardMessageTextColor)}>
+              <p className={cn("text-xs text-center", product.cardMessageTextColor, product.cardMessageFontWeight)}>
                 {product.cardMessageText}
               </p>
             ) : (

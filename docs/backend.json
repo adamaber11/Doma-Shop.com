@@ -146,6 +146,10 @@
         "cardMessageTextColor": {
             "type": "string",
             "description": "The Tailwind CSS class for the message text color (e.g., 'text-destructive')."
+        },
+        "cardMessageFontWeight": {
+            "type": "string",
+            "description": "The Tailwind CSS class for the message font weight (e.g., 'font-bold')."
         }
       },
       "required": [

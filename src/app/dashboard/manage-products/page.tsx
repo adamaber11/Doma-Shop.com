@@ -83,6 +83,7 @@ const productSchema = z.object({
   cardMessageIsEnabled: z.boolean().default(false),
   cardMessageText: z.string().optional(),
   cardMessageTextColor: z.string().optional(),
+  cardMessageFontWeight: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -100,6 +101,14 @@ const colorOptions = [
   { value: 'text-green-600', label: 'أخضر' },
   { value: 'text-blue-600', label: 'أزرق' },
   { value: 'text-primary', label: 'اللون الأساسي' },
+];
+
+const fontWeightOptions = [
+    { value: 'font-normal', label: 'عادي' },
+    { value: 'font-medium', label: 'متوسط' },
+    { value: 'font-semibold', label: 'شبه عريض' },
+    { value: 'font-bold', label: 'عريض' },
+    { value: 'font-extrabold', label: 'عريض جدًا' },
 ];
 
 function ProductForm({ product, categories, onFormSubmit, children }: ProductFormProps) {
@@ -141,6 +150,7 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
         cardMessageIsEnabled: false,
         cardMessageText: '',
         cardMessageTextColor: 'text-destructive',
+        cardMessageFontWeight: 'font-semibold',
     },
   });
 
@@ -166,6 +176,7 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
             cardMessageIsEnabled: product.cardMessageIsEnabled ?? false,
             cardMessageText: product.cardMessageText ?? '',
             cardMessageTextColor: product.cardMessageTextColor ?? 'text-destructive',
+            cardMessageFontWeight: product.cardMessageFontWeight ?? 'font-semibold',
         };
         form.reset(productData);
     } else if (isOpen) {
@@ -192,6 +203,7 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
             cardMessageIsEnabled: false,
             cardMessageText: '',
             cardMessageTextColor: 'text-destructive',
+            cardMessageFontWeight: 'font-semibold',
         });
     }
   }, [isOpen, product, form]);
@@ -251,6 +263,7 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
               cardMessageIsEnabled: values.cardMessageIsEnabled,
               cardMessageText: values.cardMessageText,
               cardMessageTextColor: values.cardMessageTextColor,
+              cardMessageFontWeight: values.cardMessageFontWeight,
           };
           
           if (values.originalPrice) {
@@ -473,12 +486,12 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
                         </FormItem>
                       )}
                     />
-                    <div className={cn("transition-all duration-300 overflow-hidden grid grid-cols-1 sm:grid-cols-2 gap-4", isCardMessageEnabled ? "max-h-40 opacity-100" : "max-h-0 opacity-0")}>
+                    <div className={cn("transition-all duration-300 overflow-hidden grid grid-cols-1 sm:grid-cols-3 gap-4", isCardMessageEnabled ? "max-h-40 opacity-100" : "max-h-0 opacity-0")}>
                         <FormField
                           control={form.control}
                           name="cardMessageText"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="sm:col-span-3">
                               <FormLabel>نص الرسالة</FormLabel>
                               <FormControl>
                                 <Input placeholder="مثال: خصم خاص" {...field} />
@@ -501,6 +514,30 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
                                 </FormControl>
                                 <SelectContent>
                                   {colorOptions.map((option) => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                      <span className={option.value}>{option.label}</span>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="cardMessageFontWeight"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>وزن الخط</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="اختر وزنًا..." />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {fontWeightOptions.map((option) => (
                                     <SelectItem key={option.value} value={option.value}>
                                       <span className={option.value}>{option.label}</span>
                                     </SelectItem>

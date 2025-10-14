@@ -47,6 +47,7 @@ export interface Product {
   cardMessageIsEnabled?: boolean;
   cardMessageText?: string;
   cardMessageTextColor?: string;
+  cardMessageFontWeight?: string;
 }
 
 export interface CartItem extends Product {
