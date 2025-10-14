@@ -13,6 +13,15 @@ export interface ReviewSummary {
     averageRating: number;
 }
 
+export interface ProductShippingAndService {
+    cashOnDelivery: boolean;
+    isReturnable: boolean;
+    freeDelivery: boolean;
+    isFulfilledByDoma: boolean;
+    isSecureTransaction: boolean;
+    returnPeriod?: number; // e.g., 30 (days)
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -34,6 +43,7 @@ export interface Product {
   material?: string;
   countryOfOrigin?: string;
   features?: string[];
+  shippingAndService?: ProductShippingAndService;
 }
 
 export interface CartItem extends Product {
@@ -147,5 +157,3 @@ export interface PopupModal {
     callToActionText: string;
     callToActionLink: string;
 }
-
-    

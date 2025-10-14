@@ -131,6 +131,9 @@
         "stock": {
             "type": "number",
             "description": "The available quantity of the product."
+        },
+        "shippingAndService": {
+            "$ref": "#/entities/ProductShippingAndService"
         }
       },
       "required": [
@@ -143,6 +146,45 @@
         "rating",
         "category",
         "stock"
+      ]
+    },
+    "ProductShippingAndService": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ProductShippingAndService",
+      "type": "object",
+      "description": "Defines the shipping and service promises for a product.",
+      "properties": {
+        "cashOnDelivery": {
+          "type": "boolean",
+          "description": "Indicates if cash on delivery is available."
+        },
+        "isReturnable": {
+          "type": "boolean",
+          "description": "Indicates if the product is returnable."
+        },
+        "freeDelivery": {
+          "type": "boolean",
+          "description": "Indicates if free delivery is available."
+        },
+        "isFulfilledByDoma": {
+          "type": "boolean",
+          "description": "Indicates if the product is fulfilled by Doma."
+        },
+        "isSecureTransaction": {
+          "type": "boolean",
+          "description": "Indicates if the transaction is secure."
+        },
+        "returnPeriod": {
+          "type": "number",
+          "description": "The return period in days (e.g., 30)."
+        }
+      },
+      "required": [
+        "cashOnDelivery",
+        "isReturnable",
+        "freeDelivery",
+        "isFulfilledByDoma",
+        "isSecureTransaction"
       ]
     },
     "ProductVariant": {
@@ -649,5 +691,3 @@
     }
   }
 }
-
-    

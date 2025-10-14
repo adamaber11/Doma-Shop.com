@@ -21,10 +21,21 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import CountdownTimer from '@/components/CountdownTimer';
 import Link from 'next/link';
-import { Tag, CheckCircle, Check, Info } from 'lucide-react';
+import { Tag, CheckCircle, Check, Info, ShieldCheck, Truck, RotateCw, HandCoins } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import Reviews from './Reviews';
+import { ProductShippingAndService } from '@/lib/types';
+
+
+const ServiceFeature = ({ icon: Icon, text, subtext }: { icon: React.ElementType, text: string, subtext?: string }) => (
+    <div className="flex flex-col items-center text-center">
+        <Icon className="h-8 w-8 text-muted-foreground mb-2" />
+        <span className="text-xs font-semibold">{text}</span>
+        {subtext && <span className="text-xs text-muted-foreground">{subtext}</span>}
+    </div>
+);
+
 
 function QuickViewSkeleton() {
     return (
@@ -100,7 +111,7 @@ export default function ProductQuickView() {
     return null;
   }
 
-  const { id: productId, name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, material, countryOfOrigin, features, variants, reviewSummary } = product;
+  const { id: productId, name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, material, countryOfOrigin, features, variants, reviewSummary, shippingAndService } = product;
   const selectedImageUrl = currentImages[selectedImageIndex] || '';
   const selectedImageHint = currentImageHints[selectedImageIndex] || '';
   
@@ -125,45 +136,57 @@ export default function ProductQuickView() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-12 items-start p-4 sm:p-6">
                 {/* Image Gallery */}
                 <div className="space-y-4">
-                <div className="bg-card p-4 rounded-lg shadow-sm border relative">
-                    <Image
-                    src={selectedImageUrl}
-                    alt={name}
-                    width={600}
-                    height={800}
-                    className="w-full h-auto object-cover rounded-md aspect-[3/4]"
-                    data-ai-hint={selectedImageHint}
-                    priority
-                    />
-                    {hasDiscount && (
-                        <div className="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-md">
-                            خصم {discountPercentage}%
+                  <div className="bg-card p-4 rounded-lg shadow-sm border relative">
+                      <Image
+                      src={selectedImageUrl}
+                      alt={name}
+                      width={600}
+                      height={800}
+                      className="w-full h-auto object-cover rounded-md aspect-[3/4]"
+                      data-ai-hint={selectedImageHint}
+                      priority
+                      />
+                      {hasDiscount && (
+                          <div className="absolute top-4 left-4 bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-md">
+                              خصم {discountPercentage}%
+                          </div>
+                      )}
+                  </div>
+                  {currentImages && currentImages.length > 1 && (
+                      <div className="grid grid-cols-5 gap-2">
+                      {currentImages.map((url, index) => (
+                          <button
+                          key={index}
+                          onClick={() => setSelectedImageIndex(index)}
+                          className={cn(
+                              'aspect-square rounded-md overflow-hidden border-2 transition-all',
+                              selectedImageIndex === index ? 'border-primary ring-2 ring-primary/50' : 'border-border hover:border-primary/50'
+                          )}
+                          >
+                          <Image
+                              src={url}
+                              alt={`${name} thumbnail ${index + 1}`}
+                              width={100}
+                              height={100}
+                              className="w-full h-full object-cover"
+                              data-ai-hint={currentImageHints?.[index]}
+                          />
+                          </button>
+                      ))}
+                      </div>
+                  )}
+
+                    {shippingAndService && (
+                        <div className="pt-4">
+                            <div className="grid grid-cols-3 sm:grid-cols-5 gap-4 border-t pt-4">
+                                {shippingAndService.cashOnDelivery && <ServiceFeature icon={HandCoins} text="الدفع عند الاستلام" />}
+                                {shippingAndService.isReturnable && <ServiceFeature icon={RotateCw} text={`${shippingAndService.returnPeriod || ''} يوم للإرجاع`} />}
+                                {shippingAndService.freeDelivery && <ServiceFeature icon={Truck} text="توصيل مجاني" />}
+                                {shippingAndService.isFulfilledByDoma && <ServiceFeature icon={Tag} text="شحن بواسطة" subtext="دوما" />}
+                                {shippingAndService.isSecureTransaction && <ServiceFeature icon={ShieldCheck} text="معاملة آمنة" />}
+                            </div>
                         </div>
                     )}
-                </div>
-                {currentImages && currentImages.length > 1 && (
-                    <div className="grid grid-cols-5 gap-2">
-                    {currentImages.map((url, index) => (
-                        <button
-                        key={index}
-                        onClick={() => setSelectedImageIndex(index)}
-                        className={cn(
-                            'aspect-square rounded-md overflow-hidden border-2 transition-all',
-                            selectedImageIndex === index ? 'border-primary ring-2 ring-primary/50' : 'border-border hover:border-primary/50'
-                        )}
-                        >
-                        <Image
-                            src={url}
-                            alt={`${name} thumbnail ${index + 1}`}
-                            width={100}
-                            height={100}
-                            className="w-full h-full object-cover"
-                            data-ai-hint={currentImageHints?.[index]}
-                        />
-                        </button>
-                    ))}
-                    </div>
-                )}
                 </div>
 
                 {/* Product Details */}
@@ -313,5 +336,3 @@ export default function ProductQuickView() {
     </Sheet>
   );
 }
-
-    

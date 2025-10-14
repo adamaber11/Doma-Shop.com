@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { addDoc, collection, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
-import type { Product, Category, ProductVariant } from '@/lib/types';
+import type { Product, Category, ProductVariant, ProductShippingAndService } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PlusCircle, Edit, Trash2, X } from 'lucide-react';
 import {
@@ -51,6 +51,15 @@ const variantSchema = z.object({
   imageHints: z.string().min(1, "Image hints are required."),
 });
 
+const shippingAndServiceSchema = z.object({
+    cashOnDelivery: z.boolean().default(false),
+    isReturnable: z.boolean().default(false),
+    freeDelivery: z.boolean().default(false),
+    isFulfilledByDoma: z.boolean().default(false),
+    isSecureTransaction: z.boolean().default(false),
+    returnPeriod: z.coerce.number().optional(),
+});
+
 const productSchema = z.object({
   name: z.string().min(2, 'اسم المنتج مطلوب'),
   description: z.string().min(10, 'الوصف مطلوب (10 أحرف على الأقل)'),
@@ -70,6 +79,7 @@ const productSchema = z.object({
   countryOfOrigin: z.string().optional(),
   features: z.string().optional(),
   variants: z.array(variantSchema).optional(),
+  shippingAndService: shippingAndServiceSchema.optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -85,6 +95,15 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
   const { toast } = useToast();
   const firestore = useFirestore();
   const [isOpen, setIsOpen] = useState(false);
+
+  const defaultShippingAndService = {
+      cashOnDelivery: true,
+      isReturnable: true,
+      freeDelivery: false,
+      isFulfilledByDoma: true,
+      isSecureTransaction: true,
+      returnPeriod: 30,
+  };
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -107,6 +126,7 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
         countryOfOrigin: '',
         features: '',
         variants: [],
+        shippingAndService: defaultShippingAndService,
     },
   });
 
@@ -127,7 +147,8 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
                 imageUrls: v.imageUrls.join(', '),
                 imageHints: v.imageHints.join(', '),
             })) ?? [],
-            dealDurationHours: undefined, // Not stored, calculated on save
+            dealDurationHours: undefined,
+            shippingAndService: product.shippingAndService || defaultShippingAndService,
         };
         form.reset(productData);
     } else if (isOpen) {
@@ -150,6 +171,7 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
             countryOfOrigin: '',
             features: '',
             variants: [],
+            shippingAndService: defaultShippingAndService,
         });
     }
   }, [isOpen, product, form]);
@@ -195,6 +217,7 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
               countryOfOrigin: values.countryOfOrigin,
               features: values.features ? values.features.split(',').map(f => f.trim()) : [],
               variants: variantsData && variantsData.length > 0 ? variantsData : [],
+              shippingAndService: values.shippingAndService,
           };
           
           if (values.originalPrice) {
@@ -321,6 +344,84 @@ function ProductForm({ product, categories, onFormSubmit, children }: ProductFor
                 </div>
                 <FormField control={form.control} name="features" render={({ field }) => (<FormItem><FormLabel>ميزات إضافية (مفصولة بفاصلة)</FormLabel><FormControl><Input placeholder="مقاوم للماء، جودة عالية، ..." {...field} /></FormControl><FormMessage /></FormItem>)} />
 
+                <Separator className="my-6" />
+                
+                <div>
+                  <h3 className="text-lg font-medium mb-4">ميزات الشحن والخدمة</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="shippingAndService.cashOnDelivery"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <FormLabel>الدفع عند الاستلام</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="shippingAndService.isReturnable"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <FormLabel>قابل للإرجاع</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="shippingAndService.freeDelivery"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <FormLabel>توصيل مجاني</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="shippingAndService.isFulfilledByDoma"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <FormLabel>يتم الشحن بواسطة دوما</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={form.control}
+                      name="shippingAndService.isSecureTransaction"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <FormLabel>معاملة آمنة</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="shippingAndService.returnPeriod"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>فترة الإرجاع (أيام)</FormLabel>
+                                <FormControl><Input type="number" placeholder="30" {...field} value={field.value ?? ''} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                     <FormField
@@ -532,5 +633,3 @@ export default function ManageProductsPage() {
     </div>
   );
 }
-
-    
