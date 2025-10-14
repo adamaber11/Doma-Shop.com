@@ -157,3 +157,12 @@ export interface PopupModal {
     callToActionText: string;
     callToActionLink: string;
 }
+
+export interface ProductCardMessage {
+    id: string;
+    isEnabled: boolean;
+    text: string;
+    textColor: string;
+}
+
+    

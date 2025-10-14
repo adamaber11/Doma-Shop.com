@@ -2,7 +2,7 @@
 'use client';
 
 import Image from 'next/image';
-import type { Product } from '@/lib/types';
+import type { Product, ProductCardMessage } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { useCart } from '@/hooks/use-cart';
@@ -11,11 +11,22 @@ import StarRating from './StarRating';
 import { ShoppingCart } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { useQuickView } from '@/hooks/use-quick-view';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { cn } from '@/lib/utils';
+import { Skeleton } from './ui/skeleton';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { openQuickView } = useQuickView();
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const messageRef = useMemoFirebase(
+    () => (firestore ? doc(firestore, 'settings', 'productCardMessage') : null),
+    [firestore]
+  );
+  const { data: messageData, isLoading: isLoadingMessage } = useDoc<ProductCardMessage>(messageRef);
 
   const handleCardClick = () => {
     openQuickView(product);
@@ -94,6 +105,16 @@ export default function ProductCard({ product }: { product: Product }) {
            </div>
         </CardContent>
         <CardFooter className="p-4 pt-0 mt-auto flex-col items-stretch gap-2">
+            {isLoadingMessage ? (
+              <Skeleton className="h-4 w-full" />
+            ) : messageData?.isEnabled && messageData.text ? (
+              <p className={cn("text-xs font-semibold text-center mb-1", messageData.textColor)}>
+                {messageData.text}
+              </p>
+            ) : (
+                <div className="h-4 mb-1"></div> // Placeholder to prevent layout shift
+            )}
+
             <Button 
                 onClick={handleAddToCart} 
                 aria-label={`Add ${product.name} to cart`}
@@ -111,3 +132,5 @@ export default function ProductCard({ product }: { product: Product }) {
     </div>
   );
 }
+
+    
