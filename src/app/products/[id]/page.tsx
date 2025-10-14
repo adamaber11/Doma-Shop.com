@@ -2,16 +2,16 @@
 
 import Image from 'next/image';
 import type { Product } from '@/lib/types';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
-import StarRating from './StarRating';
+import StarRating from '@/components/StarRating';
 import { ShoppingCart } from 'lucide-react';
-import CountdownTimer from './CountdownTimer';
+import CountdownTimer from '@/components/CountdownTimer';
 import { useQuickView } from '@/hooks/use-quick-view';
 import { cn } from '@/lib/utils';
-import { Skeleton } from './ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { openQuickView } = useQuickView();
