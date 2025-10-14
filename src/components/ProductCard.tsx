@@ -79,10 +79,10 @@ export default function ProductCard({ product }: { product: Product }) {
             <p className="text-xs text-muted-foreground">{product.category}</p>
             <StarRating rating={product.rating} />
           </div>
-          <CardTitle className="font-headline text-base group-hover:text-primary mt-1 mb-2 flex-grow">
+          <CardTitle className="font-headline text-sm font-semibold group-hover:text-primary mt-1 mb-2 h-10 line-clamp-2">
             {product.name}
           </CardTitle>
-           <div className="flex items-baseline gap-2">
+           <div className="flex items-baseline gap-2 mt-auto">
              <p className="text-sm font-semibold text-destructive">
                 {product.price.toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' })}
              </p>

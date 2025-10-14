@@ -198,7 +198,7 @@ export default function ProductQuickView() {
                         </Link>
                     </div>
                     <SheetHeader>
-                        <SheetTitle className="text-2xl sm:text-3xl font-headline font-bold text-right">{name}</SheetTitle>
+                        <SheetTitle className="text-xl sm:text-2xl font-headline font-bold text-right">{name}</SheetTitle>
                     </SheetHeader>
                     <div className="flex items-center gap-2">
                         <StarRating rating={rating} />
