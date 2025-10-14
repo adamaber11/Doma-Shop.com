@@ -13,17 +13,15 @@ import CountdownTimer from './CountdownTimer';
 import { useQuickView } from '@/hooks/use-quick-view';
 import { cn } from '@/lib/utils';
 import { Skeleton } from './ui/skeleton';
+import Link from 'next/link';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { openQuickView } = useQuickView();
   const { addToCart } = useCart();
   const { toast } = useToast();
-
-  const handleCardClick = () => {
-    openQuickView(product);
-  };
   
   const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent link navigation
     e.stopPropagation(); // Prevent card click event when clicking the button
     const hasOptions = (product.sizes && product.sizes.length > 0) || (product.variants && product.variants.length > 0);
 
@@ -49,7 +47,7 @@ export default function ProductCard({ product }: { product: Product }) {
     : 0;
 
   return (
-    <div onClick={handleCardClick} className="block group w-full h-full cursor-pointer">
+    <Link href={`/products/${product.id}`} className="block group w-full h-full cursor-pointer">
       <Card className="flex flex-col overflow-hidden h-full">
         <CardHeader className="p-0 relative">
             <div className="relative w-full aspect-square overflow-hidden">
@@ -119,6 +117,6 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
         </CardFooter>
       </Card>
-    </div>
+    </Link>
   );
 }
