@@ -95,6 +95,53 @@ function CategoryShowcase({ categories, isLoading }: { categories: Category[] | 
   )
 }
 
+function ProductCarouselSection({ title, products, isLoading, viewAllLink }: { title: string, products: Product[] | null, isLoading: boolean, viewAllLink: string }) {
+    if (!isLoading && (!products || products.length === 0)) {
+        return null; // Don't render the section if there are no products and it's not loading
+    }
+    
+    return (
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="font-headline text-3xl font-bold">{title}</h2>
+                <Button asChild variant="link">
+                    <Link href={viewAllLink}>عرض الكل</Link>
+                </Button>
+            </div>
+            <Carousel
+                opts={{
+                    align: "start",
+                    direction: "rtl",
+                }}
+                className="w-full"
+            >
+                <CarouselContent>
+                    {isLoading ? (
+                        Array.from({ length: 4 }).map((_, index) => (
+                            <CarouselItem key={index} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                                <div className="space-y-2">
+                                    <Skeleton className="h-80 w-full" />
+                                    <Skeleton className="h-6 w-3/4" />
+                                    <Skeleton className="h-5 w-1/2" />
+                                    <Skeleton className="h-8 w-1/4" />
+                                </div>
+                            </CarouselItem>
+                        ))
+                    ) : (
+                        products?.map((product) => (
+                            <CarouselItem key={product.id} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                                <ProductCard product={product} />
+                            </CarouselItem>
+                        ))
+                    )}
+                </CarouselContent>
+                <CarouselPrevious className="hidden md:flex" />
+                <CarouselNext className="hidden md:flex" />
+            </Carousel>
+        </section>
+    );
+}
+
 export default function Home() {
   const firestore = useFirestore();
   
@@ -209,115 +256,32 @@ export default function Home() {
       )}
 
       {categories1 && categories1.length > 0 && <CategoryShowcase categories={categories1} isLoading={isLoadingCategories} />}
+      
+      <ProductCarouselSection 
+        title="العروض اليومية" 
+        products={dailyDeals} 
+        isLoading={isLoadingDailyDeals} 
+        viewAllLink="/daily-deals" 
+      />
 
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <Carousel
-          opts={{
-            align: "start",
-            direction: "rtl",
-          }}
-          className="w-full"
-        >
-          <CarouselContent>
-            {isLoadingDailyDeals ? (
-              Array.from({ length: 4 }).map((_, index) => (
-                <CarouselItem key={index} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                  <div className="space-y-2">
-                    <Skeleton className="h-80 w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-5 w-1/2" />
-                    <Skeleton className="h-8 w-1/4" />
-                  </div>
-                </CarouselItem>
-              ))
-            ) : (
-              dailyDeals?.map((product) => (
-                <CarouselItem key={product.id} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                  <ProductCard product={product} />
-                </CarouselItem>
-              ))
-            )}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex" />
-          <CarouselNext className="hidden md:flex" />
-        </Carousel>
-      </section>
-
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <Carousel
-          opts={{
-            align: "start",
-            direction: "rtl",
-          }}
-          className="w-full"
-        >
-          <CarouselContent>
-            {isLoadingProducts ? (
-              Array.from({ length: 4 }).map((_, index) => (
-                <CarouselItem key={index} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                  <div className="space-y-2">
-                    <Skeleton className="aspect-square w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-5 w-1/2" />
-                    <Skeleton className="h-8 w-1/4" />
-                  </div>
-                </CarouselItem>
-              ))
-            ) : (
-              products?.map((product) => (
-                <CarouselItem key={product.id} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                  <ProductCard product={product} />
-                </CarouselItem>
-              ))
-            )}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex" />
-          <CarouselNext className="hidden md:flex" />
-        </Carousel>
-      </section>
+      <ProductCarouselSection 
+        title="منتجات مميزة" 
+        products={products} 
+        isLoading={isLoadingProducts}
+        viewAllLink="/products"
+      />
       
       {categories2 && categories2.length > 0 && <CategoryShowcase categories={categories2} isLoading={isLoadingCategories} />}
 
-      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <Carousel
-          opts={{
-            align: "start",
-            direction: "rtl",
-          }}
-          className="w-full"
-        >
-          <CarouselContent>
-            {isLoadingBestSellers ? (
-              Array.from({ length: 4 }).map((_, index) => (
-                <CarouselItem key={index} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                  <div className="space-y-2">
-                    <Skeleton className="aspect-square w-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-5 w-1/2" />
-                    <Skeleton className="h-8 w-1/4" />
-                  </div>
-                </CarouselItem>
-              ))
-            ) : (
-              bestSellers?.map((product) => (
-                <CarouselItem key={product.id} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                  <ProductCard product={product} />
-                </CarouselItem>
-              ))
-            )}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex" />
-          <CarouselNext className="hidden md:flex" />
-        </Carousel>
-      </section>
+      <ProductCarouselSection 
+        title="الأكثر مبيعًا" 
+        products={bestSellers} 
+        isLoading={isLoadingBestSellers} 
+        viewAllLink="/best-sellers" 
+      />
 
       {categories3 && categories3.length > 0 && <CategoryShowcase categories={categories3} isLoading={isLoadingCategories} />}
 
     </div>
   );
 }
-
-    
