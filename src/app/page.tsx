@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
 import { useCollection, useDoc } from '@/firebase';
-import { collection, query, limit, where, doc, startAfter, getDocs } from 'firebase/firestore';
+import { collection, query, limit, where, doc } from 'firebase/firestore';
 import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import type { Product, HeroSection, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,7 +17,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { useEffect, useState } from 'react';
 
 function HeroSectionSkeleton() {
   return (
@@ -41,55 +40,73 @@ function HeroSectionSkeleton() {
   );
 }
 
-function CategoryShowcase({ categories, isLoading }: { categories: Category[] | null, isLoading: boolean }) {
+function CategoryCarousel({ categories, isLoading }: { categories: Category[] | null, isLoading: boolean }) {
+   if (!isLoading && (!categories || categories.length === 0)) {
+        return null;
+    }
+
   return (
     <section className="bg-card py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {isLoading ? (
-                  Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="space-y-2">
-                          <Skeleton className="h-64 w-full" />
-                      </div>
-                  ))
-              ) : (
-                  categories?.map((category) => (
-                      <Link key={category.id} href={`/category/${encodeURIComponent(category.name)}`} className="group block">
-                          <div className="relative overflow-hidden rounded-lg shadow-md aspect-[4/5] border-4 border-white">
-                              {category.imageUrl ? (
-                                <Image
-                                    src={category.imageUrl}
-                                    alt={category.name}
-                                    fill
-                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                    data-ai-hint={category.imageHint || 'category image'}
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-secondary flex items-center justify-center">
-                                  <span className="text-muted-foreground">No Image</span>
+           <Carousel
+                opts={{
+                    align: "start",
+                    direction: "rtl",
+                }}
+                className="w-full"
+            >
+                <CarouselContent>
+                    {isLoading ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <CarouselItem key={i} className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
+                                 <div className="space-y-2">
+                                     <Skeleton className="h-96 w-full" />
+                                 </div>
+                             </CarouselItem>
+                        ))
+                    ) : (
+                        categories?.map((category) => (
+                           <CarouselItem key={category.id} className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
+                            <Link href={`/category/${encodeURIComponent(category.name)}`} className="group block">
+                                <div className="relative overflow-hidden rounded-lg shadow-md aspect-[4/5] border-4 border-white">
+                                    {category.imageUrl ? (
+                                      <Image
+                                          src={category.imageUrl}
+                                          alt={category.name}
+                                          fill
+                                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                          data-ai-hint={category.imageHint || 'category image'}
+                                      />
+                                    ) : (
+                                      <div className="w-full h-full bg-secondary flex items-center justify-center">
+                                        <span className="text-muted-foreground">No Image</span>
+                                      </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-transparent group-hover:bg-black/50 transition-colors duration-300" />
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
+                                        <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                            <h3 className="font-headline text-3xl font-bold drop-shadow-lg">{category.name}</h3>
+                                            {category.description && (
+                                              <p className="mt-2 text-sm max-w-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                  {category.description}
+                                              </p>
+                                            )}
+                                            {category.callToActionText && (
+                                              <Button variant="outline" className="mt-4 bg-transparent text-white border-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white hover:text-black">
+                                                  {category.callToActionText}
+                                              </Button>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                              )}
-                              <div className="absolute inset-0 bg-transparent group-hover:bg-black/50 transition-colors duration-300" />
-                              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
-                                  <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                      <h3 className="font-headline text-3xl font-bold drop-shadow-lg">{category.name}</h3>
-                                      {category.description && (
-                                        <p className="mt-2 text-sm max-w-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            {category.description}
-                                        </p>
-                                      )}
-                                      {category.callToActionText && (
-                                        <Button variant="outline" className="mt-4 bg-transparent text-white border-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white hover:text-black">
-                                            {category.callToActionText}
-                                        </Button>
-                                      )}
-                                  </div>
-                              </div>
-                          </div>
-                      </Link>
-                  ))
-              )}
-          </div>
+                            </Link>
+                           </CarouselItem>
+                        ))
+                    )}
+                </CarouselContent>
+                <CarouselPrevious className="hidden md:flex" />
+                <CarouselNext className="hidden md:flex" />
+            </Carousel>
       </div>
     </section>
   )
@@ -145,11 +162,6 @@ function ProductCarouselSection({ title, products, isLoading, viewAllLink }: { t
 export default function Home() {
   const firestore = useFirestore();
   
-  const [categories1, setCategories1] = useState<Category[] | null>(null);
-  const [categories2, setCategories2] = useState<Category[] | null>(null);
-  const [categories3, setCategories3] = useState<Category[] | null>(null);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-
   const heroSectionRef = useMemoFirebase(
     () => (firestore ? doc(firestore, 'settings', 'heroSection') : null),
     [firestore]
@@ -174,46 +186,12 @@ export default function Home() {
   );
   const { data: dailyDeals, isLoading: isLoadingDailyDeals } = useCollection<Product>(dailyDealsQuery);
   
-  useEffect(() => {
-    async function fetchCategories() {
-      if (!firestore) return;
-      setIsLoadingCategories(true);
-      try {
-        let lastVisible: any = null;
-        
-        // Fetch first set
-        const q1 = query(collection(firestore, 'categories'), where('parentId', '==', null), limit(3));
-        const snapshot1 = await getDocs(q1);
-        const cats1 = snapshot1.docs.map(d => ({id: d.id, ...d.data()} as Category));
-        setCategories1(cats1);
-        lastVisible = snapshot1.docs.length > 0 ? snapshot1.docs[snapshot1.docs.length-1] : null;
+  const categoriesQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'categories'), where('parentId', '==', null)) : null),
+    [firestore]
+  );
+  const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
-        // Fetch second set
-        if (lastVisible) {
-          const q2 = query(collection(firestore, 'categories'), where('parentId', '==', null), startAfter(lastVisible), limit(3));
-          const snapshot2 = await getDocs(q2);
-          const cats2 = snapshot2.docs.map(d => ({id: d.id, ...d.data()} as Category));
-          setCategories2(cats2);
-          lastVisible = snapshot2.docs.length > 0 ? snapshot2.docs[snapshot2.docs.length-1] : null;
-        }
-
-         // Fetch third set
-         if (lastVisible) {
-          const q3 = query(collection(firestore, 'categories'), where('parentId', '==', null), startAfter(lastVisible), limit(3));
-          const snapshot3 = await getDocs(q3);
-          const cats3 = snapshot3.docs.map(d => ({id: d.id, ...d.data()} as Category));
-          setCategories3(cats3);
-        }
-
-      } catch (error) {
-        console.error("Failed to fetch categories in sequence", error);
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    }
-
-    fetchCategories();
-  }, [firestore]);
 
   return (
     <div className="flex flex-col gap-5 overflow-hidden">
@@ -255,7 +233,7 @@ export default function Home() {
         <div className="container mx-auto text-center py-20">لم يتم تكوين الواجهة الرئيسية بعد. يرجى إعدادها من لوحة التحكم.</div>
       )}
 
-      {categories1 && categories1.length > 0 && <CategoryShowcase categories={categories1} isLoading={isLoadingCategories} />}
+      <CategoryCarousel categories={categories} isLoading={isLoadingCategories} />
       
       <ProductCarouselSection 
         title="العروض اليومية" 
@@ -270,8 +248,6 @@ export default function Home() {
         isLoading={isLoadingProducts}
         viewAllLink="/products"
       />
-      
-      {categories2 && categories2.length > 0 && <CategoryShowcase categories={categories2} isLoading={isLoadingCategories} />}
 
       <ProductCarouselSection 
         title="الأكثر مبيعًا" 
@@ -279,8 +255,6 @@ export default function Home() {
         isLoading={isLoadingBestSellers} 
         viewAllLink="/best-sellers" 
       />
-
-      {categories3 && categories3.length > 0 && <CategoryShowcase categories={categories3} isLoading={isLoadingCategories} />}
 
     </div>
   );
