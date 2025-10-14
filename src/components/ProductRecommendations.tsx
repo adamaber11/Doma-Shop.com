@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Product } from '@/lib/types';
@@ -19,17 +20,19 @@ export default function ProductRecommendations({ currentProduct }: { currentProd
       setIsLoading(true);
 
       try {
-        // Query for best-selling products, excluding the current one
+        // Query for best-selling products.
         const bestSellersQuery = query(
           collection(firestore, 'products'),
           where('isBestSeller', '==', true),
-          where('id', '!=', currentProduct.id),
-          limit(8)
+          limit(9) // Fetch a few extra items to ensure we have enough after filtering
         );
 
         const querySnapshot = await getDocs(bestSellersQuery);
         const bestSellers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        setRecommendations(bestSellers);
+        
+        // Filter out the current product on the client-side
+        const filteredRecommendations = bestSellers.filter(p => p.id !== currentProduct.id).slice(0, 8);
+        setRecommendations(filteredRecommendations);
 
       } catch (error) {
         console.error("Failed to get product recommendations:", error);
