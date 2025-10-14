@@ -111,7 +111,7 @@ export default function ProductQuickView() {
     return null;
   }
 
-  const { id: productId, name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, material, countryOfOrigin, features, variants, reviewSummary, shippingAndService } = product;
+  const { id: productId, name, description, price, rating, sizes, originalPrice, isDeal, dealEndDate, category, material, countryOfOrigin, features, variants, reviewSummary, shippingAndService, cardMessageIsEnabled, cardMessageText, cardMessageTextColor } = product;
   const selectedImageUrl = currentImages[selectedImageIndex] || '';
   const selectedImageHint = currentImageHints[selectedImageIndex] || '';
   
@@ -217,6 +217,12 @@ export default function ProductQuickView() {
                     )}
                 </div>
                 <Separator />
+
+                {cardMessageIsEnabled && cardMessageText && (
+                  <p className={cn("text-base font-semibold text-center my-2", cardMessageTextColor)}>
+                      {cardMessageText}
+                  </p>
+                )}
 
                 <SheetDescription className="text-muted-foreground leading-relaxed text-right text-sm">{description}</SheetDescription>
                 
