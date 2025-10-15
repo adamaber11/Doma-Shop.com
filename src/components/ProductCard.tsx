@@ -74,7 +74,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <p className="text-xs text-muted-foreground">{product.category}</p>
             <StarRating rating={product.rating} />
           </div>
-          <CardTitle className="font-headline text-sm font-semibold group-hover:text-primary mt-1 mb-2 h-5 truncate group-hover:underline group-hover:decoration-foreground group-hover:underline-offset-4">
+          <CardTitle className="font-headline text-sm font-semibold group-hover:text-primary mt-1 mb-2 h-5 truncate group-hover:underline group-hover:decoration-primary group-hover:underline-offset-4">
             {product.name}
           </CardTitle>
            <div className="flex items-baseline gap-2 mt-auto">
