@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -10,8 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Search, User, LogIn, UserPlus, Package, LogOut, LayoutDashboard, ShoppingBag } from 'lucide-react';
+import { User, LogIn, UserPlus, Package, LogOut, LayoutDashboard, ShoppingBag } from 'lucide-react';
 import Logo from './Logo';
 import { useUser, useAuth } from '@/firebase';
 import { Avatar, AvatarFallback } from './ui/avatar';
@@ -46,18 +46,7 @@ export default function Header() {
           <Logo />
         </div>
 
-        <div className="flex-1 flex justify-center px-4">
-          <div className="relative w-full max-w-sm hidden md:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="بحث..." className="pl-9" />
-          </div>
-        </div>
-
         <div className="flex items-center gap-2 md:gap-4">
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Search className="h-6 w-6" />
-            <span className="sr-only">Search</span>
-          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
