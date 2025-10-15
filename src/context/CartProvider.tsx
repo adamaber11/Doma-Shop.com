@@ -45,72 +45,72 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [cartItems]);
 
   const addToCart = useCallback((product: Product, quantity: number, selectedSize?: string, selectedColor?: string) => {
-    setCartItems(prevItems => {
-      const cartItemId = `${product.id}${selectedSize ? `-${selectedSize}` : ''}${selectedColor ? `-${selectedColor}` : ''}`;
-      const existingItem = prevItems.find(i => i.id === cartItemId);
-
-      if (existingItem) {
-        toast({
-          variant: 'destructive',
-          title: 'المنتج موجود بالفعل',
-          description: 'هذا المنتج موجود بالفعل في سلة التسوق الخاصة بك.',
-        });
-        return prevItems;
-      }
-      
-      if (quantity > product.stock) {
-        toast({
-            variant: 'destructive',
-            title: 'الكمية غير متوفرة',
-            description: `الكمية المتاحة لهذا المنتج هي ${product.stock} فقط.`,
-        });
-        return prevItems;
-      }
-
-      const newItem: CartItem = { 
-          ...product, 
-          quantity, 
-          selectedSize,
-          selectedColor,
-          id: cartItemId,
-          productId: product.id,
-      };
-      
+    const cartItemId = `${product.id}${selectedSize ? `-${selectedSize}` : ''}${selectedColor ? `-${selectedColor}` : ''}`;
+    
+    // Check if item exists before setting state
+    const existingItem = cartItems.find(i => i.id === cartItemId);
+    if (existingItem) {
       toast({
-        title: 'تمت الإضافة إلى السلة',
-        description: `${quantity} x ${product.name} ${selectedSize ? `(المقاس: ${selectedSize})` : ''} ${selectedColor ? `(اللون: ${selectedColor})` : ''}`,
+        variant: 'destructive',
+        title: 'المنتج موجود بالفعل',
+        description: 'هذا المنتج موجود بالفعل في سلة التسوق الخاصة بك.',
       });
+      return;
+    }
 
-      return [...prevItems, newItem];
+    if (quantity > product.stock) {
+      toast({
+          variant: 'destructive',
+          title: 'الكمية غير متوفرة',
+          description: `الكمية المتاحة لهذا المنتج هي ${product.stock} فقط.`,
+      });
+      return;
+    }
+
+    const newItem: CartItem = { 
+        ...product, 
+        quantity, 
+        selectedSize,
+        selectedColor,
+        id: cartItemId,
+        productId: product.id,
+    };
+    
+    setCartItems(prevItems => [...prevItems, newItem]);
+
+    toast({
+      title: 'تمت الإضافة إلى السلة',
+      description: `${quantity} x ${product.name} ${selectedSize ? `(المقاس: ${selectedSize})` : ''} ${selectedColor ? `(اللون: ${selectedColor})` : ''}`,
     });
-  }, [toast]);
+
+  }, [cartItems, toast]);
 
   const removeFromCart = useCallback((id: string) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== id));
   }, []);
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(id);
-    } else {
-        setCartItems(prevItems =>
-            prevItems.map(item => {
-                if (item.id === id) {
-                    if (quantity > item.stock) {
-                        toast({
-                            variant: 'destructive',
-                            title: 'الكمية غير متوفرة',
-                            description: `الكمية القصوى المتاحة هي ${item.stock}.`,
-                        });
-                        return { ...item, quantity: item.stock };
-                    }
-                    return { ...item, quantity };
+    setCartItems(prevItems => {
+        if (quantity <= 0) {
+            return prevItems.filter(item => item.id !== id);
+        }
+        
+        return prevItems.map(item => {
+            if (item.id === id) {
+                if (quantity > item.stock) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'الكمية غير متوفرة',
+                        description: `الكمية القصوى المتاحة هي ${item.stock}.`,
+                    });
+                    return { ...item, quantity: item.stock };
                 }
-                return item;
-            })
-        );
-    }
-  }, [removeFromCart, toast]);
+                return { ...item, quantity };
+            }
+            return item;
+        });
+    });
+  }, [toast]);
 
   const clearCart = useCallback(() => {
     setCartItems([]);
@@ -140,5 +140,3 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     </CartContext.Provider>
   );
 }
-
-    
