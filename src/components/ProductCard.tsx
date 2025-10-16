@@ -8,7 +8,7 @@ import { Button } from './ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
-import { ShoppingCart, Check, Link as LinkIcon } from 'lucide-react';
+import { ShoppingCart, Check, Link as LinkIcon, Eye } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { useQuickView } from '@/hooks/use-quick-view';
 import { cn } from '@/lib/utils';
@@ -66,12 +66,12 @@ export default function ProductCard({ product }: { product: Product }) {
     : 0;
 
   return (
-    <Link href={`/products/${product.id}`} className="block group w-full h-full cursor-pointer">
+    <div onClick={() => openQuickView(product)} className="block group w-full h-full cursor-pointer">
       <Card className="flex flex-col overflow-hidden h-full relative">
         <Button
             size="icon"
             variant="secondary"
-            className="absolute top-2 right-2 z-10 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            className="absolute top-2 left-2 z-10 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             onClick={handleCopyLink}
             aria-label="Copy product link"
         >
@@ -96,7 +96,7 @@ export default function ProductCard({ product }: { product: Product }) {
                     />
                 )}
                  {hasDiscount && (
-                    <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md z-10">
+                    <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md z-10">
                         خصم {discountPercentage}%
                     </div>
                 )}
@@ -145,6 +145,6 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
         </CardFooter>
       </Card>
-    </Link>
+    </div>
   );
 }
