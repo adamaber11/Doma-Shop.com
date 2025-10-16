@@ -73,7 +73,7 @@ export interface Order {
   id: string;
   userId: string;
   orderNumber?: number;
-  orderDate?: Timestamp;
+  orderDate?: Timestamp | string; // Allow string for mock data
   totalAmount?: number;
   status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   shippingAddress?: ShippingAddress;

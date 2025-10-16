@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCollection, useUser, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
 import type { Order } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -53,6 +53,14 @@ export default function OrdersPage() {
   const { data: orders, isLoading } = useCollection<Order>(ordersQuery);
 
   const showLoading = isUserLoading || isLoading;
+  
+  const formatDate = (date: Timestamp | string | undefined) => {
+    if (!date) return 'غير متوفر';
+    if (typeof date === 'string') {
+      return new Date(date).toLocaleDateString('ar-AE');
+    }
+    return date.toDate().toLocaleDateString('ar-AE');
+  };
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
@@ -87,9 +95,7 @@ export default function OrdersPage() {
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">#{order.orderNumber || order.id.substring(0,7)}</TableCell>
                     <TableCell>
-                      {order.orderDate
-                        ? new Date(order.orderDate.toDate()).toLocaleDateString('ar-AE')
-                        : 'غير متوفر'}
+                      {formatDate(order.orderDate)}
                     </TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(order.status)}>

@@ -25,7 +25,7 @@ import {
   Legend,
 } from 'recharts';
 import { useFirestore } from '@/firebase';
-import { collectionGroup, getDocs, query, orderBy } from 'firebase/firestore';
+import { collectionGroup, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
 import { useEffect, useState, useMemo } from 'react';
 import type { Order } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -80,7 +80,7 @@ export default function DashboardPage() {
 
           activeOrders.forEach(order => {
             if (order.orderDate) {
-              const date = order.orderDate.toDate();
+              const date = order.orderDate instanceof Timestamp ? order.orderDate.toDate() : new Date(order.orderDate);
               const month = date.getMonth(); // 0-11
               const year = date.getFullYear();
               const key = `${year}-${month}`;
@@ -123,7 +123,11 @@ export default function DashboardPage() {
             const fallbackSnapshot = await getDocs(fallbackQuery);
             const fallbackOrders: Order[] = fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
             // Sort manually on the client
-            fallbackOrders.sort((a, b) => (b.orderDate?.toMillis() || 0) - (a.orderDate?.toMillis() || 0));
+            fallbackOrders.sort((a, b) => {
+                const dateA = a.orderDate instanceof Timestamp ? a.orderDate.toMillis() : (a.orderDate ? new Date(a.orderDate).getTime() : 0);
+                const dateB = b.orderDate instanceof Timestamp ? b.orderDate.toMillis() : (b.orderDate ? new Date(b.orderDate).getTime() : 0);
+                return dateB - dateA;
+            });
             processOrders(fallbackOrders);
         } catch (fallbackError) {
             console.error("Error fetching dashboard data with fallback:", fallbackError);

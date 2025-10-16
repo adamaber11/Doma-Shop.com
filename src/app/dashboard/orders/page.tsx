@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useFirestore } from '@/firebase';
-import { collection, collectionGroup, getDocs, query, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, collectionGroup, getDocs, query, orderBy, doc, updateDoc, Timestamp } from 'firebase/firestore';
 import type { Order, OrderItem, ShippingAddress } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -55,6 +55,14 @@ const statusTranslations: Record<Order['status'], string> = {
 };
 
 type OrderWithUser = Order & { customerName?: string; userId: string; };
+
+const formatDate = (date: Timestamp | string | undefined) => {
+    if (!date) return 'غير متوفر';
+    if (typeof date === 'string') {
+        return new Date(date).toLocaleString('ar-AE');
+    }
+    return date.toDate().toLocaleString('ar-AE');
+};
 
 function OrderDetailsDialog({ order, onClose, onStatusUpdate }: { order: OrderWithUser | null, onClose: () => void, onStatusUpdate: (orderId: string, newStatus: Order['status']) => void }) {
   const firestore = useFirestore();
@@ -116,7 +124,7 @@ function OrderDetailsDialog({ order, onClose, onStatusUpdate }: { order: OrderWi
         <DialogHeader>
           <DialogTitle>تفاصيل الطلب #{order.orderNumber || order.id.substring(0, 7)}</DialogTitle>
           <DialogDescription>
-            بتاريخ {order.orderDate ? new Date(order.orderDate.toDate()).toLocaleString('ar-AE') : 'غير متوفر'}
+            بتاريخ {formatDate(order.orderDate)}
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
@@ -224,6 +232,14 @@ export default function DashboardOrdersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<OrderWithUser | null>(null);
 
+  const formatDate = (date: Timestamp | string | undefined) => {
+    if (!date) return 'غير متوفر';
+    if (typeof date === 'string') {
+        return new Date(date).toLocaleDateString('ar-AE');
+    }
+    return date.toDate().toLocaleDateString('ar-AE');
+  };
+
   useEffect(() => {
     async function fetchAllOrders() {
       if (!firestore) return;
@@ -270,7 +286,11 @@ export default function DashboardOrdersPage() {
                  };
             });
             // Sort manually if not ordered by Firestore
-            fallbackOrders.sort((a, b) => (b.orderDate?.toMillis() || 0) - (a.orderDate?.toMillis() || 0));
+            fallbackOrders.sort((a, b) => {
+                const dateA = a.orderDate instanceof Timestamp ? a.orderDate.toMillis() : (a.orderDate ? new Date(a.orderDate).getTime() : 0);
+                const dateB = b.orderDate instanceof Timestamp ? b.orderDate.toMillis() : (b.orderDate ? new Date(b.orderDate).getTime() : 0);
+                return dateB - dateA;
+            });
             setOrders(fallbackOrders);
         } catch (fallbackError) {
              console.error("Fallback query failed as well:", fallbackError);
@@ -333,9 +353,7 @@ export default function DashboardOrdersPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {order.orderDate
-                          ? new Date(order.orderDate.toDate()).toLocaleDateString('ar-AE')
-                          : 'غير متوفر'}
+                        {formatDate(order.orderDate)}
                       </TableCell>
                        <TableCell>{order.customerName}</TableCell>
                       <TableCell>
