@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { useCollection } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
@@ -10,7 +10,6 @@ import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { useMemo } from 'react';
 
 export default function AllProductsPage() {
   const firestore = useFirestore();

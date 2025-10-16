@@ -1,13 +1,10 @@
 
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
-import { useCollection, useDoc } from '@/firebase';
-import { collection, query, limit, where, doc } from 'firebase/firestore';
-import { useFirestore, useMemoFirebase } from '@/firebase/provider';
+import { collection, query, limit, where, doc, getDoc, getDocs } from 'firebase/firestore';
+import { firestore } from '@/firebase/server';
 import type { Product, HeroSection, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -17,6 +14,42 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+
+async function getHomePageData() {
+    try {
+        const heroDocRef = doc(firestore, 'settings', 'heroSection');
+        const productsQuery = query(collection(firestore, 'products'), where('isFeatured', '==', true), limit(8));
+        const bestSellersQuery = query(collection(firestore, 'products'), where('isBestSeller', '==', true), limit(8));
+        const dailyDealsQuery = query(collection(firestore, 'products'), where('isDeal', '==', true), limit(8));
+        const categoriesQuery = query(collection(firestore, 'categories'), where('parentId', '==', null));
+
+        const [
+            heroSnapshot,
+            productsSnapshot,
+            bestSellersSnapshot,
+            dailyDealsSnapshot,
+            categoriesSnapshot
+        ] = await Promise.all([
+            getDoc(heroDocRef),
+            getDocs(productsQuery),
+            getDocs(bestSellersSnapshot),
+            getDocs(dailyDealsSnapshot),
+            getDocs(categoriesQuery),
+        ]);
+
+        const heroData = heroSnapshot.exists() ? heroSnapshot.data() as HeroSection : null;
+        const products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        const bestSellers = bestSellersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        const dailyDeals = dailyDealsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        const categories = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+
+        return { heroData, products, bestSellers, dailyDeals, categories };
+    } catch (error) {
+        console.error("Error fetching homepage data:", error);
+        return { heroData: null, products: [], bestSellers: [], dailyDeals: [], categories: [] };
+    }
+}
+
 
 function HeroSectionSkeleton() {
   return (
@@ -40,8 +73,8 @@ function HeroSectionSkeleton() {
   );
 }
 
-function CategoryCarousel({ categories, isLoading }: { categories: Category[] | null, isLoading: boolean }) {
-   if (!isLoading && (!categories || categories.length === 0)) {
+function CategoryCarousel({ categories }: { categories: Category[] | null }) {
+   if (!categories || categories.length === 0) {
         return null;
     }
 
@@ -56,53 +89,43 @@ function CategoryCarousel({ categories, isLoading }: { categories: Category[] | 
                 className="w-full"
             >
                 <CarouselContent>
-                    {isLoading ? (
-                        Array.from({ length: 3 }).map((_, i) => (
-                            <CarouselItem key={i} className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
-                                 <div className="space-y-2">
-                                     <Skeleton className="h-96 w-full" />
-                                 </div>
-                             </CarouselItem>
-                        ))
-                    ) : (
-                        categories?.map((category) => (
-                           <CarouselItem key={category.id} className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
-                            <Link href={`/category/${encodeURIComponent(category.name)}`} className="group block">
-                                <div className="relative overflow-hidden rounded-lg shadow-md aspect-[4/5] border-4 border-white">
-                                    {category.imageUrl ? (
-                                      <Image
-                                          src={category.imageUrl}
-                                          alt={category.name}
-                                          fill
-                                          className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                          data-ai-hint={category.imageHint || 'category image'}
-                                      />
-                                    ) : (
-                                      <div className="w-full h-full bg-secondary flex items-center justify-center">
-                                        <span className="text-muted-foreground">No Image</span>
-                                      </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-transparent group-hover:bg-black/50 transition-colors duration-300" />
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
-                                        <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                            <h3 className="font-headline text-3xl font-bold drop-shadow-lg">{category.name}</h3>
-                                            {category.description && (
-                                              <p className="mt-2 text-sm max-w-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                  {category.description}
-                                              </p>
-                                            )}
-                                            {category.callToActionText && (
-                                              <Button variant="outline" className="mt-4 bg-transparent text-white border-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white hover:text-black">
-                                                  {category.callToActionText}
-                                              </Button>
-                                            )}
-                                        </div>
+                    {categories?.map((category) => (
+                       <CarouselItem key={category.id} className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
+                        <Link href={`/category/${encodeURIComponent(category.name)}`} className="group block">
+                            <div className="relative overflow-hidden rounded-lg shadow-md aspect-[4/5] border-4 border-white">
+                                {category.imageUrl ? (
+                                  <Image
+                                      src={category.imageUrl}
+                                      alt={category.name}
+                                      fill
+                                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                      data-ai-hint={category.imageHint || 'category image'}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-secondary flex items-center justify-center">
+                                    <span className="text-muted-foreground">No Image</span>
+                                  </div>
+                                )}
+                                <div className="absolute inset-0 bg-transparent group-hover:bg-black/50 transition-colors duration-300" />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
+                                    <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                        <h3 className="font-headline text-3xl font-bold drop-shadow-lg">{category.name}</h3>
+                                        {category.description && (
+                                          <p className="mt-2 text-sm max-w-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                              {category.description}
+                                          </p>
+                                        )}
+                                        {category.callToActionText && (
+                                          <Button variant="outline" className="mt-4 bg-transparent text-white border-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white hover:text-black">
+                                              {category.callToActionText}
+                                          </Button>
+                                        )}
                                     </div>
                                 </div>
-                            </Link>
-                           </CarouselItem>
-                        ))
-                    )}
+                            </div>
+                        </Link>
+                       </CarouselItem>
+                    ))}
                 </CarouselContent>
                 <CarouselPrevious className="hidden md:flex" />
                 <CarouselNext className="hidden md:flex" />
@@ -112,9 +135,9 @@ function CategoryCarousel({ categories, isLoading }: { categories: Category[] | 
   )
 }
 
-function ProductCarouselSection({ title, products, isLoading, viewAllLink }: { title: string, products: Product[] | null, isLoading: boolean, viewAllLink: string }) {
-    if (!isLoading && (!products || products.length === 0)) {
-        return null; // Don't render the section if there are no products and it's not loading
+function ProductCarouselSection({ title, products, viewAllLink }: { title: string, products: Product[] | null, viewAllLink: string }) {
+    if (!products || products.length === 0) {
+        return null;
     }
     
     return (
@@ -133,24 +156,11 @@ function ProductCarouselSection({ title, products, isLoading, viewAllLink }: { t
                 className="w-full"
             >
                 <CarouselContent>
-                    {isLoading ? (
-                        Array.from({ length: 4 }).map((_, index) => (
-                            <CarouselItem key={index} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                                <div className="space-y-2">
-                                    <Skeleton className="h-80 w-full" />
-                                    <Skeleton className="h-6 w-3/4" />
-                                    <Skeleton className="h-5 w-1/2" />
-                                    <Skeleton className="h-8 w-1/4" />
-                                </div>
-                            </CarouselItem>
-                        ))
-                    ) : (
-                        products?.map((product) => (
-                            <CarouselItem key={product.id} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-                                <ProductCard product={product} />
-                            </CarouselItem>
-                        ))
-                    )}
+                    {products?.map((product) => (
+                        <CarouselItem key={product.id} className="p-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                            <ProductCard product={product} />
+                        </CarouselItem>
+                    ))}
                 </CarouselContent>
                 <CarouselPrevious className="hidden md:flex" />
                 <CarouselNext className="hidden md:flex" />
@@ -159,45 +169,12 @@ function ProductCarouselSection({ title, products, isLoading, viewAllLink }: { t
     );
 }
 
-export default function Home() {
-  const firestore = useFirestore();
-  
-  const heroSectionRef = useMemoFirebase(
-    () => (firestore ? doc(firestore, 'settings', 'heroSection') : null),
-    [firestore]
-  );
-  const { data: heroData, isLoading: isLoadingHero } = useDoc<HeroSection>(heroSectionRef);
-
-  const productsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'products'), where('isFeatured', '==', true), limit(8)) : null),
-    [firestore]
-  );
-  const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
-
-  const bestSellersQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'products'), where('isBestSeller', '==', true), limit(8)) : null),
-    [firestore]
-  );
-  const { data: bestSellers, isLoading: isLoadingBestSellers } = useCollection<Product>(bestSellersQuery);
-
-  const dailyDealsQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'products'), where('isDeal', '==', true), limit(8)) : null),
-    [firestore]
-  );
-  const { data: dailyDeals, isLoading: isLoadingDailyDeals } = useCollection<Product>(dailyDealsQuery);
-  
-  const categoriesQuery = useMemoFirebase(
-    () => (firestore ? query(collection(firestore, 'categories'), where('parentId', '==', null)) : null),
-    [firestore]
-  );
-  const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
-
+export default async function Home() {
+  const { heroData, products, bestSellers, dailyDeals, categories } = await getHomePageData();
 
   return (
     <div className="flex flex-col gap-5 overflow-hidden">
-      {isLoadingHero ? (
-        <HeroSectionSkeleton />
-      ) : heroData ? (
+      {heroData ? (
         <section className="relative h-[60vh] w-full overflow-hidden bg-secondary shadow-lg">
           <Image
             src={heroData.imageUrl}
@@ -230,29 +207,26 @@ export default function Home() {
           </div>
         </section>
       ) : (
-        <div className="container mx-auto text-center py-20">لم يتم تكوين الواجهة الرئيسية بعد. يرجى إعدادها من لوحة التحكم.</div>
+         <HeroSectionSkeleton />
       )}
 
-      <CategoryCarousel categories={categories} isLoading={isLoadingCategories} />
+      <CategoryCarousel categories={categories} />
       
       <ProductCarouselSection 
         title="العروض اليومية" 
         products={dailyDeals} 
-        isLoading={isLoadingDailyDeals} 
         viewAllLink="/daily-deals" 
       />
 
       <ProductCarouselSection 
         title="منتجات مميزة" 
         products={products} 
-        isLoading={isLoadingProducts}
         viewAllLink="/products"
       />
 
       <ProductCarouselSection 
         title="الأكثر مبيعًا" 
         products={bestSellers} 
-        isLoading={isLoadingBestSellers} 
         viewAllLink="/best-sellers" 
       />
 

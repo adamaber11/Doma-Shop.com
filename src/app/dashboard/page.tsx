@@ -122,6 +122,8 @@ export default function DashboardPage() {
             const fallbackQuery = query(collectionGroup(firestore, 'orders'));
             const fallbackSnapshot = await getDocs(fallbackQuery);
             const fallbackOrders: Order[] = fallbackSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+            // Sort manually on the client
+            fallbackOrders.sort((a, b) => (b.orderDate?.toMillis() || 0) - (a.orderDate?.toMillis() || 0));
             processOrders(fallbackOrders);
         } catch (fallbackError) {
             console.error("Error fetching dashboard data with fallback:", fallbackError);

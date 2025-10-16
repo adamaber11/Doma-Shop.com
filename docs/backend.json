@@ -89,6 +89,10 @@
             "type": "string",
             "description": "Product category."
         },
+        "brand": {
+          "type": "string",
+          "description": "The brand of the product."
+        },
         "sizes": {
             "type": "array",
             "description": "Available sizes for the product.",

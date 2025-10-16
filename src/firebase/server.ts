@@ -14,6 +14,8 @@ function initializeFirebaseAdmin() {
     return {
       collection: () => ({
         get: () => Promise.resolve({ docs: [], empty: true }),
+        where: () => ({ get: () => Promise.resolve({ docs: [], empty: true }) }),
+        limit: () => ({ get: () => Promise.resolve({ docs: [], empty: true }) }),
       }),
     } as unknown as admin.firestore.Firestore;
   }
@@ -30,7 +32,9 @@ function initializeFirebaseAdmin() {
       // في حالة الفشل، نقوم بإنشاء كائن وهمي لمنع تعطل التطبيق بالكامل.
       return {
         collection: () => ({
-          get: () => Promise.resolve({ docs: [], empty: true }),
+         get: () => Promise.resolve({ docs: [], empty: true }),
+         where: () => ({ get: () => Promise.resolve({ docs: [], empty: true }) }),
+         limit: () => ({ get: () => Promise.resolve({ docs: [], empty: true }) }),
         }),
       } as unknown as admin.firestore.Firestore;
     }

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -252,10 +253,9 @@ export default function DashboardOrdersPage() {
         setOrders(allOrders);
 
       } catch (error) {
-        console.error("Error fetching all orders:", error);
-        // If an error occurs (like the index one), we can try fetching without ordering
-        // as a fallback for this page to still work.
+        console.error("Error fetching ordered dashboard data, trying fallback:", error);
         try {
+            // Fallback query without ordering if the index doesn't exist yet.
             const fallbackQuery = query(collectionGroup(firestore, 'orders'));
             const fallbackSnapshot = await getDocs(fallbackQuery);
             const fallbackOrders: OrderWithUser[] = fallbackSnapshot.docs.map(doc => {
