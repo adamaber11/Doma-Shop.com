@@ -1,42 +1,27 @@
 
+'use client';
+
 import type { Product } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
-import { notFound } from 'next/navigation';
-import { firestore } from '@/firebase/server'; 
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PageProps {
   params: { slug: string };
 }
 
-async function getProductsByBrand(brandName: string): Promise<Product[] | null> {
-  if (!firestore) {
-    return [];
-  }
-  try {
-    const productsRef = firestore.collection('products');
-    const snapshot = await productsRef.where('brand', '==', brandName).get();
-    
-    if (snapshot.empty) {
-      return []; 
-    }
-
-    const products: Product[] = [];
-    snapshot.forEach(doc => {
-      products.push({ id: doc.id, ...doc.data() } as Product);
-    });
-
-    return products;
-  } catch (error) {
-    console.error("Error fetching products by brand:", error);
-    return null; 
-  }
-}
-
-export default async function BrandPage({ params }: PageProps) {
+export default function BrandPage({ params }: PageProps) {
   const brandName = decodeURIComponent(params.slug);
-  const products = await getProductsByBrand(brandName);
+  const firestore = useFirestore();
 
-  if (products === null) {
+  const productsQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'products'), where('brand', '==', brandName)) : null),
+    [firestore, brandName]
+  );
+  const { data: products, isLoading, error } = useCollection<Product>(productsQuery);
+
+  if (error) {
     return <div className="text-center py-20">حدث خطأ أثناء جلب المنتجات.</div>;
   }
   
@@ -45,7 +30,18 @@ export default async function BrandPage({ params }: PageProps) {
       <h1 className="font-headline text-4xl font-bold text-center mb-8">
         منتجات {brandName}
       </h1>
-      {products.length > 0 ? (
+      {isLoading ? (
+         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-80 w-full" />
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-5 w-1/2" />
+              <Skeleton className="h-8 w-1/4" />
+            </div>
+          ))}
+        </div>
+      ) : products && products.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />

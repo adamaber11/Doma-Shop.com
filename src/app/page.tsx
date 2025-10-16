@@ -1,10 +1,12 @@
 
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import ProductCard from '@/components/ProductCard';
-import { collection, query, limit, where, doc, getDoc, getDocs } from 'firebase/firestore';
-import { firestore } from '@/firebase/server';
+import { collection, query, limit, where, doc } from 'firebase/firestore';
+import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
 import type { Product, HeroSection, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -14,45 +16,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-
-async function getHomePageData() {
-    if (!firestore) {
-        console.log("Firestore is not initialized on the server. Skipping data fetch.");
-        return { heroData: null, products: [], bestSellers: [], dailyDeals: [], categories: [] };
-    }
-    try {
-        const heroDocRef = doc(firestore, 'settings', 'heroSection');
-        const productsQuery = query(collection(firestore, 'products'), where('isFeatured', '==', true), limit(8));
-        const bestSellersQuery = query(collection(firestore, 'products'), where('isBestSeller', '==', true), limit(8));
-        const dailyDealsQuery = query(collection(firestore, 'products'), where('isDeal', '==', true), limit(8));
-        const categoriesQuery = query(collection(firestore, 'categories'), where('parentId', '==', null));
-
-        const [
-            heroSnapshot,
-            productsSnapshot,
-            bestSellersSnapshot,
-            dailyDealsSnapshot,
-            categoriesSnapshot
-        ] = await Promise.all([
-            getDoc(heroDocRef),
-            getDocs(productsQuery),
-            getDocs(bestSellersQuery),
-            getDocs(dailyDealsSnapshot),
-            getDocs(categoriesQuery),
-        ]);
-
-        const heroData = heroSnapshot.exists() ? heroSnapshot.data() as HeroSection : null;
-        const products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        const bestSellers = bestSellersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        const dailyDeals = dailyDealsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        const categories = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
-
-        return { heroData, products, bestSellers, dailyDeals, categories };
-    } catch (error) {
-        console.error("Error fetching homepage data:", error);
-        return { heroData: null, products: [], bestSellers: [], dailyDeals: [], categories: [] };
-    }
-}
 
 
 function HeroSectionSkeleton() {
@@ -77,7 +40,21 @@ function HeroSectionSkeleton() {
   );
 }
 
-function CategoryCarousel({ categories }: { categories: Category[] | null }) {
+function CategoryCarousel({ categories, isLoading }: { categories: Category[] | null, isLoading: boolean }) {
+   if (isLoading) {
+     return (
+        <section className="bg-card py-12">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Array.from({length: 3}).map((_, i) => (
+                        <Skeleton key={i} className="w-full aspect-[4/5] rounded-lg" />
+                    ))}
+                </div>
+            </div>
+        </section>
+     )
+   }
+
    if (!categories || categories.length === 0) {
         return null;
     }
@@ -139,7 +116,28 @@ function CategoryCarousel({ categories }: { categories: Category[] | null }) {
   )
 }
 
-function ProductCarouselSection({ title, products, viewAllLink }: { title: string, products: Product[] | null, viewAllLink: string }) {
+function ProductCarouselSection({ title, products, isLoading, viewAllLink }: { title: string, products: Product[] | null, isLoading: boolean, viewAllLink: string }) {
+    if (isLoading) {
+        return (
+            <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                 <div className="flex justify-between items-center mb-6">
+                    <Skeleton className="h-8 w-48" />
+                    <Skeleton className="h-6 w-20" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="space-y-2">
+                        <Skeleton className="h-80 w-full" />
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-5 w-1/2" />
+                        <Skeleton className="h-8 w-1/4" />
+                        </div>
+                    ))}
+                </div>
+            </section>
+        )
+    }
+    
     if (!products || products.length === 0) {
         return null;
     }
@@ -173,12 +171,34 @@ function ProductCarouselSection({ title, products, viewAllLink }: { title: strin
     );
 }
 
-export default async function Home() {
-  const { heroData, products, bestSellers, dailyDeals, categories } = await getHomePageData();
+export default function Home() {
+  const firestore = useFirestore();
+
+  // Hero Section
+  const heroDocRef = useMemoFirebase(() => (firestore ? doc(firestore, 'settings', 'heroSection') : null), [firestore]);
+  const { data: heroData, isLoading: isLoadingHero } = useDoc<HeroSection>(heroDocRef);
+  
+  // Products
+  const productsQuery = useMemoFirebase(() => (firestore ? query(collection(firestore, 'products'), where('isFeatured', '==', true), limit(8)) : null), [firestore]);
+  const { data: products, isLoading: isLoadingProducts } = useCollection<Product>(productsQuery);
+
+  // Best Sellers
+  const bestSellersQuery = useMemoFirebase(() => (firestore ? query(collection(firestore, 'products'), where('isBestSeller', '==', true), limit(8)) : null), [firestore]);
+  const { data: bestSellers, isLoading: isLoadingBestSellers } = useCollection<Product>(bestSellersQuery);
+
+  // Daily Deals
+  const dailyDealsQuery = useMemoFirebase(() => (firestore ? query(collection(firestore, 'products'), where('isDeal', '==', true), limit(8)) : null), [firestore]);
+  const { data: dailyDeals, isLoading: isLoadingDailyDeals } = useCollection<Product>(dailyDealsQuery);
+  
+  // Categories
+  const categoriesQuery = useMemoFirebase(() => (firestore ? query(collection(firestore, 'categories'), where('parentId', '==', null)) : null), [firestore]);
+  const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
   return (
     <div className="flex flex-col gap-5 overflow-hidden">
-      {heroData ? (
+      {isLoadingHero ? (
+        <HeroSectionSkeleton />
+      ) : heroData ? (
         <section className="relative h-[60vh] w-full overflow-hidden bg-secondary shadow-lg">
           <Image
             src={heroData.imageUrl}
@@ -214,23 +234,26 @@ export default async function Home() {
          <HeroSectionSkeleton />
       )}
 
-      <CategoryCarousel categories={categories} />
+      <CategoryCarousel categories={categories} isLoading={isLoadingCategories} />
       
       <ProductCarouselSection 
         title="العروض اليومية" 
         products={dailyDeals} 
+        isLoading={isLoadingDailyDeals}
         viewAllLink="/daily-deals" 
       />
 
       <ProductCarouselSection 
         title="منتجات مميزة" 
-        products={products} 
+        products={products}
+        isLoading={isLoadingProducts} 
         viewAllLink="/products"
       />
 
       <ProductCarouselSection 
         title="الأكثر مبيعًا" 
         products={bestSellers} 
+        isLoading={isLoadingBestSellers}
         viewAllLink="/best-sellers" 
       />
 
