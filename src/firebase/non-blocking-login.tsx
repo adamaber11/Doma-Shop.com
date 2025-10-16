@@ -4,12 +4,13 @@ import {
   signInAnonymously,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  UserCredential,
 } from 'firebase/auth';
 
 /** Initiate anonymous sign-in (non-blocking). */
 export function initiateAnonymousSignIn(authInstance: Auth): Promise<void> {
   return new Promise((resolve, reject) => {
-    signInAnonymously(authInstance).then(resolve).catch(reject);
+    signInAnonymously(authInstance).then(() => resolve()).catch(reject);
   });
 }
 

@@ -24,7 +24,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { ScrollArea } from './ui/scroll-area';
 
 type CategoryWithSubcategories = CategoryType & {
@@ -36,8 +36,14 @@ const isLucideIcon = (name: string): name is keyof typeof Icons => {
   return name in Icons;
 };
 
-// A fallback icon component
-const DefaultIcon = LayoutGrid;
+// A safe icon component that renders a Lucide icon by name or a default.
+const CategoryIcon = ({ iconName }: { iconName?: string }) => {
+  const IconComponent = (iconName && isLucideIcon(iconName)
+    ? Icons[iconName]
+    : LayoutGrid) as React.ElementType;
+  return <IconComponent className="h-5 w-5" />;
+};
+
 
 export default function CategoriesSheet() {
   const firestore = useFirestore();
@@ -86,10 +92,6 @@ export default function CategoriesSheet() {
   ];
 
   const renderCategory = (category: CategoryWithSubcategories) => {
-    const IconComponent = (category.iconName && isLucideIcon(category.iconName)
-      ? Icons[category.iconName]
-      : DefaultIcon) as React.ElementType;
-      
     if (category.subcategories.length === 0) {
       return (
         <SheetClose asChild key={category.id}>
@@ -97,7 +99,7 @@ export default function CategoriesSheet() {
             href="/products"
             className="flex items-center gap-3 p-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
           >
-            <IconComponent className="h-5 w-5" />
+            <CategoryIcon iconName={category.iconName} />
             <span className="font-medium">{category.name}</span>
           </Link>
         </SheetClose>
@@ -109,7 +111,7 @@ export default function CategoriesSheet() {
         <AccordionItem value={category.id} className="border-none">
           <AccordionTrigger className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors hover:no-underline">
               <div className="flex items-center gap-3">
-                <IconComponent className="h-5 w-5" />
+                <CategoryIcon iconName={category.iconName} />
                 <span className="font-medium">{category.name}</span>
               </div>
           </AccordionTrigger>
