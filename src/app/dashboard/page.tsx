@@ -130,7 +130,7 @@ export default function DashboardPage() {
             });
             processOrders(fallbackOrders);
         } catch (fallbackError) {
-            console.error("Error fetching dashboard data with fallback:", fallbackError);
+             console.error("Error fetching dashboard data with fallback:", fallbackError);
         }
       } finally {
         setIsLoading(false);
