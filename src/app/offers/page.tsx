@@ -6,6 +6,9 @@ import type { Product } from '@/lib/types';
 import { TicketPercent } from 'lucide-react';
 
 async function getDeals() {
+    if (!firestore) {
+        return [];
+    }
     try {
         const productsRef = collection(firestore, 'products');
         const q = query(productsRef, where('isDeal', '==', true));

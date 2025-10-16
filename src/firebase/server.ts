@@ -1,50 +1,46 @@
 
 import * as admin from 'firebase-admin';
 
-// ملاحظة: تأكد من أن متغير البيئة هذا متاح في بيئة النشر (Vercel, etc.).
 const serviceAccountString = process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON;
 
-let firestore: admin.firestore.Firestore;
+let firestoreInstance: admin.firestore.Firestore | null = null;
+let isInitialized = false;
 
-function initializeFirebaseAdmin() {
+function initializeFirebaseAdmin(): admin.firestore.Firestore | null {
+  if (isInitialized) {
+    return firestoreInstance;
+  }
+
+  isInitialized = true; // Mark as initialized to prevent re-runs
+
   if (!serviceAccountString) {
-    console.error("The FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON environment variable is not set. It's required for server-side Firebase operations.");
-    // في حالة عدم وجود متغير البيئة، نُنشئ كائنًا وهميًا لتجنب تعطل التطبيق بالكامل.
-    // هذا يسمح لعملية البناء بالاستمرار حتى لو فشل جلب البيانات الديناميكية.
-    return {
-      collection: () => ({
-        get: () => Promise.resolve({ docs: [], empty: true }),
-        where: () => ({ get: () => Promise.resolve({ docs: [], empty: true }) }),
-        limit: () => ({ get: () => Promise.resolve({ docs: [], empty: true }) }),
-      }),
-    } as unknown as admin.firestore.Firestore;
-  }
-  
-  // تحقق مما إذا كان التطبيق قد تم تهيئته بالفعل لمنع الخطأ
-  if (!admin.apps.length) {
-    try {
-      const serviceAccount = JSON.parse(serviceAccountString);
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
-    } catch (error) {
-      console.error("Failed to parse service account JSON or initialize Firebase Admin SDK:", error);
-      // في حالة الفشل، نقوم بإنشاء كائن وهمي لمنع تعطل التطبيق بالكامل.
-      return {
-        collection: () => ({
-         get: () => Promise.resolve({ docs: [], empty: true }),
-         where: () => ({ get: () => Promise.resolve({ docs: [], empty: true }) }),
-         limit: () => ({ get: () => Promise.resolve({ docs: [], empty: true }) }),
-        }),
-      } as unknown as admin.firestore.Firestore;
-    }
+    console.error("Firebase Admin SDK Error: The FIREBASE_ADMIN_SERVICE_ACCOUNT_JSON environment variable is not set. Server-side data fetching will be disabled.");
+    firestoreInstance = null;
+    return null;
   }
 
-  return admin.firestore();
+  if (admin.apps.length) {
+    firestoreInstance = admin.firestore();
+    return firestoreInstance;
+  }
+
+  try {
+    const serviceAccount = JSON.parse(serviceAccountString);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    firestoreInstance = admin.firestore();
+    return firestoreInstance;
+  } catch (error) {
+    console.error("Firebase Admin SDK Error: Failed to parse service account JSON or initialize.", error);
+    firestoreInstance = null;
+    return null;
+  }
 }
 
-// قم بتهيئة firestore مرة واحدة فقط
-firestore = initializeFirebaseAdmin();
+// Initialize on module load.
+const firestore = initializeFirebaseAdmin();
 
-// تصدير firestore instance لاستخدامه في جميع أنحاء الخادم.
+// Export the potentially null instance.
+// Code using this module must handle the case where it's null.
 export { firestore };

@@ -6,6 +6,9 @@ import { firestore } from '@/firebase/server';
 
 // دالة لجلب المنتجات حسب الفئة من جهة الخادم
 async function getProductsByCategory(categoryName: string): Promise<Product[] | null> {
+    if (!firestore) {
+      return [];
+    }
     try {
         const productsRef = firestore.collection('products');
         // استخدام where للبحث عن المنتجات التي تطابق اسم الفئة

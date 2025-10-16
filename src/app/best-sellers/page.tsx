@@ -6,6 +6,9 @@ import type { Product } from '@/lib/types';
 import { Star } from 'lucide-react';
 
 async function getBestSellers() {
+    if (!firestore) {
+        return [];
+    }
     try {
         const productsRef = collection(firestore, 'products');
         const q = query(productsRef, where('isBestSeller', '==', true));

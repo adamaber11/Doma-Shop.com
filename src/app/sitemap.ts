@@ -33,6 +33,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : 0.8,
   }));
 
+  if (!firestore) {
+    console.warn("Sitemap: Firestore not available, returning only static routes.");
+    return staticRoutes;
+  }
+
   try {
     // Dynamic routes from Firestore
     const productsSnapshot = await firestore.collection('products').get();

@@ -2,22 +2,22 @@
 import type { Product } from '@/lib/types';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
-import { firestore } from '@/firebase/server'; // استيراد من ملف الخادم الجديد
+import { firestore } from '@/firebase/server'; 
 
-// تعريف واجهة الخصائص (props) لمكونات الخادم
 interface PageProps {
   params: { slug: string };
 }
 
-// دالة لجلب المنتجات حسب العلامة التجارية من جهة الخادم
 async function getProductsByBrand(brandName: string): Promise<Product[] | null> {
+  if (!firestore) {
+    return [];
+  }
   try {
     const productsRef = firestore.collection('products');
-    // استخدام where للبحث عن المنتجات التي تطابق اسم العلامة التجارية
     const snapshot = await productsRef.where('brand', '==', brandName).get();
     
     if (snapshot.empty) {
-      return []; // إرجاع مصفوفة فارغة إذا لم يتم العثور على منتجات
+      return []; 
     }
 
     const products: Product[] = [];
@@ -28,23 +28,17 @@ async function getProductsByBrand(brandName: string): Promise<Product[] | null> 
     return products;
   } catch (error) {
     console.error("Error fetching products by brand:", error);
-    return null; // إرجاع null في حالة حدوث خطأ
+    return null; 
   }
 }
 
-// تعريف المكون كـ async ليتمكن من جلب البيانات
 export default async function BrandPage({ params }: PageProps) {
-  // فك ترميز الـ slug للحصول على اسم العلامة التجارية الصحيح
   const brandName = decodeURIComponent(params.slug);
   const products = await getProductsByBrand(brandName);
 
-  // في حالة حدوث خطأ أثناء جلب البيانات
   if (products === null) {
     return <div className="text-center py-20">حدث خطأ أثناء جلب المنتجات.</div>;
   }
-  
-  // إذا لم يتم العثور على منتجات، يمكن عرض صفحة "غير موجود"
-  // أو عرض رسالة للمستخدم. هنا نعرض رسالة.
   
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">

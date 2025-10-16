@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/carousel"
 
 async function getHomePageData() {
+    if (!firestore) {
+        console.log("Firestore is not initialized on the server. Skipping data fetch.");
+        return { heroData: null, products: [], bestSellers: [], dailyDeals: [], categories: [] };
+    }
     try {
         const heroDocRef = doc(firestore, 'settings', 'heroSection');
         const productsQuery = query(collection(firestore, 'products'), where('isFeatured', '==', true), limit(8));
@@ -32,7 +36,7 @@ async function getHomePageData() {
         ] = await Promise.all([
             getDoc(heroDocRef),
             getDocs(productsQuery),
-            getDocs(bestSellersSnapshot),
+            getDocs(bestSellersQuery),
             getDocs(dailyDealsSnapshot),
             getDocs(categoriesQuery),
         ]);
