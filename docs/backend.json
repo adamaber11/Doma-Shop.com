@@ -273,6 +273,10 @@
         "callToActionText": {
           "type": "string",
           "description": "Text for the call-to-action button on the category card."
+        },
+        "iconName": {
+            "type": "string",
+            "description": "The name of the lucide-react icon to display for this category."
         }
       },
       "required": [

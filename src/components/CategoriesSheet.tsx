@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -10,7 +11,8 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, LayoutGrid, ChevronLeft, ArrowLeft } from 'lucide-react';
+import { Menu, ChevronLeft, ArrowLeft, type LucideIcon, type LucideProps, ForwardRefExoticComponent, RefAttributes } from 'lucide-react';
+import * as Icons from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
@@ -23,10 +25,19 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { useMemo } from 'react';
+import { ScrollArea } from './ui/scroll-area';
 
 type CategoryWithSubcategories = CategoryType & {
   subcategories: CategoryWithSubcategories[];
 };
+
+// A type guard to check if a string is a valid Lucide icon name
+const isLucideIcon = (name: string): name is keyof typeof Icons => {
+  return name in Icons;
+};
+
+// A fallback icon component
+const DefaultIcon = Icons.LayoutGrid;
 
 export default function CategoriesSheet() {
   const firestore = useFirestore();
@@ -75,15 +86,18 @@ export default function CategoriesSheet() {
   ];
 
   const renderCategory = (category: CategoryWithSubcategories) => {
-    const categorySlug = encodeURIComponent(category.name);
+    const IconComponent: ForwardRefExoticComponent<Omit<LucideIcon, "ref"> & RefAttributes<LucideIcon>> = category.iconName && isLucideIcon(category.iconName)
+      ? Icons[category.iconName]
+      : DefaultIcon;
+      
     if (category.subcategories.length === 0) {
       return (
         <SheetClose asChild key={category.id}>
           <Link
-            href={`/category/${categorySlug}`}
-            className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+            href="/products"
+            className="flex items-center gap-3 p-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
           >
-            <LayoutGrid className="h-5 w-5" />
+            <IconComponent className="h-5 w-5" />
             <span className="font-medium">{category.name}</span>
           </Link>
         </SheetClose>
@@ -95,7 +109,7 @@ export default function CategoriesSheet() {
         <AccordionItem value={category.id} className="border-none">
           <AccordionTrigger className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors hover:no-underline">
               <div className="flex items-center gap-3">
-                <LayoutGrid className="h-5 w-5" />
+                <IconComponent className="h-5 w-5" />
                 <span className="font-medium">{category.name}</span>
               </div>
           </AccordionTrigger>
@@ -103,8 +117,8 @@ export default function CategoriesSheet() {
             <div className="flex flex-col space-y-1 mt-1">
               <SheetClose asChild>
                 <Link
-                  href={`/category/${categorySlug}`}
-                  className="flex items-center gap-3 p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                  href="/products"
+                  className="flex items-center gap-3 p-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
                   <ArrowLeft className="h-5 w-5" />
                   <span className="font-medium">عرض الكل في {category.name}</span>
@@ -130,7 +144,7 @@ export default function CategoriesSheet() {
         <SheetHeader>
           <SheetTitle className="font-headline text-2xl">الفئات</SheetTitle>
         </SheetHeader>
-        <div className="flex-grow overflow-y-auto pr-4 -mr-4 my-4">
+        <ScrollArea className="flex-grow my-4">
           {isLoading ? (
             <div className="space-y-4">
                 {Array.from({length: 8}).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
@@ -160,7 +174,7 @@ export default function CategoriesSheet() {
                 </SheetClose>
               ))}
             </div>
-        </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -146,9 +147,9 @@ export default function ProductQuickViewContent({ product, isSheet = false }: { 
         <div className="space-y-4 sm:space-y-6">
         <div className="space-y-2">
             <div className="flex gap-4 items-center text-xs sm:text-sm text-muted-foreground">
-                <Link href={`/category/${encodeURIComponent(category)}`} className="hover:text-primary hover:underline flex items-center gap-1">
+                <div className="flex items-center gap-1">
                     <Tag className="w-4 h-4" /> {category}
-                </Link>
+                </div>
             </div>
             <SheetHeader>
                 <SheetTitle className="text-xl sm:text-2xl font-headline font-bold text-right">{name}</SheetTitle>

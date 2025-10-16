@@ -66,6 +66,7 @@ export interface Category {
   imageHint?: string;
   description?: string;
   callToActionText?: string;
+  iconName?: string;
 }
 
 export interface Order {

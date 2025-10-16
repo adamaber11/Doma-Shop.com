@@ -72,7 +72,7 @@ function CategoryCarousel({ categories, isLoading }: { categories: Category[] | 
                 <CarouselContent>
                     {categories?.map((category) => (
                        <CarouselItem key={category.id} className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
-                        <Link href={`/category/${encodeURIComponent(category.name)}`} className="group block">
+                        <div className="group block cursor-pointer">
                             <div className="relative overflow-hidden rounded-lg shadow-md aspect-[4/5] border-4 border-white">
                                 {category.imageUrl ? (
                                   <Image
@@ -104,7 +104,7 @@ function CategoryCarousel({ categories, isLoading }: { categories: Category[] | 
                                     </div>
                                 </div>
                             </div>
-                        </Link>
+                        </div>
                        </CarouselItem>
                     ))}
                 </CarouselContent>
