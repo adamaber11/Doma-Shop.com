@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -88,7 +89,7 @@ export default function DashboardMessagesPage() {
   const { data: fetchedMessages, isLoading } = useCollection<ContactMessage>(messagesQuery);
 
   // Sync state with fetched data
-  useState(() => {
+  useEffect(() => {
     if (fetchedMessages) {
       setMessages(fetchedMessages);
     }
