@@ -8,27 +8,51 @@ import { Button } from './ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Link as LinkIcon, Check } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { useQuickView } from '@/hooks/use-quick-view';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { openQuickView } = useQuickView();
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const [isLinkCopied, setIsLinkCopied] = useState(false);
+
   
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent link navigation
-    e.stopPropagation(); // Prevent card click event when clicking the button
+    e.preventDefault(); 
+    e.stopPropagation(); 
     const hasOptions = (product.sizes && product.sizes.length > 0) || (product.variants && product.variants.length > 0);
 
     if (hasOptions) {
-        openQuickView(product); // Open quick view to select size/color
+        openQuickView(product); 
     } else {
         addToCart(product, 1);
     }
+  };
+
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const productUrl = `${window.location.origin}${window.location.pathname}#product=${product.id}`;
+    navigator.clipboard.writeText(productUrl).then(() => {
+        setIsLinkCopied(true);
+        toast({
+            title: 'تم نسخ الرابط!',
+            description: 'يمكنك الآن مشاركة رابط المنتج.',
+        });
+        setTimeout(() => setIsLinkCopied(false), 2000);
+    }).catch(err => {
+        console.error('Failed to copy link: ', err);
+        toast({
+            variant: 'destructive',
+            title: 'فشل النسخ',
+            description: 'لم نتمكن من نسخ الرابط.',
+        });
+    });
   };
   
   const imageUrl1 = product.imageUrls?.[0] || 'https://picsum.photos/seed/placeholder/600/800';
@@ -43,7 +67,16 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <div onClick={() => openQuickView(product)} className="block group w-full h-full cursor-pointer">
-      <Card className="flex flex-col overflow-hidden h-full">
+      <Card className="flex flex-col overflow-hidden h-full relative">
+        <Button
+            size="icon"
+            variant="secondary"
+            className="absolute top-2 right-2 z-10 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            onClick={handleCopyLink}
+            aria-label="Copy product link"
+        >
+            {isLinkCopied ? <Check className="h-4 w-4 text-green-500" /> : <LinkIcon className="h-4 w-4" />}
+        </Button>
         <CardHeader className="p-0 relative">
             <div className="relative w-full aspect-square overflow-hidden">
                 <Image
@@ -63,7 +96,7 @@ export default function ProductCard({ product }: { product: Product }) {
                     />
                 )}
                  {hasDiscount && (
-                    <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md">
+                    <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md z-10">
                         خصم {discountPercentage}%
                     </div>
                 )}
@@ -74,7 +107,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <p className="text-xs text-muted-foreground">{product.category}</p>
             <StarRating rating={product.rating} />
           </div>
-          <CardTitle className="font-headline text-sm font-semibold group-hover:text-primary mt-1 mb-2 h-5 truncate group-hover:underline group-hover:decoration-primary group-hover:underline-offset-4">
+          <CardTitle className="font-headline text-sm font-semibold group-hover:text-primary mt-1 mb-2 h-5 truncate hover:underline decoration-primary underline-offset-4">
             {product.name}
           </CardTitle>
            <div className="flex items-baseline gap-2 mt-auto">
@@ -104,7 +137,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 {product.cardMessageText}
               </p>
             ) : (
-                <div className="h-4"></div> // Placeholder to prevent layout shift
+                <div className="h-4"></div> 
             )}
 
             {product.isDeal && product.dealEndDate && (
