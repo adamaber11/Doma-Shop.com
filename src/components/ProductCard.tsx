@@ -6,20 +6,15 @@ import type { Product } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { useCart } from '@/hooks/use-cart';
-import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
-import { ShoppingCart, Check, Link as LinkIcon, Eye } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { useQuickView } from '@/hooks/use-quick-view';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
-import { useState } from 'react';
 
 export default function ProductCard({ product }: { product: Product }) {
   const { openQuickView } = useQuickView();
   const { addToCart } = useCart();
-  const { toast } = useToast();
-  const [isLinkCopied, setIsLinkCopied] = useState(false);
 
   
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -32,27 +27,6 @@ export default function ProductCard({ product }: { product: Product }) {
     } else {
         addToCart(product, 1);
     }
-  };
-
-  const handleCopyLink = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const productUrl = `${window.location.origin}/products/${product.id}`;
-    navigator.clipboard.writeText(productUrl).then(() => {
-        setIsLinkCopied(true);
-        toast({
-            title: 'تم نسخ الرابط!',
-            description: 'يمكنك الآن مشاركة رابط المنتج.',
-        });
-        setTimeout(() => setIsLinkCopied(false), 2000);
-    }).catch(err => {
-        console.error('Failed to copy link: ', err);
-        toast({
-            variant: 'destructive',
-            title: 'فشل النسخ',
-            description: 'لم نتمكن من نسخ الرابط.',
-        });
-    });
   };
   
   const imageUrl1 = product.imageUrls?.[0] || 'https://picsum.photos/seed/placeholder/600/800';
@@ -68,15 +42,6 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div onClick={() => openQuickView(product)} className="block group w-full h-full cursor-pointer">
       <Card className="flex flex-col overflow-hidden h-full relative">
-        <Button
-            size="icon"
-            variant="secondary"
-            className="absolute top-2 left-2 z-10 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            onClick={handleCopyLink}
-            aria-label="Copy product link"
-        >
-            {isLinkCopied ? <Check className="h-4 w-4 text-green-500" /> : <LinkIcon className="h-4 w-4" />}
-        </Button>
         <CardHeader className="p-0 relative">
             <div className="relative w-full aspect-square overflow-hidden">
                 <Image
