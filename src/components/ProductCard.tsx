@@ -8,7 +8,7 @@ import { Button } from './ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { useToast } from '@/hooks/use-toast';
 import StarRating from './StarRating';
-import { ShoppingCart, Link as LinkIcon, Check } from 'lucide-react';
+import { ShoppingCart, Check, Link as LinkIcon } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import { useQuickView } from '@/hooks/use-quick-view';
 import { cn } from '@/lib/utils';
@@ -37,7 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const handleCopyLink = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const productUrl = `${window.location.origin}${window.location.pathname}#product=${product.id}`;
+    const productUrl = `${window.location.origin}/products/${product.id}`;
     navigator.clipboard.writeText(productUrl).then(() => {
         setIsLinkCopied(true);
         toast({
@@ -66,7 +66,7 @@ export default function ProductCard({ product }: { product: Product }) {
     : 0;
 
   return (
-    <div onClick={() => openQuickView(product)} className="block group w-full h-full cursor-pointer">
+    <Link href={`/products/${product.id}`} className="block group w-full h-full cursor-pointer">
       <Card className="flex flex-col overflow-hidden h-full relative">
         <Button
             size="icon"
@@ -145,6 +145,6 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
         </CardFooter>
       </Card>
-    </div>
+    </Link>
   );
 }
