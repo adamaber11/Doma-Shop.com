@@ -11,7 +11,7 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, ChevronLeft, ArrowLeft, type LucideIcon, type LucideProps, ForwardRefExoticComponent, RefAttributes } from 'lucide-react';
+import { Menu, ChevronLeft, ArrowLeft, LayoutGrid } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
@@ -37,7 +37,7 @@ const isLucideIcon = (name: string): name is keyof typeof Icons => {
 };
 
 // A fallback icon component
-const DefaultIcon = Icons.LayoutGrid;
+const DefaultIcon = LayoutGrid;
 
 export default function CategoriesSheet() {
   const firestore = useFirestore();
@@ -86,9 +86,9 @@ export default function CategoriesSheet() {
   ];
 
   const renderCategory = (category: CategoryWithSubcategories) => {
-    const IconComponent: ForwardRefExoticComponent<Omit<LucideIcon, "ref"> & RefAttributes<LucideIcon>> = category.iconName && isLucideIcon(category.iconName)
+    const IconComponent = (category.iconName && isLucideIcon(category.iconName)
       ? Icons[category.iconName]
-      : DefaultIcon;
+      : DefaultIcon) as React.ElementType;
       
     if (category.subcategories.length === 0) {
       return (
